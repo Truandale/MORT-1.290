@@ -1,0 +1,12 @@
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\bin\x64\Release\net9.0-windows10.0.22621.0\GSTrans.dll.config
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\bin\x64\Release\net9.0-windows10.0.22621.0\GSTrans.deps.json
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\bin\x64\Release\net9.0-windows10.0.22621.0\GSTrans.dll
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\GSTrans.csproj.AssemblyReference.cache
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\GSTrans.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\GSTrans.AssemblyInfoInputs.cache
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\GSTrans.AssemblyInfo.cs
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\GSTrans.csproj.CoreCompileInputs.cache
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\GSTrans.sourcelink.json
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\GSTrans.dll
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\refint\GSTrans.dll
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\GSTrans\obj\x64\Release\net9.0-windows10.0.22621.0\ref\GSTrans.dll

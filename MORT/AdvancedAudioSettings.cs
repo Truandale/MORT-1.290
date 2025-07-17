@@ -800,6 +800,7 @@ namespace MORT
                 Size = new Size(120, 30),
                 ForeColor = Color.Black
             };
+            btnTestTranslation.Click += BtnTestTranslation_Click;
 
             gbTranslationSettings.Controls.AddRange(new Control[] 
             { 
@@ -1094,6 +1095,13 @@ namespace MORT
             // Save and close
             SaveSettings();
             this.Close();
+        }
+
+        private void BtnTestTranslation_Click(object sender, EventArgs e)
+        {
+            // Открываем окно тестирования перевода
+            TranslationTestForm testForm = new TranslationTestForm();
+            testForm.ShowDialog();
         }
 
         #endregion

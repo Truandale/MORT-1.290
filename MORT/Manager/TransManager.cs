@@ -733,6 +733,13 @@ namespace MORT
         {
             string result = "";
 
+            // Check if sheets is initialized
+            if (sheets == null)
+            {
+                isError = true;
+                return "Error: Google Sheets not initialized. Please configure Google Sheets API first.";
+            }
+
             sheets.target = _backupSheetTarget;
             sheets.source = _backupSheetSource;
 
