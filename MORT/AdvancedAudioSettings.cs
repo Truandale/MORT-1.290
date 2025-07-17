@@ -142,7 +142,7 @@ namespace MORT
             {
                 Text = "Выберите режим работы",
                 Location = new Point(10, 10),
-                Size = new Size(720, 120),
+                Size = new Size(720, 140),
                 ForeColor = Color.Black
             };
 
@@ -150,7 +150,7 @@ namespace MORT
             {
                 Text = "🔴 Выключен",
                 Location = new Point(20, 30),
-                Size = new Size(150, 20),
+                Size = new Size(150, 25),
                 ForeColor = Color.Black,
                 Checked = true
             };
@@ -158,24 +158,24 @@ namespace MORT
             rbModeIncoming = new RadioButton()
             {
                 Text = "📥 Входящий перевод (EN→RU)",
-                Location = new Point(200, 30),
-                Size = new Size(200, 20),
+                Location = new Point(20, 60),
+                Size = new Size(250, 25),
                 ForeColor = Color.Black
             };
 
             rbModeOutgoing = new RadioButton()
             {
                 Text = "📤 Исходящий перевод (RU→EN)",
-                Location = new Point(20, 60),
-                Size = new Size(200, 20),
+                Location = new Point(300, 60),
+                Size = new Size(250, 25),
                 ForeColor = Color.Black
             };
 
             rbModeBidirectional = new RadioButton()
             {
                 Text = "🔄 Двусторонний перевод",
-                Location = new Point(200, 60),
-                Size = new Size(200, 20),
+                Location = new Point(20, 90),
+                Size = new Size(250, 25),
                 ForeColor = Color.Black
             };
 
