@@ -3891,6 +3891,7 @@ namespace MORT
             button1.TabIndex = 47;
             button1.Text = "Audio Translate";
             button1.UseVisualStyleBackColor = true;
+            button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 

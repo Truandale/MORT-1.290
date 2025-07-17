@@ -1420,6 +1420,29 @@ namespace MORT
 
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            // Open AutoVoiceTranslator settings form
+            try
+            {
+                using (AdvancedAudioSettings audioForm = new AdvancedAudioSettings())
+                {
+                    DialogResult result = audioForm.ShowDialog(this);
+                    if (result == DialogResult.OK)
+                    {
+                        // Settings were saved and applied
+                        Util.ShowLog("Audio Translate settings applied successfully");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening Audio Translate settings: {ex.Message}", 
+                               "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Util.ShowLog($"Error opening Audio Translate settings: {ex}");
+            }
+        }
+
 
         #endregion
 
