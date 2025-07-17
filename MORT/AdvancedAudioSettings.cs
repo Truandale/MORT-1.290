@@ -103,8 +103,8 @@ namespace MORT
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.BackColor = Color.FromArgb(45, 45, 48);
-            this.ForeColor = Color.White;
+            this.BackColor = Color.LightGray;
+            this.ForeColor = Color.Black;
             
             this.ResumeLayout(false);
         }
@@ -143,7 +143,7 @@ namespace MORT
                 Text = "Выберите режим работы",
                 Location = new Point(10, 10),
                 Size = new Size(720, 120),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             rbModeOff = new RadioButton()
@@ -151,7 +151,7 @@ namespace MORT
                 Text = "🔴 Выключен",
                 Location = new Point(20, 30),
                 Size = new Size(150, 20),
-                ForeColor = Color.White,
+                ForeColor = Color.Black,
                 Checked = true
             };
 
@@ -160,7 +160,7 @@ namespace MORT
                 Text = "📥 Входящий перевод (EN→RU)",
                 Location = new Point(200, 30),
                 Size = new Size(200, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             rbModeOutgoing = new RadioButton()
@@ -168,7 +168,7 @@ namespace MORT
                 Text = "📤 Исходящий перевод (RU→EN)",
                 Location = new Point(20, 60),
                 Size = new Size(200, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             rbModeBidirectional = new RadioButton()
@@ -176,7 +176,7 @@ namespace MORT
                 Text = "🔄 Двусторонний перевод",
                 Location = new Point(200, 60),
                 Size = new Size(200, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             gbWorkMode.Controls.AddRange(new Control[] 
@@ -197,7 +197,7 @@ namespace MORT
                 Text = "Настройки Speech-to-Text",
                 Location = new Point(10, 10),
                 Size = new Size(720, 200),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             // STT Engine
@@ -206,7 +206,7 @@ namespace MORT
                 Text = "Движок STT:",
                 Location = new Point(20, 30),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbSTTEngine = new ComboBox()
@@ -224,7 +224,7 @@ namespace MORT
                 Text = "Модель Whisper:",
                 Location = new Point(20, 65),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbWhisperModel = new ComboBox()
@@ -249,7 +249,7 @@ namespace MORT
                 Text = "Модель Vosk:",
                 Location = new Point(20, 100),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbVoskModel = new ComboBox()
@@ -272,7 +272,7 @@ namespace MORT
                 Text = "Чувствительность: 50%",
                 Location = new Point(20, 135),
                 Size = new Size(150, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbSTTSensitivity = new TrackBar()
@@ -310,7 +310,7 @@ namespace MORT
                 Text = "Настройки Text-to-Speech",
                 Location = new Point(10, 10),
                 Size = new Size(720, 250),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             // TTS Engine
@@ -319,7 +319,7 @@ namespace MORT
                 Text = "Движок TTS:",
                 Location = new Point(20, 30),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbTTSEngine = new ComboBox()
@@ -337,7 +337,7 @@ namespace MORT
                 Text = "Голос (RU):",
                 Location = new Point(20, 65),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbTTSVoiceRU = new ComboBox()
@@ -353,7 +353,7 @@ namespace MORT
                 Text = "Голос (EN):",
                 Location = new Point(350, 65),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbTTSVoiceEN = new ComboBox()
@@ -369,7 +369,7 @@ namespace MORT
                 Text = "Скорость RU: 50%",
                 Location = new Point(20, 100),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbTTSSpeedRU = new TrackBar()
@@ -387,7 +387,7 @@ namespace MORT
                 Text = "Скорость EN: 50%",
                 Location = new Point(350, 100),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbTTSSpeedEN = new TrackBar()
@@ -406,7 +406,7 @@ namespace MORT
                 Text = "Громкость RU: 100%",
                 Location = new Point(20, 150),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbTTSVolumeRU = new TrackBar()
@@ -424,7 +424,7 @@ namespace MORT
                 Text = "Громкость EN: 100%",
                 Location = new Point(350, 150),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbTTSVolumeEN = new TrackBar()
@@ -461,7 +461,7 @@ namespace MORT
                 Text = "Настройки аудио устройств",
                 Location = new Point(10, 10),
                 Size = new Size(720, 300),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             // Microphone
@@ -470,7 +470,7 @@ namespace MORT
                 Text = "🎤 Микрофон:",
                 Location = new Point(20, 30),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbMicrophone = new ComboBox()
@@ -494,7 +494,7 @@ namespace MORT
                 Text = "🔊 Динамики:",
                 Location = new Point(20, 70),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbSpeakers = new ComboBox()
@@ -518,7 +518,7 @@ namespace MORT
                 Text = "🎧 Наушники:",
                 Location = new Point(20, 110),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbHeadphones = new ComboBox()
@@ -534,7 +534,7 @@ namespace MORT
                 Text = "🎛️ VB-Cable:",
                 Location = new Point(20, 150),
                 Size = new Size(100, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbVBCable = new ComboBox()
@@ -558,7 +558,7 @@ namespace MORT
                 Text = "ℹ️ VB-Cable должен быть установлен и настроен как микрофон в Discord/игре",
                 Location = new Point(20, 190),
                 Size = new Size(600, 40),
-                ForeColor = Color.LightGray
+                ForeColor = Color.DarkBlue
             };
 
             gbAudioDevices.Controls.AddRange(new Control[] 
@@ -583,7 +583,7 @@ namespace MORT
                 Text = "Настройки Voice Activity Detection",
                 Location = new Point(10, 10),
                 Size = new Size(720, 250),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbEnableVAD = new CheckBox()
@@ -591,7 +591,7 @@ namespace MORT
                 Text = "✅ Включить VAD (Silero Neural Network)",
                 Location = new Point(20, 30),
                 Size = new Size(300, 20),
-                ForeColor = Color.White,
+                ForeColor = Color.Black,
                 Checked = true
             };
 
@@ -601,7 +601,7 @@ namespace MORT
                 Text = "Порог детекции речи: 0.5",
                 Location = new Point(20, 70),
                 Size = new Size(200, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbVADThreshold = new TrackBar()
@@ -624,7 +624,7 @@ namespace MORT
                 Text = "Минимальная длительность: 0.5 сек",
                 Location = new Point(20, 120),
                 Size = new Size(200, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbMinDuration = new TrackBar()
@@ -647,7 +647,7 @@ namespace MORT
                 Text = "Таймаут тишины: 2.0 сек",
                 Location = new Point(20, 170),
                 Size = new Size(200, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbSilenceTimeout = new TrackBar()
@@ -685,7 +685,7 @@ namespace MORT
                 Text = "Настройки переводчика",
                 Location = new Point(10, 10),
                 Size = new Size(720, 300),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             // Translation Engine
@@ -694,7 +694,7 @@ namespace MORT
                 Text = "Движок перевода:",
                 Location = new Point(20, 30),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbTranslationEngine = new ComboBox()
@@ -717,7 +717,7 @@ namespace MORT
                 Text = "Google API ключ:",
                 Location = new Point(20, 70),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbGoogleAPIKey = new TextBox()
@@ -733,7 +733,7 @@ namespace MORT
                 Text = "LibreTranslate URL:",
                 Location = new Point(20, 110),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbLibreTranslateURL = new TextBox()
@@ -749,7 +749,7 @@ namespace MORT
                 Text = "Исходный язык:",
                 Location = new Point(20, 150),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbSourceLanguage = new ComboBox()
@@ -767,7 +767,7 @@ namespace MORT
                 Text = "Целевой язык:",
                 Location = new Point(290, 150),
                 Size = new Size(120, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             cbTargetLanguage = new ComboBox()
@@ -810,7 +810,7 @@ namespace MORT
                 Text = "Мониторинг в реальном времени",
                 Location = new Point(10, 10),
                 Size = new Size(720, 400),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             // Status
@@ -828,7 +828,7 @@ namespace MORT
                 Text = "Задержка: N/A",
                 Location = new Point(240, 30),
                 Size = new Size(150, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             // Microphone Level
@@ -837,7 +837,7 @@ namespace MORT
                 Text = "🎤 Уровень микрофона:",
                 Location = new Point(20, 70),
                 Size = new Size(150, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             pbMicLevel = new ProgressBar()
@@ -853,7 +853,7 @@ namespace MORT
                 Text = "🔊 Уровень динамиков:",
                 Location = new Point(20, 100),
                 Size = new Size(150, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             pbSpeakerLevel = new ProgressBar()
@@ -869,7 +869,7 @@ namespace MORT
                 Text = "Входящий текст (распознанный):",
                 Location = new Point(20, 140),
                 Size = new Size(250, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbIncomingText = new TextBox()
@@ -879,8 +879,8 @@ namespace MORT
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 ReadOnly = true,
-                BackColor = Color.FromArgb(30, 30, 30),
-                ForeColor = Color.LightGreen
+                BackColor = Color.White,
+                ForeColor = Color.DarkGreen
             };
 
             Label lblTranslated = new Label()
@@ -888,7 +888,7 @@ namespace MORT
                 Text = "Переведенный текст:",
                 Location = new Point(20, 240),
                 Size = new Size(200, 20),
-                ForeColor = Color.White
+                ForeColor = Color.Black
             };
 
             tbTranslatedText = new TextBox()
@@ -898,8 +898,8 @@ namespace MORT
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 ReadOnly = true,
-                BackColor = Color.FromArgb(30, 30, 30),
-                ForeColor = Color.LightBlue
+                BackColor = Color.White,
+                ForeColor = Color.DarkBlue
             };
 
             gbMonitoring.Controls.AddRange(new Control[] 
