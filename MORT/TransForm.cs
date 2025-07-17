@@ -1,0 +1,282 @@
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows.Forms;
+namespace MORT
+{
+    public partial class TransForm : Form, ITransform
+    {
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int TaskIndex { get; private set; }
+        public Thread thread;  //빙 번역기 처리 쓰레드
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public TranslateStatusType TranslateStatusType { get; private set; }
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool UseTopMostOptionWhenTranslate { get; private set; }
+
+        private Point mousePoint;
+
+        private Font _defaultFont;
+
+        bool isTopMostFlag = true;
+        bool isDestroyFormFlag = false;
+        private string _warningMessage;
+        private DateTime _dtWarningDisplayTime;
+
+        //번역창에 번역문 출력
+        private delegate void myDelegate(string transText, string ocrText, bool isShowOCRResultFlag);
+        private void updateProgress(string transText, string ocrText, bool isShowOCRResultFlag)
+        {
+            transTextBox.Text = Regex.Replace(transText, @"\r\n?|\n", System.Environment.NewLine); ;
+            ocrText = Regex.Replace(ocrText, @"\r\n?|\n", System.Environment.NewLine); ;
+            if (isShowOCRResultFlag == true)
+            {
+                transTextBox.Text += "\r\n\r\n" + "OCR : " + ocrText;
+            }
+
+            if (!string.IsNullOrEmpty(_warningMessage))
+            {
+                if (DateTime.Now < _dtWarningDisplayTime)
+                {
+                    transTextBox.Text = _warningMessage + transTextBox.Text;
+                }
+                else
+                {
+                    _warningMessage = "";
+                }
+            }
+        }
+
+        public void ApplyRTL(bool enableRTL)
+        {
+            transTextBox.RightToLeft = enableRTL ? RightToLeft.Yes : RightToLeft.No;
+        }
+
+        public void ApplyFont(Font font)
+        {
+            this.Invoke(new Action(delegate ()
+            {
+                this.transTextBox.Font = font;
+            }));
+        }
+
+        public void SetDefaultFont()
+        {
+            this.Invoke(new Action(delegate ()
+            {
+                this.transTextBox.Font = _defaultFont;
+            }));
+        }
+
+        public void AddText(string addText)
+        {
+            transTextBox.Text = addText + System.Environment.NewLine + transTextBox.Text;
+        }
+
+        //ocr 및 번역 결과 처리
+        public void updateText(string transText, string ocrText, SettingManager.TransType transType, bool isShowOCRResultFlag)
+        {
+
+            if (AdvencedOptionManager.UseIgonoreEmptyTranslate && string.IsNullOrEmpty(ocrText))
+            {
+                return;
+            }
+
+            try
+            {
+                if (thread != null)
+                {
+                    thread.Join();
+                }
+                try
+                {
+                    this.BeginInvoke(new myDelegate(updateProgress), new object[] { transText, ocrText, isShowOCRResultFlag });
+                }
+                catch (InvalidOperationException)
+                {
+                    // Error logging, post processing etc.
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+        }
+
+        public void StopTrans()
+        {
+            this.StopStateLabel.Visible = true;
+            TranslateStatusType = TranslateStatusType.Stop;
+
+
+            ApplyTopMost();
+        }
+
+        public void StartTrans()
+        {
+            TaskIndex++;
+            if (TaskIndex > 100000)
+            {
+                TaskIndex = 0;
+            }
+
+            this.StopStateLabel.Visible = false;
+            TranslateStatusType = TranslateStatusType.Translate;
+
+            ApplyTopMost();
+        }
+
+        public TransForm()
+        {
+            InitializeComponent();
+            _defaultFont = this.transTextBox.Font;
+            string basicText = Properties.Settings.Default.BASIC_TEXT;
+            basicText = string.Format(basicText, Properties.Settings.Default.MORT_VERSION);
+
+            transTextBox.Text = basicText + System.Environment.NewLine + System.Environment.NewLine + "[TIP]" + Util.GetToolTip(); ;
+            TranslateStatusType = TranslateStatusType.None;
+        }
+
+        public void ApplyUseTopMostOptionWhenTranslate(bool useTopMostOptionWhenTranslate)
+        {
+            UseTopMostOptionWhenTranslate = useTopMostOptionWhenTranslate;
+            ApplyTopMost();
+        }
+
+        public void SetTopMost(bool topMost, bool useTopMostOptionWhenTranslate)
+        {
+            UseTopMostOptionWhenTranslate = useTopMostOptionWhenTranslate;
+            isTopMostFlag = topMost;
+
+            ApplyTopMost();
+        }
+
+        public void ApplyTopMost()
+        {
+            Action callback = delegate
+            {
+                if (UseTopMostOptionWhenTranslate)
+                {
+                    if (TranslateStatusType == TranslateStatusType.Translate)
+                    {
+                        this.TopMost = isTopMostFlag;
+                    }
+                    else
+                    {
+                        //번역중이 아니면 끈다
+                        this.TopMost = false;
+                    }
+                }
+                else
+                {
+                    this.TopMost = isTopMostFlag;
+                }
+            };
+
+
+            if(InvokeRequired)
+            {
+                this.BeginInvoke(callback);
+            }
+            else
+            {
+                callback();
+            }
+        }
+
+        private void closeApplication()
+        {
+            //더이상 안 씀.
+            this.Visible = false;
+            return;
+        }
+
+        public void destroyForm()
+        {
+            isDestroyFormFlag = true;
+            FormManager.Instace.MyBasicTransForm = null;
+            this.Close();
+        }
+
+        private void TransForm_FormClosing(Object sender, FormClosingEventArgs e)
+        {
+            if (thread != null)
+            {
+                thread.Join();
+            }
+            closeApplication();
+            if (isDestroyFormFlag == false)
+            {
+                e.Cancel = true;//종료를 취소하고 
+            }
+
+        }
+
+        private void TransForm_MouseDown(object sender, MouseEventArgs e)
+        {
+            mousePoint = new Point(e.X, e.Y);
+        }
+
+        private void TransForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            if ((e.Button & MouseButtons.Left) == MouseButtons.Left)
+            {
+                Location = new Point(this.Left - (mousePoint.X - e.X),
+                    this.Top - (mousePoint.Y - e.Y));
+            }
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+            closeApplication();
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+
+        #region ::::::::: 인터페이스 관련 :::::::::::
+
+
+        public void ForceTransparency()
+        {
+
+        }
+
+        public void DoUpdate(bool isTranslating)
+        {
+
+        }
+
+        public SettingManager.Skin GetSkinType()
+        {
+            return SettingManager.Skin.dark;
+        }
+
+        public void ForceUpdateText(string text)
+        {
+            transTextBox.Text = text;
+        }
+
+        public void ApplyWarningMessage(string message, DateTime dtDisplayTime)
+        {
+            _warningMessage = message;
+            _dtWarningDisplayTime = dtDisplayTime;
+        }
+
+        public void ClearWarningMessage()
+        {
+            _warningMessage = "";
+        }
+
+        #endregion
+
+
+    }
+}

@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "dgSpecHash": "VJtgxjJAoo0=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Predator\\Documents\\MORT\\MORT-1.290\\MORT-1.290\\GSTrans\\GSTrans.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Predator\\.nuget\\packages\\google.apis\\1.57.0\\google.apis.1.57.0.nupkg.sha512",
+    "C:\\Users\\Predator\\.nuget\\packages\\google.apis.auth\\1.57.0\\google.apis.auth.1.57.0.nupkg.sha512",
+    "C:\\Users\\Predator\\.nuget\\packages\\google.apis.core\\1.57.0\\google.apis.core.1.57.0.nupkg.sha512",
+    "C:\\Users\\Predator\\.nuget\\packages\\google.apis.sheets.v4\\1.57.0.2637\\google.apis.sheets.v4.1.57.0.2637.nupkg.sha512",
+    "C:\\Users\\Predator\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
+    "C:\\Users\\Predator\\.nuget\\packages\\zlib.portable.signed\\1.11.0\\zlib.portable.signed.1.11.0.nupkg.sha512",
+    "C:\\Users\\Predator\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.22621.57\\microsoft.windows.sdk.net.ref.10.0.22621.57.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Пакет \"Zlib.Portable.Signed 1.11.0\" был восстановлен с помощью \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\", а не целевой платформы проекта \"net9.0-windows10.0.22621\". Этот пакет может быть не полностью совместим с вашим проектом.",
+      "projectPath": "C:\\Users\\Predator\\Documents\\MORT\\MORT-1.290\\MORT-1.290\\GSTrans\\GSTrans.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Predator\\Documents\\MORT\\MORT-1.290\\MORT-1.290\\GSTrans\\GSTrans.csproj",
+      "libraryId": "Zlib.Portable.Signed",
+      "targetGraphs": [
+        "net9.0-windows10.0.22621"
+      ]
+    }
+  ]
+}
