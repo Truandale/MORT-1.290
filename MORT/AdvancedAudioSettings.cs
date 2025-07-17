@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace MORT
@@ -83,10 +84,21 @@ namespace MORT
         private Button? btnCancel;
         private Button? btnOK;
         
+        // Settings Manager Reference
+        private SettingManager? settingManager;
+        
         #endregion
 
         public AdvancedAudioSettings()
         {
+            InitializeComponent();
+            InitializeCustomControls();
+            LoadSettings();
+        }
+
+        public AdvancedAudioSettings(SettingManager settingManager)
+        {
+            this.settingManager = settingManager;
             InitializeComponent();
             InitializeCustomControls();
             LoadSettings();
@@ -1066,14 +1078,241 @@ namespace MORT
 
         private void LoadSettings()
         {
-            // TODO: Load settings from file/registry
-            // This would load saved configuration for all controls
+            try
+            {
+                // Создаем файл настроек, если он не существует
+                string settingsPath = "AutoVoiceTranslator_Settings.ini";
+                if (!File.Exists(settingsPath))
+                {
+                    SaveDefaultSettings();
+                    return;
+                }
+
+                // Загружаем настройки из файла
+                string[] lines = File.ReadAllLines(settingsPath);
+                foreach (string line in lines)
+                {
+                    if (line.Contains("="))
+                    {
+                        string[] parts = line.Split('=');
+                        if (parts.Length == 2)
+                        {
+                            string key = parts[0].Trim();
+                            string value = parts[1].Trim();
+                            
+                            ApplySetting(key, value);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки настроек: {ex.Message}", "Ошибка", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void SaveSettings()
         {
-            // TODO: Save settings to file/registry
-            // This would save current configuration of all controls
+            try
+            {
+                string settingsPath = "AutoVoiceTranslator_Settings.ini";
+                using (StreamWriter writer = new StreamWriter(settingsPath))
+                {
+                    writer.WriteLine("[AutoVoiceTranslator Settings]");
+                    writer.WriteLine($"WorkMode={GetSelectedWorkMode()}");
+                    
+                    // STT Settings
+                    writer.WriteLine($"STTEngine={cbSTTEngine?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"WhisperModel={cbWhisperModel?.SelectedIndex ?? 2}");
+                    writer.WriteLine($"VoskModel={cbVoskModel?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"STTSensitivity={tbSTTSensitivity?.Value ?? 50}");
+                    
+                    // TTS Settings
+                    writer.WriteLine($"TTSEngine={cbTTSEngine?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"TTSVoiceRU={cbTTSVoiceRU?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"TTSVoiceEN={cbTTSVoiceEN?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"TTSSpeedRU={tbTTSSpeedRU?.Value ?? 100}");
+                    writer.WriteLine($"TTSSpeedEN={tbTTSSpeedEN?.Value ?? 100}");
+                    writer.WriteLine($"TTSVolumeRU={tbTTSVolumeRU?.Value ?? 100}");
+                    writer.WriteLine($"TTSVolumeEN={tbTTSVolumeEN?.Value ?? 100}");
+                    
+                    // Audio Devices
+                    writer.WriteLine($"Microphone={cbMicrophone?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"Speakers={cbSpeakers?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"Headphones={cbHeadphones?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"VBCable={cbVBCable?.SelectedIndex ?? 0}");
+                    
+                    // VAD Settings
+                    writer.WriteLine($"EnableVAD={cbEnableVAD?.Checked ?? true}");
+                    writer.WriteLine($"VADThreshold={tbVADThreshold?.Value ?? 50}");
+                    writer.WriteLine($"MinDuration={tbMinDuration?.Value ?? 5}");
+                    writer.WriteLine($"SilenceTimeout={tbSilenceTimeout?.Value ?? 20}");
+                    
+                    // Translation Settings
+                    writer.WriteLine($"TranslationEngine={cbTranslationEngine?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"GoogleAPIKey={tbGoogleAPIKey?.Text ?? ""}");
+                    writer.WriteLine($"LibreTranslateURL={tbLibreTranslateURL?.Text ?? "http://localhost:5000"}");
+                    writer.WriteLine($"SourceLanguage={cbSourceLanguage?.SelectedIndex ?? 0}");
+                    writer.WriteLine($"TargetLanguage={cbTargetLanguage?.SelectedIndex ?? 0}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сохранения настроек: {ex.Message}", "Ошибка", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void SaveDefaultSettings()
+        {
+            // Сохраняем настройки по умолчанию
+            SaveSettings();
+        }
+
+        private string GetSelectedWorkMode()
+        {
+            if (rbModeOff?.Checked == true) return "Off";
+            if (rbModeIncoming?.Checked == true) return "Incoming";
+            if (rbModeOutgoing?.Checked == true) return "Outgoing";
+            if (rbModeBidirectional?.Checked == true) return "Bidirectional";
+            return "Off";
+        }
+
+        private void ApplySetting(string key, string value)
+        {
+            try
+            {
+                switch (key)
+                {
+                    case "WorkMode":
+                        SetWorkMode(value);
+                        break;
+                    case "STTEngine":
+                        if (cbSTTEngine != null && int.TryParse(value, out int sttEngine))
+                            cbSTTEngine.SelectedIndex = Math.Max(0, Math.Min(sttEngine, cbSTTEngine.Items.Count - 1));
+                        break;
+                    case "WhisperModel":
+                        if (cbWhisperModel != null && int.TryParse(value, out int whisperModel))
+                            cbWhisperModel.SelectedIndex = Math.Max(0, Math.Min(whisperModel, cbWhisperModel.Items.Count - 1));
+                        break;
+                    case "VoskModel":
+                        if (cbVoskModel != null && int.TryParse(value, out int voskModel))
+                            cbVoskModel.SelectedIndex = Math.Max(0, Math.Min(voskModel, cbVoskModel.Items.Count - 1));
+                        break;
+                    case "STTSensitivity":
+                        if (tbSTTSensitivity != null && int.TryParse(value, out int sttSens))
+                            tbSTTSensitivity.Value = Math.Max(0, Math.Min(sttSens, 100));
+                        break;
+                    case "TTSEngine":
+                        if (cbTTSEngine != null && int.TryParse(value, out int ttsEngine))
+                            cbTTSEngine.SelectedIndex = Math.Max(0, Math.Min(ttsEngine, cbTTSEngine.Items.Count - 1));
+                        break;
+                    case "TTSVoiceRU":
+                        if (cbTTSVoiceRU != null && int.TryParse(value, out int ttsVoiceRU))
+                            cbTTSVoiceRU.SelectedIndex = Math.Max(0, Math.Min(ttsVoiceRU, cbTTSVoiceRU.Items.Count - 1));
+                        break;
+                    case "TTSVoiceEN":
+                        if (cbTTSVoiceEN != null && int.TryParse(value, out int ttsVoiceEN))
+                            cbTTSVoiceEN.SelectedIndex = Math.Max(0, Math.Min(ttsVoiceEN, cbTTSVoiceEN.Items.Count - 1));
+                        break;
+                    case "TTSSpeedRU":
+                        if (tbTTSSpeedRU != null && int.TryParse(value, out int speedRU))
+                            tbTTSSpeedRU.Value = Math.Max(10, Math.Min(speedRU, 200));
+                        break;
+                    case "TTSSpeedEN":
+                        if (tbTTSSpeedEN != null && int.TryParse(value, out int speedEN))
+                            tbTTSSpeedEN.Value = Math.Max(10, Math.Min(speedEN, 200));
+                        break;
+                    case "TTSVolumeRU":
+                        if (tbTTSVolumeRU != null && int.TryParse(value, out int volumeRU))
+                            tbTTSVolumeRU.Value = Math.Max(0, Math.Min(volumeRU, 100));
+                        break;
+                    case "TTSVolumeEN":
+                        if (tbTTSVolumeEN != null && int.TryParse(value, out int volumeEN))
+                            tbTTSVolumeEN.Value = Math.Max(0, Math.Min(volumeEN, 100));
+                        break;
+                    case "Microphone":
+                        if (cbMicrophone != null && int.TryParse(value, out int mic))
+                            cbMicrophone.SelectedIndex = Math.Max(0, Math.Min(mic, cbMicrophone.Items.Count - 1));
+                        break;
+                    case "Speakers":
+                        if (cbSpeakers != null && int.TryParse(value, out int speakers))
+                            cbSpeakers.SelectedIndex = Math.Max(0, Math.Min(speakers, cbSpeakers.Items.Count - 1));
+                        break;
+                    case "Headphones":
+                        if (cbHeadphones != null && int.TryParse(value, out int headphones))
+                            cbHeadphones.SelectedIndex = Math.Max(0, Math.Min(headphones, cbHeadphones.Items.Count - 1));
+                        break;
+                    case "VBCable":
+                        if (cbVBCable != null && int.TryParse(value, out int vbcable))
+                            cbVBCable.SelectedIndex = Math.Max(0, Math.Min(vbcable, cbVBCable.Items.Count - 1));
+                        break;
+                    case "EnableVAD":
+                        if (cbEnableVAD != null && bool.TryParse(value, out bool enableVAD))
+                            cbEnableVAD.Checked = enableVAD;
+                        break;
+                    case "VADThreshold":
+                        if (tbVADThreshold != null && int.TryParse(value, out int vadThreshold))
+                            tbVADThreshold.Value = Math.Max(10, Math.Min(vadThreshold, 95));
+                        break;
+                    case "MinDuration":
+                        if (tbMinDuration != null && int.TryParse(value, out int minDuration))
+                            tbMinDuration.Value = Math.Max(1, Math.Min(minDuration, 30));
+                        break;
+                    case "SilenceTimeout":
+                        if (tbSilenceTimeout != null && int.TryParse(value, out int silenceTimeout))
+                            tbSilenceTimeout.Value = Math.Max(5, Math.Min(silenceTimeout, 100));
+                        break;
+                    case "TranslationEngine":
+                        if (cbTranslationEngine != null && int.TryParse(value, out int transEngine))
+                            cbTranslationEngine.SelectedIndex = Math.Max(0, Math.Min(transEngine, cbTranslationEngine.Items.Count - 1));
+                        break;
+                    case "GoogleAPIKey":
+                        if (tbGoogleAPIKey != null)
+                            tbGoogleAPIKey.Text = value;
+                        break;
+                    case "LibreTranslateURL":
+                        if (tbLibreTranslateURL != null)
+                            tbLibreTranslateURL.Text = value;
+                        break;
+                    case "SourceLanguage":
+                        if (cbSourceLanguage != null && int.TryParse(value, out int sourceLang))
+                            cbSourceLanguage.SelectedIndex = Math.Max(0, Math.Min(sourceLang, cbSourceLanguage.Items.Count - 1));
+                        break;
+                    case "TargetLanguage":
+                        if (cbTargetLanguage != null && int.TryParse(value, out int targetLang))
+                            cbTargetLanguage.SelectedIndex = Math.Max(0, Math.Min(targetLang, cbTargetLanguage.Items.Count - 1));
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Игнорируем ошибки применения отдельных настроек
+                System.Diagnostics.Debug.WriteLine($"Error applying setting {key}={value}: {ex.Message}");
+            }
+        }
+
+        private void SetWorkMode(string mode)
+        {
+            switch (mode)
+            {
+                case "Off":
+                    if (rbModeOff != null) rbModeOff.Checked = true;
+                    break;
+                case "Incoming":
+                    if (rbModeIncoming != null) rbModeIncoming.Checked = true;
+                    break;
+                case "Outgoing":
+                    if (rbModeOutgoing != null) rbModeOutgoing.Checked = true;
+                    break;
+                case "Bidirectional":
+                    if (rbModeBidirectional != null) rbModeBidirectional.Checked = true;
+                    break;
+                default:
+                    if (rbModeOff != null) rbModeOff.Checked = true;
+                    break;
+            }
         }
 
         #endregion
