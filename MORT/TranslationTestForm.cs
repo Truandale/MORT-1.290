@@ -326,6 +326,16 @@ namespace MORT
                     }
                 }
                 
+                // For Google Translate, set up language codes based on form selection
+                if (transType == SettingManager.TransType.google_url)
+                {
+                    string sourceLanguage = GetLanguageCode(cbSourceLanguage?.SelectedItem?.ToString() ?? "RU");
+                    string targetLanguage = GetLanguageCode(cbTargetLanguage?.SelectedItem?.ToString() ?? "EN");
+                    
+                    // Set the translation codes for Google Basic API
+                    GoogleBasicTranslateAPI.instance?.SetTransCode(sourceLanguage, targetLanguage);
+                }
+                
                 // Perform translation using real API
                 string result = await transManager.StartTrans(sourceText, transType);
                 
@@ -354,6 +364,19 @@ namespace MORT
                 "TRANSLATE EZTRANS" => SettingManager.TransType.ezTrans,
                 "TRANSLATE CUSTOM API" => SettingManager.TransType.customApi,
                 _ => SettingManager.TransType.google_url // Default
+            };
+        }
+
+        private string GetLanguageCode(string displayName)
+        {
+            return displayName switch
+            {
+                "RU" => "ru",
+                "EN" => "en", 
+                "KO" => "ko",
+                "JA" => "ja",
+                "ZH" => "zh",
+                _ => "en" // Default to English
             };
         }
 
