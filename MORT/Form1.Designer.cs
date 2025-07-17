@@ -332,6 +332,7 @@ namespace MORT
             label63 = new System.Windows.Forms.Label();
             btnDebugOn = new System.Windows.Forms.Button();
             lbDebugging = new System.Windows.Forms.Label();
+            button1 = new System.Windows.Forms.Button();
             ContextOption.SuspendLayout();
             optionMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -413,40 +414,40 @@ namespace MORT
             ContextOption.ImageScalingSize = new System.Drawing.Size(24, 24);
             ContextOption.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { optionToolStripMenuItem, showTransToolStripMenuItem, rTTToolStripMenuItem, toolStripSeparator7, setTranslateTopMostToolStripMenuItem, setCheckSpellingToolStripMenuItem, setCutPointToolStripMenuItem, toolStripSeparator5, transToolStripMenuItem, toolStripSeparator6, settingToolStripMenuItem, toolStripSeparator8, aboutToolStripMenuItem, checkUpdateToolStripMenuItem, ExitToolStripMenuItem });
             ContextOption.Name = "contextMenuStrip1";
-            ContextOption.Size = new System.Drawing.Size(151, 270);
+            ContextOption.Size = new System.Drawing.Size(150, 270);
             // 
             // optionToolStripMenuItem
             // 
             optionToolStripMenuItem.Name = "optionToolStripMenuItem";
-            optionToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            optionToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             optionToolStripMenuItem.Text = "옵션";
             optionToolStripMenuItem.Click += ContextOption_Click;
             // 
             // showTransToolStripMenuItem
             // 
             showTransToolStripMenuItem.Name = "showTransToolStripMenuItem";
-            showTransToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            showTransToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             showTransToolStripMenuItem.Text = "번역창";
             showTransToolStripMenuItem.Click += showTransToolStripMenuItem_Click;
             // 
             // rTTToolStripMenuItem
             // 
             rTTToolStripMenuItem.Name = "rTTToolStripMenuItem";
-            rTTToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            rTTToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             rTTToolStripMenuItem.Text = "리모컨";
             rTTToolStripMenuItem.Click += rTTToolStripMenuItem_Click;
             // 
             // toolStripSeparator7
             // 
             toolStripSeparator7.Name = "toolStripSeparator7";
-            toolStripSeparator7.Size = new System.Drawing.Size(147, 6);
+            toolStripSeparator7.Size = new System.Drawing.Size(146, 6);
             // 
             // setTranslateTopMostToolStripMenuItem
             // 
             setTranslateTopMostToolStripMenuItem.Checked = true;
             setTranslateTopMostToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             setTranslateTopMostToolStripMenuItem.Name = "setTranslateTopMostToolStripMenuItem";
-            setTranslateTopMostToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            setTranslateTopMostToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             setTranslateTopMostToolStripMenuItem.Text = "번역창 고정";
             setTranslateTopMostToolStripMenuItem.Click += setTranslateTopMostToolStripMenuItem_Click;
             // 
@@ -456,39 +457,39 @@ namespace MORT
             setCheckSpellingToolStripMenuItem.CheckOnClick = true;
             setCheckSpellingToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             setCheckSpellingToolStripMenuItem.Name = "setCheckSpellingToolStripMenuItem";
-            setCheckSpellingToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            setCheckSpellingToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             setCheckSpellingToolStripMenuItem.Text = "교정사전 사용";
             setCheckSpellingToolStripMenuItem.Click += setCheckSpellingToolStripMenuItem_Click;
             // 
             // setCutPointToolStripMenuItem
             // 
             setCutPointToolStripMenuItem.Name = "setCutPointToolStripMenuItem";
-            setCutPointToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            setCutPointToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             setCutPointToolStripMenuItem.Text = "영역 설정";
             setCutPointToolStripMenuItem.Click += setCutPointToolStripMenuItem_Click;
             // 
             // toolStripSeparator5
             // 
             toolStripSeparator5.Name = "toolStripSeparator5";
-            toolStripSeparator5.Size = new System.Drawing.Size(147, 6);
+            toolStripSeparator5.Size = new System.Drawing.Size(146, 6);
             // 
             // transToolStripMenuItem
             // 
             transToolStripMenuItem.Name = "transToolStripMenuItem";
-            transToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            transToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             transToolStripMenuItem.Text = "번역 시작";
             transToolStripMenuItem.Click += ContextTranslate_Click;
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new System.Drawing.Size(147, 6);
+            toolStripSeparator6.Size = new System.Drawing.Size(146, 6);
             // 
             // settingToolStripMenuItem
             // 
             settingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { settingSaveToolStripMenuItem2, settingLoadToolStripMenuItem2, settingDefaultToolStripMenuItem });
             settingToolStripMenuItem.Name = "settingToolStripMenuItem";
-            settingToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            settingToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             settingToolStripMenuItem.Text = "설정";
             // 
             // settingSaveToolStripMenuItem2
@@ -515,26 +516,26 @@ namespace MORT
             // toolStripSeparator8
             // 
             toolStripSeparator8.Name = "toolStripSeparator8";
-            toolStripSeparator8.Size = new System.Drawing.Size(147, 6);
+            toolStripSeparator8.Size = new System.Drawing.Size(146, 6);
             // 
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            aboutToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             aboutToolStripMenuItem.Text = "About";
             aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
             // 
             // checkUpdateToolStripMenuItem
             // 
             checkUpdateToolStripMenuItem.Name = "checkUpdateToolStripMenuItem";
-            checkUpdateToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            checkUpdateToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             checkUpdateToolStripMenuItem.Text = "업데이트";
             checkUpdateToolStripMenuItem.Click += checkUpdateToolStripMenuItem_Click;
             // 
             // ExitToolStripMenuItem
             // 
             ExitToolStripMenuItem.Name = "ExitToolStripMenuItem";
-            ExitToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            ExitToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             ExitToolStripMenuItem.Text = "종료";
             ExitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
             // 
@@ -558,18 +559,18 @@ namespace MORT
             optionMenuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
             optionMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 설정저장ToolStripMenuItem, 설정불러오기ToolStripMenuItem });
             optionMenuStrip.Name = "optionMenuStrip";
-            optionMenuStrip.Size = new System.Drawing.Size(151, 48);
+            optionMenuStrip.Size = new System.Drawing.Size(150, 48);
             // 
             // 설정저장ToolStripMenuItem
             // 
             설정저장ToolStripMenuItem.Name = "설정저장ToolStripMenuItem";
-            설정저장ToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            설정저장ToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             설정저장ToolStripMenuItem.Text = "설정 저장";
             // 
             // 설정불러오기ToolStripMenuItem
             // 
             설정불러오기ToolStripMenuItem.Name = "설정불러오기ToolStripMenuItem";
-            설정불러오기ToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+            설정불러오기ToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             설정불러오기ToolStripMenuItem.Text = "설정 불러오기";
             // 
             // acceptButton
@@ -577,7 +578,7 @@ namespace MORT
             acceptButton.BackColor = System.Drawing.Color.FromArgb(91, 91, 91);
             acceptButton.FlatAppearance.BorderSize = 0;
             acceptButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            acceptButton.Font = new System.Drawing.Font("맑은 고딕", 14.25F, System.Drawing.FontStyle.Bold);
+            acceptButton.Font = new System.Drawing.Font("Malgun Gothic", 14.25F, System.Drawing.FontStyle.Bold);
             acceptButton.ForeColor = System.Drawing.Color.White;
             acceptButton.Location = new System.Drawing.Point(398, 589);
             acceptButton.Margin = new System.Windows.Forms.Padding(0);
@@ -603,7 +604,7 @@ namespace MORT
             donationButton.BackColor = System.Drawing.Color.FromArgb(91, 91, 91);
             donationButton.FlatAppearance.BorderSize = 0;
             donationButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            donationButton.Font = new System.Drawing.Font("맑은 고딕", 14.25F, System.Drawing.FontStyle.Bold);
+            donationButton.Font = new System.Drawing.Font("Malgun Gothic", 14.25F, System.Drawing.FontStyle.Bold);
             donationButton.ForeColor = System.Drawing.Color.White;
             donationButton.Location = new System.Drawing.Point(100, 589);
             donationButton.Margin = new System.Windows.Forms.Padding(0);
@@ -633,7 +634,7 @@ namespace MORT
             tbMain.Controls.Add(tpDebuging);
             tbMain.Dock = System.Windows.Forms.DockStyle.Top;
             tbMain.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
-            tbMain.Font = new System.Drawing.Font("맑은 고딕", 9F);
+            tbMain.Font = new System.Drawing.Font("Malgun Gothic", 9F);
             tbMain.ItemSize = new System.Drawing.Size(44, 76);
             tbMain.Location = new System.Drawing.Point(0, 0);
             tbMain.Margin = new System.Windows.Forms.Padding(0);
@@ -721,7 +722,7 @@ namespace MORT
             // cbThreshold
             // 
             cbThreshold.AutoSize = true;
-            cbThreshold.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbThreshold.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbThreshold.ForeColor = System.Drawing.Color.White;
             cbThreshold.Location = new System.Drawing.Point(12, 82);
             cbThreshold.Name = "cbThreshold";
@@ -733,7 +734,7 @@ namespace MORT
             // 
             // tbThreshold
             // 
-            tbThreshold.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            tbThreshold.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             tbThreshold.Location = new System.Drawing.Point(163, 81);
             tbThreshold.Name = "tbThreshold";
             tbThreshold.Size = new System.Drawing.Size(47, 25);
@@ -756,7 +757,7 @@ namespace MORT
             // groupLabel
             // 
             groupLabel.AutoSize = true;
-            groupLabel.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            groupLabel.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             groupLabel.ForeColor = System.Drawing.Color.White;
             groupLabel.Location = new System.Drawing.Point(350, 144);
             groupLabel.Name = "groupLabel";
@@ -767,7 +768,7 @@ namespace MORT
             // lbImgGroupCount
             // 
             lbImgGroupCount.AutoSize = true;
-            lbImgGroupCount.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbImgGroupCount.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbImgGroupCount.ForeColor = System.Drawing.Color.White;
             lbImgGroupCount.Location = new System.Drawing.Point(279, 144);
             lbImgGroupCount.Name = "lbImgGroupCount";
@@ -778,7 +779,7 @@ namespace MORT
             // lbImgGroup
             // 
             lbImgGroup.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lbImgGroup.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbImgGroup.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbImgGroup.ForeColor = System.Drawing.Color.White;
             lbImgGroup.Location = new System.Drawing.Point(91, 146);
             lbImgGroup.Name = "lbImgGroup";
@@ -790,7 +791,7 @@ namespace MORT
             // label1
             // 
             label1.AutoSize = true;
-            label1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label1.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label1.ForeColor = System.Drawing.Color.White;
             label1.Location = new System.Drawing.Point(368, 53);
             label1.Name = "label1";
@@ -800,7 +801,7 @@ namespace MORT
             // 
             // v2TextBox
             // 
-            v2TextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            v2TextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             v2TextBox.Location = new System.Drawing.Point(388, 51);
             v2TextBox.Name = "v2TextBox";
             v2TextBox.Size = new System.Drawing.Size(47, 25);
@@ -812,7 +813,7 @@ namespace MORT
             // lbAdjustImg
             // 
             lbAdjustImg.AutoSize = true;
-            lbAdjustImg.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbAdjustImg.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbAdjustImg.ForeColor = System.Drawing.Color.White;
             lbAdjustImg.Location = new System.Drawing.Point(4, 3);
             lbAdjustImg.Name = "lbAdjustImg";
@@ -823,7 +824,7 @@ namespace MORT
             // checkRGB
             // 
             checkRGB.AutoSize = true;
-            checkRGB.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            checkRGB.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             checkRGB.ForeColor = System.Drawing.Color.White;
             checkRGB.Location = new System.Drawing.Point(12, 25);
             checkRGB.Name = "checkRGB";
@@ -835,7 +836,7 @@ namespace MORT
             // 
             // s2TextBox
             // 
-            s2TextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            s2TextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             s2TextBox.Location = new System.Drawing.Point(239, 51);
             s2TextBox.Name = "s2TextBox";
             s2TextBox.Size = new System.Drawing.Size(47, 25);
@@ -847,7 +848,7 @@ namespace MORT
             // label3
             // 
             label3.AutoSize = true;
-            label3.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label3.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label3.ForeColor = System.Drawing.Color.White;
             label3.Location = new System.Drawing.Point(140, 25);
             label3.Name = "label3";
@@ -858,7 +859,7 @@ namespace MORT
             // label16
             // 
             label16.AutoSize = true;
-            label16.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label16.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label16.ForeColor = System.Drawing.Color.White;
             label16.Location = new System.Drawing.Point(217, 53);
             label16.Name = "label16";
@@ -868,7 +869,7 @@ namespace MORT
             // 
             // rTextBox
             // 
-            rTextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            rTextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             rTextBox.Location = new System.Drawing.Point(163, 22);
             rTextBox.Name = "rTextBox";
             rTextBox.Size = new System.Drawing.Size(47, 25);
@@ -880,7 +881,7 @@ namespace MORT
             // checkErode
             // 
             checkErode.AutoSize = true;
-            checkErode.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            checkErode.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             checkErode.ForeColor = System.Drawing.Color.White;
             checkErode.Location = new System.Drawing.Point(12, 113);
             checkErode.Name = "checkErode";
@@ -892,7 +893,7 @@ namespace MORT
             // label4
             // 
             label4.AutoSize = true;
-            label4.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label4.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label4.ForeColor = System.Drawing.Color.White;
             label4.Location = new System.Drawing.Point(216, 25);
             label4.Name = "label4";
@@ -903,7 +904,7 @@ namespace MORT
             // checkHSV
             // 
             checkHSV.AutoSize = true;
-            checkHSV.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            checkHSV.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             checkHSV.ForeColor = System.Drawing.Color.White;
             checkHSV.Location = new System.Drawing.Point(12, 52);
             checkHSV.Name = "checkHSV";
@@ -915,7 +916,7 @@ namespace MORT
             // 
             // gTextBox
             // 
-            gTextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            gTextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             gTextBox.Location = new System.Drawing.Point(239, 22);
             gTextBox.Name = "gTextBox";
             gTextBox.Size = new System.Drawing.Size(47, 25);
@@ -927,7 +928,7 @@ namespace MORT
             // label5
             // 
             label5.AutoSize = true;
-            label5.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label5.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label5.ForeColor = System.Drawing.Color.White;
             label5.Location = new System.Drawing.Point(292, 25);
             label5.Name = "label5";
@@ -937,7 +938,7 @@ namespace MORT
             // 
             // v1TextBox
             // 
-            v1TextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            v1TextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             v1TextBox.Location = new System.Drawing.Point(315, 51);
             v1TextBox.Name = "v1TextBox";
             v1TextBox.Size = new System.Drawing.Size(47, 25);
@@ -948,7 +949,7 @@ namespace MORT
             // 
             // bTextBox
             // 
-            bTextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            bTextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             bTextBox.Location = new System.Drawing.Point(315, 22);
             bTextBox.Name = "bTextBox";
             bTextBox.Size = new System.Drawing.Size(47, 25);
@@ -960,7 +961,7 @@ namespace MORT
             // label7
             // 
             label7.AutoSize = true;
-            label7.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label7.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label7.ForeColor = System.Drawing.Color.White;
             label7.Location = new System.Drawing.Point(292, 52);
             label7.Name = "label7";
@@ -971,7 +972,7 @@ namespace MORT
             // label8
             // 
             label8.AutoSize = true;
-            label8.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label8.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label8.ForeColor = System.Drawing.Color.White;
             label8.Location = new System.Drawing.Point(140, 52);
             label8.Name = "label8";
@@ -981,7 +982,7 @@ namespace MORT
             // 
             // s1TextBox
             // 
-            s1TextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            s1TextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             s1TextBox.Location = new System.Drawing.Point(163, 51);
             s1TextBox.Name = "s1TextBox";
             s1TextBox.Size = new System.Drawing.Size(47, 25);
@@ -1015,7 +1016,7 @@ namespace MORT
             btOcrHelp.BackColor = System.Drawing.Color.FromArgb(91, 91, 91);
             btOcrHelp.FlatAppearance.BorderSize = 0;
             btOcrHelp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btOcrHelp.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            btOcrHelp.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             btOcrHelp.ForeColor = System.Drawing.Color.White;
             btOcrHelp.Location = new System.Drawing.Point(284, 31);
             btOcrHelp.Margin = new System.Windows.Forms.Padding(0);
@@ -1029,7 +1030,7 @@ namespace MORT
             // label48
             // 
             label48.AutoSize = true;
-            label48.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label48.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label48.ForeColor = System.Drawing.Color.White;
             label48.Location = new System.Drawing.Point(16, 34);
             label48.Name = "label48";
@@ -1040,7 +1041,7 @@ namespace MORT
             // OCR_Type_comboBox
             // 
             OCR_Type_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            OCR_Type_comboBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            OCR_Type_comboBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             OCR_Type_comboBox.FormattingEnabled = true;
             OCR_Type_comboBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             OCR_Type_comboBox.Items.AddRange(new object[] { "OCR Tesseract", "OCR Win OCR", "OCR NHocr", "OCR Google", "OCR Easy OCR" });
@@ -1053,7 +1054,7 @@ namespace MORT
             // isClipBoardcheckBox1
             // 
             isClipBoardcheckBox1.AutoSize = true;
-            isClipBoardcheckBox1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            isClipBoardcheckBox1.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             isClipBoardcheckBox1.ForeColor = System.Drawing.Color.White;
             isClipBoardcheckBox1.Location = new System.Drawing.Point(367, 123);
             isClipBoardcheckBox1.Name = "isClipBoardcheckBox1";
@@ -1065,7 +1066,7 @@ namespace MORT
             // saveOCRCheckBox
             // 
             saveOCRCheckBox.AutoSize = true;
-            saveOCRCheckBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            saveOCRCheckBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             saveOCRCheckBox.ForeColor = System.Drawing.Color.White;
             saveOCRCheckBox.Location = new System.Drawing.Point(193, 123);
             saveOCRCheckBox.Name = "saveOCRCheckBox";
@@ -1077,7 +1078,7 @@ namespace MORT
             // ocrLabel
             // 
             ocrLabel.AutoSize = true;
-            ocrLabel.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            ocrLabel.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             ocrLabel.ForeColor = System.Drawing.Color.White;
             ocrLabel.Location = new System.Drawing.Point(4, 3);
             ocrLabel.Name = "ocrLabel";
@@ -1090,7 +1091,7 @@ namespace MORT
             showOcrCheckBox.AutoSize = true;
             showOcrCheckBox.Checked = true;
             showOcrCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            showOcrCheckBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            showOcrCheckBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             showOcrCheckBox.ForeColor = System.Drawing.Color.White;
             showOcrCheckBox.Location = new System.Drawing.Point(27, 123);
             showOcrCheckBox.Name = "showOcrCheckBox";
@@ -1126,7 +1127,7 @@ namespace MORT
             // WinOCR_Language_comboBox
             // 
             WinOCR_Language_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            WinOCR_Language_comboBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            WinOCR_Language_comboBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             WinOCR_Language_comboBox.FormattingEnabled = true;
             WinOCR_Language_comboBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             WinOCR_Language_comboBox.Items.AddRange(new object[] { "초기화 실패" });
@@ -1139,7 +1140,7 @@ namespace MORT
             // lbWinOCRLanguage
             // 
             lbWinOCRLanguage.AutoSize = true;
-            lbWinOCRLanguage.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbWinOCRLanguage.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbWinOCRLanguage.ForeColor = System.Drawing.Color.White;
             lbWinOCRLanguage.Location = new System.Drawing.Point(8, 9);
             lbWinOCRLanguage.Name = "lbWinOCRLanguage";
@@ -1174,7 +1175,7 @@ namespace MORT
             // cbEasyOcrCode
             // 
             cbEasyOcrCode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cbEasyOcrCode.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbEasyOcrCode.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbEasyOcrCode.FormattingEnabled = true;
             cbEasyOcrCode.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             cbEasyOcrCode.Items.AddRange(new object[] { "자동" });
@@ -1187,7 +1188,7 @@ namespace MORT
             // lbEasyOcrLanguage
             // 
             lbEasyOcrLanguage.AutoSize = true;
-            lbEasyOcrLanguage.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbEasyOcrLanguage.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbEasyOcrLanguage.ForeColor = System.Drawing.Color.White;
             lbEasyOcrLanguage.Location = new System.Drawing.Point(8, 12);
             lbEasyOcrLanguage.Name = "lbEasyOcrLanguage";
@@ -1210,7 +1211,7 @@ namespace MORT
             // cbFastTess
             // 
             cbFastTess.AutoSize = true;
-            cbFastTess.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbFastTess.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbFastTess.ForeColor = System.Drawing.Color.White;
             cbFastTess.Location = new System.Drawing.Point(19, 42);
             cbFastTess.Name = "cbFastTess";
@@ -1222,7 +1223,7 @@ namespace MORT
             // tesseractLanguageComboBox
             // 
             tesseractLanguageComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            tesseractLanguageComboBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            tesseractLanguageComboBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             tesseractLanguageComboBox.FormattingEnabled = true;
             tesseractLanguageComboBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             tesseractLanguageComboBox.Items.AddRange(new object[] { "en", "ja", "Language ETC" });
@@ -1235,7 +1236,7 @@ namespace MORT
             // lbTesseractLanguage
             // 
             lbTesseractLanguage.AutoSize = true;
-            lbTesseractLanguage.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbTesseractLanguage.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbTesseractLanguage.ForeColor = System.Drawing.Color.White;
             lbTesseractLanguage.Location = new System.Drawing.Point(273, 10);
             lbTesseractLanguage.Name = "lbTesseractLanguage";
@@ -1246,7 +1247,7 @@ namespace MORT
             // label18
             // 
             label18.AutoSize = true;
-            label18.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label18.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label18.ForeColor = System.Drawing.Color.White;
             label18.Location = new System.Drawing.Point(10, 9);
             label18.Name = "label18";
@@ -1277,7 +1278,7 @@ namespace MORT
             // cbGoogleOcrLanguge
             // 
             cbGoogleOcrLanguge.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cbGoogleOcrLanguge.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbGoogleOcrLanguge.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbGoogleOcrLanguge.FormattingEnabled = true;
             cbGoogleOcrLanguge.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             cbGoogleOcrLanguge.Items.AddRange(new object[] { "자동" });
@@ -1290,7 +1291,7 @@ namespace MORT
             // lbGoogleOCRLanguage
             // 
             lbGoogleOCRLanguage.AutoSize = true;
-            lbGoogleOCRLanguage.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbGoogleOCRLanguage.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbGoogleOCRLanguage.ForeColor = System.Drawing.Color.White;
             lbGoogleOCRLanguage.Location = new System.Drawing.Point(8, 12);
             lbGoogleOCRLanguage.Name = "lbGoogleOCRLanguage";
@@ -1301,7 +1302,7 @@ namespace MORT
             // lbGoogleOcrStatus
             // 
             lbGoogleOcrStatus.AutoSize = true;
-            lbGoogleOcrStatus.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbGoogleOcrStatus.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbGoogleOcrStatus.ForeColor = System.Drawing.Color.White;
             lbGoogleOcrStatus.Location = new System.Drawing.Point(94, 39);
             lbGoogleOcrStatus.Name = "lbGoogleOcrStatus";
@@ -1336,7 +1337,7 @@ namespace MORT
             lbNHOcrInfo.Anchor = System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             lbNHOcrInfo.AutoEllipsis = true;
             lbNHOcrInfo.AutoSize = true;
-            lbNHOcrInfo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbNHOcrInfo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbNHOcrInfo.ForeColor = System.Drawing.Color.White;
             lbNHOcrInfo.Location = new System.Drawing.Point(54, 14);
             lbNHOcrInfo.Name = "lbNHOcrInfo";
@@ -1385,7 +1386,7 @@ namespace MORT
             // cbGeminiModel
             // 
             cbGeminiModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cbGeminiModel.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbGeminiModel.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbGeminiModel.FormattingEnabled = true;
             cbGeminiModel.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             cbGeminiModel.Items.AddRange(new object[] { "gemini-2.5-flash-preview-05-20", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-pro-preview-06-05", "custom" });
@@ -1397,7 +1398,7 @@ namespace MORT
             // lbGeminiModel
             // 
             lbGeminiModel.AutoSize = true;
-            lbGeminiModel.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbGeminiModel.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbGeminiModel.ForeColor = System.Drawing.Color.White;
             lbGeminiModel.Location = new System.Drawing.Point(3, 38);
             lbGeminiModel.Name = "lbGeminiModel";
@@ -1407,7 +1408,7 @@ namespace MORT
             // 
             // tbGeminiApi
             // 
-            tbGeminiApi.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            tbGeminiApi.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             tbGeminiApi.Location = new System.Drawing.Point(98, 3);
             tbGeminiApi.Name = "tbGeminiApi";
             tbGeminiApi.Size = new System.Drawing.Size(354, 25);
@@ -1416,7 +1417,7 @@ namespace MORT
             // lbGeminiApi
             // 
             lbGeminiApi.AutoSize = true;
-            lbGeminiApi.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbGeminiApi.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbGeminiApi.ForeColor = System.Drawing.Color.White;
             lbGeminiApi.Location = new System.Drawing.Point(3, 8);
             lbGeminiApi.Name = "lbGeminiApi";
@@ -1429,7 +1430,7 @@ namespace MORT
             btnTransHelp.BackColor = System.Drawing.Color.FromArgb(91, 91, 91);
             btnTransHelp.FlatAppearance.BorderSize = 0;
             btnTransHelp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnTransHelp.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            btnTransHelp.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             btnTransHelp.ForeColor = System.Drawing.Color.White;
             btnTransHelp.Location = new System.Drawing.Point(284, 30);
             btnTransHelp.Margin = new System.Windows.Forms.Padding(0);
@@ -1443,7 +1444,7 @@ namespace MORT
             // cbPerWordDic
             // 
             cbPerWordDic.AutoSize = true;
-            cbPerWordDic.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbPerWordDic.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbPerWordDic.ForeColor = System.Drawing.Color.White;
             cbPerWordDic.Location = new System.Drawing.Point(11, 188);
             cbPerWordDic.Name = "cbPerWordDic";
@@ -1455,7 +1456,7 @@ namespace MORT
             // lbTransType
             // 
             lbTransType.AutoSize = true;
-            lbTransType.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbTransType.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbTransType.ForeColor = System.Drawing.Color.White;
             lbTransType.Location = new System.Drawing.Point(9, 33);
             lbTransType.Name = "lbTransType";
@@ -1466,7 +1467,7 @@ namespace MORT
             // TransType_Combobox
             // 
             TransType_Combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            TransType_Combobox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            TransType_Combobox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             TransType_Combobox.FormattingEnabled = true;
             TransType_Combobox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             TransType_Combobox.Items.AddRange(new object[] { "TRANSLATE GOOGLE", "TRANSLATE DB", "TRANSLATE PAPAGO WEB", "TRANSLATE NAVER", "TRANSLATE GOOGLE SHEET", "TRANSLATE DEEPL", "TRANSLATE DEEPLAPI", "TRANSLATE GEMINI API", "TRANSLATE EZTRANS", "TRANSLATE CUSTOM API" });
@@ -1479,7 +1480,7 @@ namespace MORT
             // checkDic
             // 
             checkDic.AutoSize = true;
-            checkDic.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            checkDic.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             checkDic.ForeColor = System.Drawing.Color.White;
             checkDic.Location = new System.Drawing.Point(11, 161);
             checkDic.Name = "checkDic";
@@ -1491,7 +1492,7 @@ namespace MORT
             // 
             // dicFileTextBox
             // 
-            dicFileTextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            dicFileTextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             dicFileTextBox.Location = new System.Drawing.Point(225, 159);
             dicFileTextBox.Name = "dicFileTextBox";
             dicFileTextBox.Size = new System.Drawing.Size(252, 25);
@@ -1500,7 +1501,7 @@ namespace MORT
             // lbDicFile
             // 
             lbDicFile.AutoSize = true;
-            lbDicFile.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbDicFile.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbDicFile.ForeColor = System.Drawing.Color.White;
             lbDicFile.Location = new System.Drawing.Point(139, 162);
             lbDicFile.Name = "lbDicFile";
@@ -1511,7 +1512,7 @@ namespace MORT
             // lbTransTypeTitle
             // 
             lbTransTypeTitle.AutoSize = true;
-            lbTransTypeTitle.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbTransTypeTitle.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbTransTypeTitle.ForeColor = System.Drawing.Color.White;
             lbTransTypeTitle.Location = new System.Drawing.Point(4, 3);
             lbTransTypeTitle.Name = "lbTransTypeTitle";
@@ -1537,7 +1538,7 @@ namespace MORT
             Button_NaverTransKeyList.BackColor = System.Drawing.Color.FromArgb(91, 91, 91);
             Button_NaverTransKeyList.FlatAppearance.BorderSize = 0;
             Button_NaverTransKeyList.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            Button_NaverTransKeyList.Font = new System.Drawing.Font("맑은 고딕", 14.25F, System.Drawing.FontStyle.Bold);
+            Button_NaverTransKeyList.Font = new System.Drawing.Font("Malgun Gothic", 14.25F, System.Drawing.FontStyle.Bold);
             Button_NaverTransKeyList.ForeColor = System.Drawing.Color.White;
             Button_NaverTransKeyList.Location = new System.Drawing.Point(360, 6);
             Button_NaverTransKeyList.Margin = new System.Windows.Forms.Padding(0);
@@ -1551,7 +1552,7 @@ namespace MORT
             // lbPapagoSecret
             // 
             lbPapagoSecret.AutoSize = true;
-            lbPapagoSecret.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbPapagoSecret.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbPapagoSecret.ForeColor = System.Drawing.Color.White;
             lbPapagoSecret.Location = new System.Drawing.Point(3, 38);
             lbPapagoSecret.Name = "lbPapagoSecret";
@@ -1561,7 +1562,7 @@ namespace MORT
             // 
             // NaverSecretKeyTextBox
             // 
-            NaverSecretKeyTextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            NaverSecretKeyTextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             NaverSecretKeyTextBox.Location = new System.Drawing.Point(98, 34);
             NaverSecretKeyTextBox.Name = "NaverSecretKeyTextBox";
             NaverSecretKeyTextBox.Size = new System.Drawing.Size(252, 25);
@@ -1569,7 +1570,7 @@ namespace MORT
             // 
             // NaverIDKeyTextBox
             // 
-            NaverIDKeyTextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            NaverIDKeyTextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             NaverIDKeyTextBox.Location = new System.Drawing.Point(98, 3);
             NaverIDKeyTextBox.Name = "NaverIDKeyTextBox";
             NaverIDKeyTextBox.Size = new System.Drawing.Size(252, 25);
@@ -1578,7 +1579,7 @@ namespace MORT
             // lbPapagoID
             // 
             lbPapagoID.AutoSize = true;
-            lbPapagoID.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbPapagoID.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbPapagoID.ForeColor = System.Drawing.Color.White;
             lbPapagoID.Location = new System.Drawing.Point(3, 8);
             lbPapagoID.Name = "lbPapagoID";
@@ -1606,7 +1607,7 @@ namespace MORT
             button_RemoveAllGoogleToekn.BackColor = System.Drawing.Color.FromArgb(91, 91, 91);
             button_RemoveAllGoogleToekn.FlatAppearance.BorderSize = 0;
             button_RemoveAllGoogleToekn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            button_RemoveAllGoogleToekn.Font = new System.Drawing.Font("맑은 고딕", 14.25F, System.Drawing.FontStyle.Bold);
+            button_RemoveAllGoogleToekn.Font = new System.Drawing.Font("Malgun Gothic", 14.25F, System.Drawing.FontStyle.Bold);
             button_RemoveAllGoogleToekn.ForeColor = System.Drawing.Color.White;
             button_RemoveAllGoogleToekn.Location = new System.Drawing.Point(360, 6);
             button_RemoveAllGoogleToekn.Margin = new System.Windows.Forms.Padding(0);
@@ -1619,7 +1620,7 @@ namespace MORT
             // 
             // textBox_GoogleSecretKey
             // 
-            textBox_GoogleSecretKey.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            textBox_GoogleSecretKey.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             textBox_GoogleSecretKey.Location = new System.Drawing.Point(98, 65);
             textBox_GoogleSecretKey.Name = "textBox_GoogleSecretKey";
             textBox_GoogleSecretKey.Size = new System.Drawing.Size(252, 25);
@@ -1628,7 +1629,7 @@ namespace MORT
             // lbSheetSecret
             // 
             lbSheetSecret.AutoSize = true;
-            lbSheetSecret.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbSheetSecret.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbSheetSecret.ForeColor = System.Drawing.Color.White;
             lbSheetSecret.Location = new System.Drawing.Point(3, 67);
             lbSheetSecret.Name = "lbSheetSecret";
@@ -1638,7 +1639,7 @@ namespace MORT
             // 
             // textBox_GoogleClientID
             // 
-            textBox_GoogleClientID.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            textBox_GoogleClientID.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             textBox_GoogleClientID.Location = new System.Drawing.Point(98, 34);
             textBox_GoogleClientID.Name = "textBox_GoogleClientID";
             textBox_GoogleClientID.Size = new System.Drawing.Size(252, 25);
@@ -1647,7 +1648,7 @@ namespace MORT
             // lbSheetID
             // 
             lbSheetID.AutoSize = true;
-            lbSheetID.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbSheetID.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbSheetID.ForeColor = System.Drawing.Color.White;
             lbSheetID.Location = new System.Drawing.Point(3, 38);
             lbSheetID.Name = "lbSheetID";
@@ -1657,7 +1658,7 @@ namespace MORT
             // 
             // googleSheet_textBox
             // 
-            googleSheet_textBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            googleSheet_textBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             googleSheet_textBox.Location = new System.Drawing.Point(98, 3);
             googleSheet_textBox.Name = "googleSheet_textBox";
             googleSheet_textBox.Size = new System.Drawing.Size(252, 25);
@@ -1666,7 +1667,7 @@ namespace MORT
             // lbGoogleSheetAddress
             // 
             lbGoogleSheetAddress.AutoSize = true;
-            lbGoogleSheetAddress.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbGoogleSheetAddress.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbGoogleSheetAddress.ForeColor = System.Drawing.Color.White;
             lbGoogleSheetAddress.Location = new System.Drawing.Point(3, 8);
             lbGoogleSheetAddress.Name = "lbGoogleSheetAddress";
@@ -1685,7 +1686,7 @@ namespace MORT
             // lbEzTransInfo
             // 
             lbEzTransInfo.AutoSize = true;
-            lbEzTransInfo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbEzTransInfo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbEzTransInfo.ForeColor = System.Drawing.Color.White;
             lbEzTransInfo.Location = new System.Drawing.Point(79, 21);
             lbEzTransInfo.Name = "lbEzTransInfo";
@@ -1704,7 +1705,7 @@ namespace MORT
             // 
             // lbPapagoWebInfo
             // 
-            lbPapagoWebInfo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbPapagoWebInfo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbPapagoWebInfo.ForeColor = System.Drawing.Color.White;
             lbPapagoWebInfo.Location = new System.Drawing.Point(3, 21);
             lbPapagoWebInfo.Name = "lbPapagoWebInfo";
@@ -1724,7 +1725,7 @@ namespace MORT
             // 
             // lbBasicInfo
             // 
-            lbBasicInfo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbBasicInfo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbBasicInfo.ForeColor = System.Drawing.Color.White;
             lbBasicInfo.Location = new System.Drawing.Point(3, 21);
             lbBasicInfo.Name = "lbBasicInfo";
@@ -1735,7 +1736,7 @@ namespace MORT
             // 
             // lbBasicStatus
             // 
-            lbBasicStatus.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbBasicStatus.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbBasicStatus.ForeColor = System.Drawing.Color.White;
             lbBasicStatus.Location = new System.Drawing.Point(3, 60);
             lbBasicStatus.Name = "lbBasicStatus";
@@ -1754,7 +1755,7 @@ namespace MORT
             // 
             // lbCustomApiInformation
             // 
-            lbCustomApiInformation.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbCustomApiInformation.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbCustomApiInformation.ForeColor = System.Drawing.Color.White;
             lbCustomApiInformation.Location = new System.Drawing.Point(3, 8);
             lbCustomApiInformation.Name = "lbCustomApiInformation";
@@ -1776,7 +1777,7 @@ namespace MORT
             // 
             // tbDeeplApi
             // 
-            tbDeeplApi.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            tbDeeplApi.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             tbDeeplApi.Location = new System.Drawing.Point(98, 3);
             tbDeeplApi.Name = "tbDeeplApi";
             tbDeeplApi.Size = new System.Drawing.Size(252, 25);
@@ -1785,7 +1786,7 @@ namespace MORT
             // lbDeeplApi
             // 
             lbDeeplApi.AutoSize = true;
-            lbDeeplApi.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbDeeplApi.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbDeeplApi.ForeColor = System.Drawing.Color.White;
             lbDeeplApi.Location = new System.Drawing.Point(3, 8);
             lbDeeplApi.Name = "lbDeeplApi";
@@ -1796,7 +1797,7 @@ namespace MORT
             // rbDeepLAPIEndpointFree
             // 
             rbDeepLAPIEndpointFree.AutoSize = true;
-            rbDeepLAPIEndpointFree.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            rbDeepLAPIEndpointFree.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             rbDeepLAPIEndpointFree.ForeColor = System.Drawing.Color.White;
             rbDeepLAPIEndpointFree.Location = new System.Drawing.Point(3, 40);
             rbDeepLAPIEndpointFree.Name = "rbDeepLAPIEndpointFree";
@@ -1809,7 +1810,7 @@ namespace MORT
             // rbDeepLAPIEndpointPaid
             // 
             rbDeepLAPIEndpointPaid.AutoSize = true;
-            rbDeepLAPIEndpointPaid.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            rbDeepLAPIEndpointPaid.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             rbDeepLAPIEndpointPaid.ForeColor = System.Drawing.Color.White;
             rbDeepLAPIEndpointPaid.Location = new System.Drawing.Point(3, 68);
             rbDeepLAPIEndpointPaid.Name = "rbDeepLAPIEndpointPaid";
@@ -1846,7 +1847,7 @@ namespace MORT
             // lbDeepLStatus
             // 
             lbDeepLStatus.AutoSize = true;
-            lbDeepLStatus.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbDeepLStatus.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbDeepLStatus.ForeColor = System.Drawing.Color.White;
             lbDeepLStatus.Location = new System.Drawing.Point(3, 62);
             lbDeepLStatus.Name = "lbDeepLStatus";
@@ -1857,7 +1858,7 @@ namespace MORT
             // 
             // lbDeepLInfo
             // 
-            lbDeepLInfo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbDeepLInfo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbDeepLInfo.ForeColor = System.Drawing.Color.White;
             lbDeepLInfo.Location = new System.Drawing.Point(3, 8);
             lbDeepLInfo.Name = "lbDeepLInfo";
@@ -1880,7 +1881,7 @@ namespace MORT
             // cbDBMultiGet
             // 
             cbDBMultiGet.AutoSize = true;
-            cbDBMultiGet.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbDBMultiGet.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbDBMultiGet.ForeColor = System.Drawing.Color.White;
             cbDBMultiGet.Location = new System.Drawing.Point(5, 65);
             cbDBMultiGet.Name = "cbDBMultiGet";
@@ -1892,7 +1893,7 @@ namespace MORT
             // checkStringUpper
             // 
             checkStringUpper.AutoSize = true;
-            checkStringUpper.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            checkStringUpper.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             checkStringUpper.ForeColor = System.Drawing.Color.White;
             checkStringUpper.Location = new System.Drawing.Point(5, 40);
             checkStringUpper.Name = "checkStringUpper";
@@ -1903,7 +1904,7 @@ namespace MORT
             // 
             // dbFileTextBox
             // 
-            dbFileTextBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            dbFileTextBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             dbFileTextBox.Location = new System.Drawing.Point(98, 3);
             dbFileTextBox.Name = "dbFileTextBox";
             dbFileTextBox.Size = new System.Drawing.Size(252, 25);
@@ -1913,7 +1914,7 @@ namespace MORT
             // lbDbFile
             // 
             lbDbFile.AutoSize = true;
-            lbDbFile.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbDbFile.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbDbFile.ForeColor = System.Drawing.Color.White;
             lbDbFile.Location = new System.Drawing.Point(3, 8);
             lbDbFile.Name = "lbDbFile";
@@ -1959,7 +1960,7 @@ namespace MORT
             // lbPreview
             // 
             lbPreview.AutoSize = true;
-            lbPreview.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbPreview.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbPreview.ForeColor = System.Drawing.Color.White;
             lbPreview.Location = new System.Drawing.Point(4, 3);
             lbPreview.Name = "lbPreview";
@@ -1969,7 +1970,7 @@ namespace MORT
             // 
             // fontResultLabel
             // 
-            fontResultLabel.Font = new System.Drawing.Font("맑은 고딕", 15.75F);
+            fontResultLabel.Font = new System.Drawing.Font("Malgun Gothic", 15.75F);
             fontResultLabel.Location = new System.Drawing.Point(12, 34);
             fontResultLabel.Name = "fontResultLabel";
             fontResultLabel.Size = new System.Drawing.Size(511, 249);
@@ -2011,7 +2012,7 @@ namespace MORT
             // lbFontBackground
             // 
             lbFontBackground.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            lbFontBackground.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbFontBackground.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbFontBackground.ForeColor = System.Drawing.Color.White;
             lbFontBackground.Location = new System.Drawing.Point(354, 48);
             lbFontBackground.Name = "lbFontBackground";
@@ -2023,7 +2024,7 @@ namespace MORT
             // lbFontOutlineColor2
             // 
             lbFontOutlineColor2.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            lbFontOutlineColor2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbFontOutlineColor2.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbFontOutlineColor2.ForeColor = System.Drawing.Color.White;
             lbFontOutlineColor2.Location = new System.Drawing.Point(264, 48);
             lbFontOutlineColor2.Name = "lbFontOutlineColor2";
@@ -2035,7 +2036,7 @@ namespace MORT
             // lbFontOutlineColor1
             // 
             lbFontOutlineColor1.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            lbFontOutlineColor1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbFontOutlineColor1.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbFontOutlineColor1.ForeColor = System.Drawing.Color.White;
             lbFontOutlineColor1.Location = new System.Drawing.Point(174, 48);
             lbFontOutlineColor1.Name = "lbFontOutlineColor1";
@@ -2077,7 +2078,7 @@ namespace MORT
             // lbFontBasicColor
             // 
             lbFontBasicColor.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            lbFontBasicColor.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbFontBasicColor.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbFontBasicColor.ForeColor = System.Drawing.Color.White;
             lbFontBasicColor.Location = new System.Drawing.Point(84, 48);
             lbFontBasicColor.Name = "lbFontBasicColor";
@@ -2099,7 +2100,7 @@ namespace MORT
             // lbFontColor
             // 
             lbFontColor.AutoSize = true;
-            lbFontColor.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbFontColor.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbFontColor.ForeColor = System.Drawing.Color.White;
             lbFontColor.Location = new System.Drawing.Point(4, 3);
             lbFontColor.Name = "lbFontColor";
@@ -2125,7 +2126,7 @@ namespace MORT
             cbShowOCRIndex.AutoSize = true;
             cbShowOCRIndex.Checked = true;
             cbShowOCRIndex.CheckState = System.Windows.Forms.CheckState.Checked;
-            cbShowOCRIndex.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            cbShowOCRIndex.Font = new System.Drawing.Font("Malgun Gothic", 9F, System.Drawing.FontStyle.Bold);
             cbShowOCRIndex.ForeColor = System.Drawing.Color.White;
             cbShowOCRIndex.Location = new System.Drawing.Point(17, 53);
             cbShowOCRIndex.Name = "cbShowOCRIndex";
@@ -2140,7 +2141,7 @@ namespace MORT
             useBackColorCheckBox.AutoSize = true;
             useBackColorCheckBox.Checked = true;
             useBackColorCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            useBackColorCheckBox.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            useBackColorCheckBox.Font = new System.Drawing.Font("Malgun Gothic", 9F, System.Drawing.FontStyle.Bold);
             useBackColorCheckBox.ForeColor = System.Drawing.Color.White;
             useBackColorCheckBox.Location = new System.Drawing.Point(405, 26);
             useBackColorCheckBox.Name = "useBackColorCheckBox";
@@ -2155,7 +2156,7 @@ namespace MORT
             removeSpaceCheckBox.AutoSize = true;
             removeSpaceCheckBox.Checked = true;
             removeSpaceCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            removeSpaceCheckBox.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            removeSpaceCheckBox.Font = new System.Drawing.Font("Malgun Gothic", 9F, System.Drawing.FontStyle.Bold);
             removeSpaceCheckBox.ForeColor = System.Drawing.Color.White;
             removeSpaceCheckBox.Location = new System.Drawing.Point(186, 26);
             removeSpaceCheckBox.Name = "removeSpaceCheckBox";
@@ -2170,7 +2171,7 @@ namespace MORT
             alignmentCenterCheckBox.AutoSize = true;
             alignmentCenterCheckBox.Checked = true;
             alignmentCenterCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            alignmentCenterCheckBox.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            alignmentCenterCheckBox.Font = new System.Drawing.Font("Malgun Gothic", 9F, System.Drawing.FontStyle.Bold);
             alignmentCenterCheckBox.ForeColor = System.Drawing.Color.White;
             alignmentCenterCheckBox.Location = new System.Drawing.Point(17, 26);
             alignmentCenterCheckBox.Name = "alignmentCenterCheckBox";
@@ -2183,7 +2184,7 @@ namespace MORT
             // lbTextAdditionalSettings
             // 
             lbTextAdditionalSettings.AutoSize = true;
-            lbTextAdditionalSettings.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbTextAdditionalSettings.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbTextAdditionalSettings.ForeColor = System.Drawing.Color.White;
             lbTextAdditionalSettings.Location = new System.Drawing.Point(4, 3);
             lbTextAdditionalSettings.Name = "lbTextAdditionalSettings";
@@ -2219,7 +2220,7 @@ namespace MORT
             // lbFontSize
             // 
             lbFontSize.AutoSize = true;
-            lbFontSize.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbFontSize.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbFontSize.ForeColor = System.Drawing.Color.White;
             lbFontSize.Location = new System.Drawing.Point(255, 36);
             lbFontSize.Name = "lbFontSize";
@@ -2230,7 +2231,7 @@ namespace MORT
             // lbFont
             // 
             lbFont.AutoSize = true;
-            lbFont.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbFont.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbFont.ForeColor = System.Drawing.Color.White;
             lbFont.Location = new System.Drawing.Point(13, 36);
             lbFont.Name = "lbFont";
@@ -2255,7 +2256,7 @@ namespace MORT
             // lbFontSetting
             // 
             lbFontSetting.AutoSize = true;
-            lbFontSetting.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbFontSetting.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbFontSetting.ForeColor = System.Drawing.Color.White;
             lbFontSetting.Location = new System.Drawing.Point(4, 3);
             lbFontSetting.Name = "lbFontSetting";
@@ -2317,7 +2318,7 @@ namespace MORT
             // lbAdvencedConfig
             // 
             lbAdvencedConfig.AutoSize = true;
-            lbAdvencedConfig.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbAdvencedConfig.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbAdvencedConfig.ForeColor = System.Drawing.Color.White;
             lbAdvencedConfig.Location = new System.Drawing.Point(4, 3);
             lbAdvencedConfig.Name = "lbAdvencedConfig";
@@ -2367,7 +2368,7 @@ namespace MORT
             // lbSearchConfig
             // 
             lbSearchConfig.AutoSize = true;
-            lbSearchConfig.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbSearchConfig.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbSearchConfig.ForeColor = System.Drawing.Color.White;
             lbSearchConfig.Location = new System.Drawing.Point(4, 3);
             lbSearchConfig.Name = "lbSearchConfig";
@@ -2393,7 +2394,7 @@ namespace MORT
             // speedRadioButton5
             // 
             speedRadioButton5.AutoSize = true;
-            speedRadioButton5.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            speedRadioButton5.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             speedRadioButton5.ForeColor = System.Drawing.Color.White;
             speedRadioButton5.Location = new System.Drawing.Point(406, 27);
             speedRadioButton5.Name = "speedRadioButton5";
@@ -2405,7 +2406,7 @@ namespace MORT
             // lbSpeed
             // 
             lbSpeed.AutoSize = true;
-            lbSpeed.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbSpeed.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbSpeed.ForeColor = System.Drawing.Color.White;
             lbSpeed.Location = new System.Drawing.Point(4, 3);
             lbSpeed.Name = "lbSpeed";
@@ -2416,7 +2417,7 @@ namespace MORT
             // lbSpeedInformation
             // 
             lbSpeedInformation.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            lbSpeedInformation.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbSpeedInformation.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbSpeedInformation.ForeColor = System.Drawing.Color.White;
             lbSpeedInformation.Location = new System.Drawing.Point(33, 50);
             lbSpeedInformation.Name = "lbSpeedInformation";
@@ -2428,7 +2429,7 @@ namespace MORT
             // speedRadioButton4
             // 
             speedRadioButton4.AutoSize = true;
-            speedRadioButton4.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            speedRadioButton4.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             speedRadioButton4.ForeColor = System.Drawing.Color.White;
             speedRadioButton4.Location = new System.Drawing.Point(318, 27);
             speedRadioButton4.Name = "speedRadioButton4";
@@ -2440,7 +2441,7 @@ namespace MORT
             // speedRadioButton1
             // 
             speedRadioButton1.AutoSize = true;
-            speedRadioButton1.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            speedRadioButton1.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             speedRadioButton1.ForeColor = System.Drawing.Color.White;
             speedRadioButton1.Location = new System.Drawing.Point(23, 27);
             speedRadioButton1.Name = "speedRadioButton1";
@@ -2453,7 +2454,7 @@ namespace MORT
             // 
             speedRadioButton3.AutoSize = true;
             speedRadioButton3.Checked = true;
-            speedRadioButton3.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            speedRadioButton3.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             speedRadioButton3.ForeColor = System.Drawing.Color.White;
             speedRadioButton3.Location = new System.Drawing.Point(230, 27);
             speedRadioButton3.Name = "speedRadioButton3";
@@ -2466,7 +2467,7 @@ namespace MORT
             // speedRadioButton2
             // 
             speedRadioButton2.AutoSize = true;
-            speedRadioButton2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            speedRadioButton2.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             speedRadioButton2.ForeColor = System.Drawing.Color.White;
             speedRadioButton2.Location = new System.Drawing.Point(142, 27);
             speedRadioButton2.Name = "speedRadioButton2";
@@ -2532,7 +2533,7 @@ namespace MORT
             // lbSettingFile
             // 
             lbSettingFile.AutoSize = true;
-            lbSettingFile.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbSettingFile.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbSettingFile.ForeColor = System.Drawing.Color.White;
             lbSettingFile.Location = new System.Drawing.Point(4, 3);
             lbSettingFile.Name = "lbSettingFile";
@@ -2556,7 +2557,7 @@ namespace MORT
             topMostcheckBox.AutoSize = true;
             topMostcheckBox.Checked = true;
             topMostcheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            topMostcheckBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            topMostcheckBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             topMostcheckBox.ForeColor = System.Drawing.Color.White;
             topMostcheckBox.Location = new System.Drawing.Point(199, 36);
             topMostcheckBox.Name = "topMostcheckBox";
@@ -2570,7 +2571,7 @@ namespace MORT
             checkUpdateCheckBox.AutoSize = true;
             checkUpdateCheckBox.Checked = true;
             checkUpdateCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            checkUpdateCheckBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            checkUpdateCheckBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             checkUpdateCheckBox.ForeColor = System.Drawing.Color.White;
             checkUpdateCheckBox.Location = new System.Drawing.Point(17, 36);
             checkUpdateCheckBox.Name = "checkUpdateCheckBox";
@@ -2582,7 +2583,7 @@ namespace MORT
             // label15
             // 
             label15.AutoSize = true;
-            label15.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            label15.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             label15.ForeColor = System.Drawing.Color.White;
             label15.Location = new System.Drawing.Point(4, 3);
             label15.Name = "label15";
@@ -2649,7 +2650,7 @@ namespace MORT
             // lbImgZoom
             // 
             lbImgZoom.AutoSize = true;
-            lbImgZoom.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbImgZoom.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbImgZoom.ForeColor = System.Drawing.Color.White;
             lbImgZoom.Location = new System.Drawing.Point(269, 36);
             lbImgZoom.Name = "lbImgZoom";
@@ -2662,7 +2663,7 @@ namespace MORT
             activeWinodeCheckBox.AutoSize = true;
             activeWinodeCheckBox.Checked = true;
             activeWinodeCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            activeWinodeCheckBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            activeWinodeCheckBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             activeWinodeCheckBox.ForeColor = System.Drawing.Color.White;
             activeWinodeCheckBox.Location = new System.Drawing.Point(17, 36);
             activeWinodeCheckBox.Name = "activeWinodeCheckBox";
@@ -2674,7 +2675,7 @@ namespace MORT
             // lbImgCapture
             // 
             lbImgCapture.AutoSize = true;
-            lbImgCapture.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbImgCapture.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbImgCapture.ForeColor = System.Drawing.Color.White;
             lbImgCapture.Location = new System.Drawing.Point(4, 3);
             lbImgCapture.Name = "lbImgCapture";
@@ -2725,7 +2726,7 @@ namespace MORT
             // cbDeepLLanguageTo
             // 
             cbDeepLLanguageTo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cbDeepLLanguageTo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbDeepLLanguageTo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbDeepLLanguageTo.FormattingEnabled = true;
             cbDeepLLanguageTo.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             cbDeepLLanguageTo.Items.AddRange(new object[] { "한국어", "영어", "일본어", "중국어 - 간체", "중국어 - 번체", "러시아어", "독일어", "브라질어", "포르투갈어", "스페인어", "프랑스어", "베트남어", "태국어" });
@@ -2737,7 +2738,7 @@ namespace MORT
             // lbDeepLTo
             // 
             lbDeepLTo.AutoSize = true;
-            lbDeepLTo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbDeepLTo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbDeepLTo.ForeColor = System.Drawing.Color.White;
             lbDeepLTo.Location = new System.Drawing.Point(417, 38);
             lbDeepLTo.Name = "lbDeepLTo";
@@ -2748,7 +2749,7 @@ namespace MORT
             // label6
             // 
             label6.AutoSize = true;
-            label6.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label6.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label6.ForeColor = System.Drawing.Color.White;
             label6.Location = new System.Drawing.Point(249, 38);
             label6.Name = "label6";
@@ -2759,7 +2760,7 @@ namespace MORT
             // cbDeepLLanguage
             // 
             cbDeepLLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cbDeepLLanguage.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbDeepLLanguage.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbDeepLLanguage.FormattingEnabled = true;
             cbDeepLLanguage.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             cbDeepLLanguage.Items.AddRange(new object[] { "영어", "일본어", "중국어 간체", "중국어 번체", "한국어", "러시아어", "독일어", "브라질어", "포르투갈어", "스페인어", "프랑스어", "베트남어", "태국어" });
@@ -2771,7 +2772,7 @@ namespace MORT
             // lbDeepL
             // 
             lbDeepL.AutoSize = true;
-            lbDeepL.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbDeepL.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbDeepL.ForeColor = System.Drawing.Color.White;
             lbDeepL.Location = new System.Drawing.Point(4, 3);
             lbDeepL.Name = "lbDeepL";
@@ -2782,7 +2783,7 @@ namespace MORT
             // lbDeepLFrom
             // 
             lbDeepLFrom.AutoSize = true;
-            lbDeepLFrom.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbDeepLFrom.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbDeepLFrom.ForeColor = System.Drawing.Color.White;
             lbDeepLFrom.Location = new System.Drawing.Point(170, 38);
             lbDeepLFrom.Name = "lbDeepLFrom";
@@ -2805,7 +2806,7 @@ namespace MORT
             // 
             cbTTSWaitEnd.AutoSize = true;
             cbTTSWaitEnd.BackColor = System.Drawing.Color.FromArgb(35, 36, 38);
-            cbTTSWaitEnd.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbTTSWaitEnd.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbTTSWaitEnd.ForeColor = System.Drawing.Color.White;
             cbTTSWaitEnd.Location = new System.Drawing.Point(135, 26);
             cbTTSWaitEnd.Name = "cbTTSWaitEnd";
@@ -2817,7 +2818,7 @@ namespace MORT
             // cbUseTTS
             // 
             cbUseTTS.AutoSize = true;
-            cbUseTTS.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbUseTTS.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbUseTTS.ForeColor = System.Drawing.Color.White;
             cbUseTTS.Location = new System.Drawing.Point(20, 26);
             cbUseTTS.Name = "cbUseTTS";
@@ -2830,7 +2831,7 @@ namespace MORT
             // label66
             // 
             label66.AutoSize = true;
-            label66.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            label66.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             label66.ForeColor = System.Drawing.Color.White;
             label66.Location = new System.Drawing.Point(4, 3);
             label66.Name = "label66";
@@ -2855,7 +2856,7 @@ namespace MORT
             // googleResultCodeComboBox
             // 
             googleResultCodeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            googleResultCodeComboBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            googleResultCodeComboBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             googleResultCodeComboBox.FormattingEnabled = true;
             googleResultCodeComboBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             googleResultCodeComboBox.Items.AddRange(new object[] { "한국어", "영어", "일본어", "중국어 - 간체", "중국어 - 번체", "러시아어", "독일어", "브라질어", "포르투갈어", "스페인어", "프랑스어", "베트남어", "태국어" });
@@ -2867,7 +2868,7 @@ namespace MORT
             // lbGoogleTo
             // 
             lbGoogleTo.AutoSize = true;
-            lbGoogleTo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbGoogleTo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbGoogleTo.ForeColor = System.Drawing.Color.White;
             lbGoogleTo.Location = new System.Drawing.Point(417, 38);
             lbGoogleTo.Name = "lbGoogleTo";
@@ -2878,7 +2879,7 @@ namespace MORT
             // label56
             // 
             label56.AutoSize = true;
-            label56.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label56.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label56.ForeColor = System.Drawing.Color.White;
             label56.Location = new System.Drawing.Point(249, 38);
             label56.Name = "label56";
@@ -2889,7 +2890,7 @@ namespace MORT
             // googleTransComboBox
             // 
             googleTransComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            googleTransComboBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            googleTransComboBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             googleTransComboBox.FormattingEnabled = true;
             googleTransComboBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             googleTransComboBox.Items.AddRange(new object[] { "영어", "일본어", "중국어 간체", "중국어 번체", "한국어", "러시아어", "독일어", "브라질어", "포르투갈어", "스페인어", "프랑스어", "베트남어", "태국어" });
@@ -2901,7 +2902,7 @@ namespace MORT
             // lbGoogle
             // 
             lbGoogle.AutoSize = true;
-            lbGoogle.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbGoogle.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbGoogle.ForeColor = System.Drawing.Color.White;
             lbGoogle.Location = new System.Drawing.Point(4, 3);
             lbGoogle.Name = "lbGoogle";
@@ -2912,7 +2913,7 @@ namespace MORT
             // lbGoogleFrom
             // 
             lbGoogleFrom.AutoSize = true;
-            lbGoogleFrom.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbGoogleFrom.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbGoogleFrom.ForeColor = System.Drawing.Color.White;
             lbGoogleFrom.Location = new System.Drawing.Point(170, 38);
             lbGoogleFrom.Name = "lbGoogleFrom";
@@ -2935,7 +2936,7 @@ namespace MORT
             // skinOverRadioButton
             // 
             skinOverRadioButton.AutoSize = true;
-            skinOverRadioButton.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            skinOverRadioButton.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             skinOverRadioButton.ForeColor = System.Drawing.Color.White;
             skinOverRadioButton.Location = new System.Drawing.Point(150, 23);
             skinOverRadioButton.Name = "skinOverRadioButton";
@@ -2947,7 +2948,7 @@ namespace MORT
             // skinLayerRadioButton
             // 
             skinLayerRadioButton.AutoSize = true;
-            skinLayerRadioButton.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            skinLayerRadioButton.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             skinLayerRadioButton.ForeColor = System.Drawing.Color.White;
             skinLayerRadioButton.Location = new System.Drawing.Point(77, 23);
             skinLayerRadioButton.Name = "skinLayerRadioButton";
@@ -2959,7 +2960,7 @@ namespace MORT
             // lbTransformType
             // 
             lbTransformType.AutoSize = true;
-            lbTransformType.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbTransformType.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbTransformType.ForeColor = System.Drawing.Color.White;
             lbTransformType.Location = new System.Drawing.Point(4, 3);
             lbTransformType.Name = "lbTransformType";
@@ -2971,7 +2972,7 @@ namespace MORT
             // 
             skinDarkRadioButton.AutoSize = true;
             skinDarkRadioButton.Checked = true;
-            skinDarkRadioButton.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            skinDarkRadioButton.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             skinDarkRadioButton.ForeColor = System.Drawing.Color.White;
             skinDarkRadioButton.Location = new System.Drawing.Point(11, 23);
             skinDarkRadioButton.Name = "skinDarkRadioButton";
@@ -2998,7 +2999,7 @@ namespace MORT
             // 
             // lbPapagoLanguageCodeInformation
             // 
-            lbPapagoLanguageCodeInformation.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbPapagoLanguageCodeInformation.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbPapagoLanguageCodeInformation.ForeColor = System.Drawing.Color.White;
             lbPapagoLanguageCodeInformation.Location = new System.Drawing.Point(21, 74);
             lbPapagoLanguageCodeInformation.Name = "lbPapagoLanguageCodeInformation";
@@ -3010,7 +3011,7 @@ namespace MORT
             // cbNaverResultCode
             // 
             cbNaverResultCode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cbNaverResultCode.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbNaverResultCode.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbNaverResultCode.FormattingEnabled = true;
             cbNaverResultCode.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             cbNaverResultCode.Items.AddRange(new object[] { "한국어", "영어" });
@@ -3022,7 +3023,7 @@ namespace MORT
             // lbPaPagoTo
             // 
             lbPaPagoTo.AutoSize = true;
-            lbPaPagoTo.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbPaPagoTo.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbPaPagoTo.ForeColor = System.Drawing.Color.White;
             lbPaPagoTo.Location = new System.Drawing.Point(417, 33);
             lbPaPagoTo.Name = "lbPaPagoTo";
@@ -3033,7 +3034,7 @@ namespace MORT
             // label43
             // 
             label43.AutoSize = true;
-            label43.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            label43.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             label43.ForeColor = System.Drawing.Color.White;
             label43.Location = new System.Drawing.Point(249, 38);
             label43.Name = "label43";
@@ -3044,7 +3045,7 @@ namespace MORT
             // naverTransComboBox
             // 
             naverTransComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            naverTransComboBox.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            naverTransComboBox.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             naverTransComboBox.FormattingEnabled = true;
             naverTransComboBox.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             naverTransComboBox.Items.AddRange(new object[] { "영어", "일본어", "중국어 간체", "중국어 번체", "스페인어", "프랑스어", "베트남어", "태국어", "인도네시아어", "한국어" });
@@ -3056,7 +3057,7 @@ namespace MORT
             // lbPaPago
             // 
             lbPaPago.AutoSize = true;
-            lbPaPago.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbPaPago.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbPaPago.ForeColor = System.Drawing.Color.White;
             lbPaPago.Location = new System.Drawing.Point(4, 3);
             lbPaPago.Name = "lbPaPago";
@@ -3067,7 +3068,7 @@ namespace MORT
             // lbPaPagoFrom
             // 
             lbPaPagoFrom.AutoSize = true;
-            lbPaPagoFrom.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbPaPagoFrom.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbPaPagoFrom.ForeColor = System.Drawing.Color.White;
             lbPaPagoFrom.Location = new System.Drawing.Point(170, 38);
             lbPaPagoFrom.Name = "lbPaPagoFrom";
@@ -3156,7 +3157,7 @@ namespace MORT
             // lbLink
             // 
             lbLink.AutoSize = true;
-            lbLink.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbLink.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbLink.ForeColor = System.Drawing.Color.White;
             lbLink.Location = new System.Drawing.Point(4, 3);
             lbLink.Name = "lbLink";
@@ -3221,7 +3222,7 @@ namespace MORT
             // lbETC
             // 
             lbETC.AutoSize = true;
-            lbETC.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbETC.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbETC.ForeColor = System.Drawing.Color.White;
             lbETC.Location = new System.Drawing.Point(4, 3);
             lbETC.Name = "lbETC";
@@ -3284,7 +3285,7 @@ namespace MORT
             btnHideTransEmpty.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             btnHideTransEmpty.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             btnHideTransEmpty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnHideTransEmpty.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            btnHideTransEmpty.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             btnHideTransEmpty.ForeColor = System.Drawing.Color.White;
             btnHideTransEmpty.Location = new System.Drawing.Point(296, 153);
             btnHideTransEmpty.Name = "btnHideTransEmpty";
@@ -3307,7 +3308,7 @@ namespace MORT
             btnHideTransDefault.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             btnHideTransDefault.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             btnHideTransDefault.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnHideTransDefault.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            btnHideTransDefault.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             btnHideTransDefault.ForeColor = System.Drawing.Color.White;
             btnHideTransDefault.Location = new System.Drawing.Point(234, 153);
             btnHideTransDefault.Name = "btnHideTransDefault";
@@ -3338,7 +3339,7 @@ namespace MORT
             transKeyInputResetButton.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             transKeyInputResetButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             transKeyInputResetButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            transKeyInputResetButton.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            transKeyInputResetButton.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             transKeyInputResetButton.ForeColor = System.Drawing.Color.White;
             transKeyInputResetButton.Location = new System.Drawing.Point(234, 11);
             transKeyInputResetButton.Name = "transKeyInputResetButton";
@@ -3353,7 +3354,7 @@ namespace MORT
             dicKeyInputResetButton.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             dicKeyInputResetButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             dicKeyInputResetButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            dicKeyInputResetButton.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            dicKeyInputResetButton.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             dicKeyInputResetButton.ForeColor = System.Drawing.Color.White;
             dicKeyInputResetButton.Location = new System.Drawing.Point(234, 38);
             dicKeyInputResetButton.Name = "dicKeyInputResetButton";
@@ -3368,7 +3369,7 @@ namespace MORT
             btnOneTransEmpty.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             btnOneTransEmpty.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             btnOneTransEmpty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnOneTransEmpty.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            btnOneTransEmpty.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             btnOneTransEmpty.ForeColor = System.Drawing.Color.White;
             btnOneTransEmpty.Location = new System.Drawing.Point(296, 124);
             btnOneTransEmpty.Name = "btnOneTransEmpty";
@@ -3383,7 +3384,7 @@ namespace MORT
             quickKeyInputResetButton.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             quickKeyInputResetButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             quickKeyInputResetButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            quickKeyInputResetButton.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            quickKeyInputResetButton.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             quickKeyInputResetButton.ForeColor = System.Drawing.Color.White;
             quickKeyInputResetButton.Location = new System.Drawing.Point(234, 65);
             quickKeyInputResetButton.Name = "quickKeyInputResetButton";
@@ -3398,7 +3399,7 @@ namespace MORT
             btnOneTransDefault.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             btnOneTransDefault.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             btnOneTransDefault.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnOneTransDefault.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            btnOneTransDefault.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             btnOneTransDefault.ForeColor = System.Drawing.Color.White;
             btnOneTransDefault.Location = new System.Drawing.Point(234, 124);
             btnOneTransDefault.Name = "btnOneTransDefault";
@@ -3413,7 +3414,7 @@ namespace MORT
             transKeyInputEmptyButton.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             transKeyInputEmptyButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             transKeyInputEmptyButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            transKeyInputEmptyButton.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            transKeyInputEmptyButton.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             transKeyInputEmptyButton.ForeColor = System.Drawing.Color.White;
             transKeyInputEmptyButton.Location = new System.Drawing.Point(296, 11);
             transKeyInputEmptyButton.Name = "transKeyInputEmptyButton";
@@ -3436,7 +3437,7 @@ namespace MORT
             dicKeyInputEmptyButton.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             dicKeyInputEmptyButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             dicKeyInputEmptyButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            dicKeyInputEmptyButton.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            dicKeyInputEmptyButton.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             dicKeyInputEmptyButton.ForeColor = System.Drawing.Color.White;
             dicKeyInputEmptyButton.Location = new System.Drawing.Point(296, 38);
             dicKeyInputEmptyButton.Name = "dicKeyInputEmptyButton";
@@ -3451,7 +3452,7 @@ namespace MORT
             quickKeyInputEmptyButton.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             quickKeyInputEmptyButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             quickKeyInputEmptyButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            quickKeyInputEmptyButton.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            quickKeyInputEmptyButton.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             quickKeyInputEmptyButton.ForeColor = System.Drawing.Color.White;
             quickKeyInputEmptyButton.Location = new System.Drawing.Point(296, 65);
             quickKeyInputEmptyButton.Name = "quickKeyInputEmptyButton";
@@ -3466,7 +3467,7 @@ namespace MORT
             snapShotKeyInputEmptyButton.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             snapShotKeyInputEmptyButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             snapShotKeyInputEmptyButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            snapShotKeyInputEmptyButton.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            snapShotKeyInputEmptyButton.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             snapShotKeyInputEmptyButton.ForeColor = System.Drawing.Color.White;
             snapShotKeyInputEmptyButton.Location = new System.Drawing.Point(296, 95);
             snapShotKeyInputEmptyButton.Name = "snapShotKeyInputEmptyButton";
@@ -3489,7 +3490,7 @@ namespace MORT
             snapShotKeyInputResetButton.BackColor = System.Drawing.Color.FromArgb(50, 50, 50);
             snapShotKeyInputResetButton.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
             snapShotKeyInputResetButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            snapShotKeyInputResetButton.Font = new System.Drawing.Font("맑은 고딕", 8.25F);
+            snapShotKeyInputResetButton.Font = new System.Drawing.Font("Malgun Gothic", 8.25F);
             snapShotKeyInputResetButton.ForeColor = System.Drawing.Color.White;
             snapShotKeyInputResetButton.Location = new System.Drawing.Point(234, 95);
             snapShotKeyInputResetButton.Name = "snapShotKeyInputResetButton";
@@ -3502,7 +3503,7 @@ namespace MORT
             // lbHotKeyHideTransWindow
             // 
             lbHotKeyHideTransWindow.AutoSize = true;
-            lbHotKeyHideTransWindow.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            lbHotKeyHideTransWindow.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
             lbHotKeyHideTransWindow.ForeColor = System.Drawing.Color.White;
             lbHotKeyHideTransWindow.Location = new System.Drawing.Point(14, 176);
             lbHotKeyHideTransWindow.Name = "lbHotKeyHideTransWindow";
@@ -3513,7 +3514,7 @@ namespace MORT
             // lbHotKeyOnceTranslate
             // 
             lbHotKeyOnceTranslate.AutoSize = true;
-            lbHotKeyOnceTranslate.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            lbHotKeyOnceTranslate.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
             lbHotKeyOnceTranslate.ForeColor = System.Drawing.Color.White;
             lbHotKeyOnceTranslate.Location = new System.Drawing.Point(14, 145);
             lbHotKeyOnceTranslate.Name = "lbHotKeyOnceTranslate";
@@ -3524,7 +3525,7 @@ namespace MORT
             // lbHotKeySnapShot
             // 
             lbHotKeySnapShot.AutoSize = true;
-            lbHotKeySnapShot.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            lbHotKeySnapShot.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
             lbHotKeySnapShot.ForeColor = System.Drawing.Color.White;
             lbHotKeySnapShot.Location = new System.Drawing.Point(14, 118);
             lbHotKeySnapShot.Name = "lbHotKeySnapShot";
@@ -3535,7 +3536,7 @@ namespace MORT
             // lbHotKeyInformation
             // 
             lbHotKeyInformation.Anchor = System.Windows.Forms.AnchorStyles.None;
-            lbHotKeyInformation.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            lbHotKeyInformation.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
             lbHotKeyInformation.ForeColor = System.Drawing.Color.White;
             lbHotKeyInformation.Location = new System.Drawing.Point(17, 210);
             lbHotKeyInformation.Name = "lbHotKeyInformation";
@@ -3547,7 +3548,7 @@ namespace MORT
             // lbHotKeyQuickOCR
             // 
             lbHotKeyQuickOCR.AutoSize = true;
-            lbHotKeyQuickOCR.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            lbHotKeyQuickOCR.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
             lbHotKeyQuickOCR.ForeColor = System.Drawing.Color.White;
             lbHotKeyQuickOCR.Location = new System.Drawing.Point(14, 91);
             lbHotKeyQuickOCR.Name = "lbHotKeyQuickOCR";
@@ -3558,7 +3559,7 @@ namespace MORT
             // lbHotKeyDic
             // 
             lbHotKeyDic.AutoSize = true;
-            lbHotKeyDic.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            lbHotKeyDic.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
             lbHotKeyDic.ForeColor = System.Drawing.Color.White;
             lbHotKeyDic.Location = new System.Drawing.Point(14, 64);
             lbHotKeyDic.Name = "lbHotKeyDic";
@@ -3569,7 +3570,7 @@ namespace MORT
             // lbHotKeyDoTrans
             // 
             lbHotKeyDoTrans.AutoSize = true;
-            lbHotKeyDoTrans.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            lbHotKeyDoTrans.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
             lbHotKeyDoTrans.ForeColor = System.Drawing.Color.White;
             lbHotKeyDoTrans.Location = new System.Drawing.Point(14, 37);
             lbHotKeyDoTrans.Name = "lbHotKeyDoTrans";
@@ -3580,7 +3581,7 @@ namespace MORT
             // lbHotkey
             // 
             lbHotkey.AutoSize = true;
-            lbHotkey.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbHotkey.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbHotkey.ForeColor = System.Drawing.Color.White;
             lbHotkey.Location = new System.Drawing.Point(4, 3);
             lbHotkey.Name = "lbHotkey";
@@ -3625,7 +3626,7 @@ namespace MORT
             // cbSetBasicDefaultPage
             // 
             cbSetBasicDefaultPage.AutoSize = true;
-            cbSetBasicDefaultPage.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbSetBasicDefaultPage.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbSetBasicDefaultPage.ForeColor = System.Drawing.Color.White;
             cbSetBasicDefaultPage.Location = new System.Drawing.Point(20, 301);
             cbSetBasicDefaultPage.Name = "cbSetBasicDefaultPage";
@@ -3650,7 +3651,7 @@ namespace MORT
             // 
             // lbQuickSettingInformation
             // 
-            lbQuickSettingInformation.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            lbQuickSettingInformation.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             lbQuickSettingInformation.ForeColor = System.Drawing.Color.White;
             lbQuickSettingInformation.Location = new System.Drawing.Point(20, 259);
             lbQuickSettingInformation.Name = "lbQuickSettingInformation";
@@ -3676,7 +3677,7 @@ namespace MORT
             // lbQuickSetting
             // 
             lbQuickSetting.AutoSize = true;
-            lbQuickSetting.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbQuickSetting.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbQuickSetting.ForeColor = System.Drawing.Color.White;
             lbQuickSetting.Location = new System.Drawing.Point(4, 3);
             lbQuickSetting.Name = "lbQuickSetting";
@@ -3735,7 +3736,7 @@ namespace MORT
             // cbShowOverlayWordArea
             // 
             cbShowOverlayWordArea.AutoSize = true;
-            cbShowOverlayWordArea.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbShowOverlayWordArea.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbShowOverlayWordArea.ForeColor = System.Drawing.Color.White;
             cbShowOverlayWordArea.Location = new System.Drawing.Point(14, 213);
             cbShowOverlayWordArea.Name = "cbShowOverlayWordArea";
@@ -3748,7 +3749,7 @@ namespace MORT
             // cbSetLineTrans
             // 
             cbSetLineTrans.AutoSize = true;
-            cbSetLineTrans.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbSetLineTrans.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbSetLineTrans.ForeColor = System.Drawing.Color.White;
             cbSetLineTrans.Location = new System.Drawing.Point(14, 186);
             cbSetLineTrans.Name = "cbSetLineTrans";
@@ -3775,7 +3776,7 @@ namespace MORT
             // cbShowFormerLog
             // 
             cbShowFormerLog.AutoSize = true;
-            cbShowFormerLog.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbShowFormerLog.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbShowFormerLog.ForeColor = System.Drawing.Color.White;
             cbShowFormerLog.Location = new System.Drawing.Point(14, 128);
             cbShowFormerLog.Name = "cbShowFormerLog";
@@ -3788,7 +3789,7 @@ namespace MORT
             // cbUnlockSpeed
             // 
             cbUnlockSpeed.AutoSize = true;
-            cbUnlockSpeed.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbUnlockSpeed.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbUnlockSpeed.ForeColor = System.Drawing.Color.White;
             cbUnlockSpeed.Location = new System.Drawing.Point(14, 101);
             cbUnlockSpeed.Name = "cbUnlockSpeed";
@@ -3801,7 +3802,7 @@ namespace MORT
             // cbSaveCaptureResult
             // 
             cbSaveCaptureResult.AutoSize = true;
-            cbSaveCaptureResult.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbSaveCaptureResult.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbSaveCaptureResult.ForeColor = System.Drawing.Color.White;
             cbSaveCaptureResult.Location = new System.Drawing.Point(14, 74);
             cbSaveCaptureResult.Name = "cbSaveCaptureResult";
@@ -3813,7 +3814,7 @@ namespace MORT
             // cbSaveCapture
             // 
             cbSaveCapture.AutoSize = true;
-            cbSaveCapture.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbSaveCapture.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbSaveCapture.ForeColor = System.Drawing.Color.White;
             cbSaveCapture.Location = new System.Drawing.Point(14, 47);
             cbSaveCapture.Name = "cbSaveCapture";
@@ -3825,7 +3826,7 @@ namespace MORT
             // cbShowReplace
             // 
             cbShowReplace.AutoSize = true;
-            cbShowReplace.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold);
+            cbShowReplace.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold);
             cbShowReplace.ForeColor = System.Drawing.Color.White;
             cbShowReplace.Location = new System.Drawing.Point(14, 20);
             cbShowReplace.Name = "cbShowReplace";
@@ -3848,7 +3849,7 @@ namespace MORT
             // 
             label63.Anchor = System.Windows.Forms.AnchorStyles.None;
             label63.AutoSize = true;
-            label63.Font = new System.Drawing.Font("맑은 고딕", 9.75F);
+            label63.Font = new System.Drawing.Font("Malgun Gothic", 9.75F);
             label63.ForeColor = System.Drawing.Color.White;
             label63.Location = new System.Drawing.Point(52, 20);
             label63.Name = "label63";
@@ -3874,7 +3875,7 @@ namespace MORT
             // lbDebugging
             // 
             lbDebugging.AutoSize = true;
-            lbDebugging.Font = new System.Drawing.Font("맑은 고딕", 11.25F, System.Drawing.FontStyle.Bold);
+            lbDebugging.Font = new System.Drawing.Font("Malgun Gothic", 11.25F, System.Drawing.FontStyle.Bold);
             lbDebugging.ForeColor = System.Drawing.Color.White;
             lbDebugging.Location = new System.Drawing.Point(4, 3);
             lbDebugging.Name = "lbDebugging";
@@ -3882,12 +3883,22 @@ namespace MORT
             lbDebugging.TabIndex = 8;
             lbDebugging.Text = "디버깅";
             // 
+            // button1
+            // 
+            button1.Location = new System.Drawing.Point(100, 670);
+            button1.Name = "button1";
+            button1.Size = new System.Drawing.Size(75, 41);
+            button1.TabIndex = 47;
+            button1.Text = "Audio Translate";
+            button1.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             BackColor = System.Drawing.Color.FromArgb(35, 36, 38);
-            ClientSize = new System.Drawing.Size(624, 658);
+            ClientSize = new System.Drawing.Size(624, 705);
+            Controls.Add(button1);
             Controls.Add(donationButton);
             Controls.Add(pictureBox1);
             Controls.Add(acceptButton);
@@ -4312,6 +4323,7 @@ namespace MORT
         private System.Windows.Forms.Label lbGeminiModel;
         private System.Windows.Forms.TextBox tbGeminiApi;
         private System.Windows.Forms.Label lbGeminiApi;
+        private System.Windows.Forms.Button button1;
     }
 
 
