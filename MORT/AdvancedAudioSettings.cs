@@ -60,7 +60,6 @@ namespace MORT
         // Translation Settings Tab
         private GroupBox? gbTranslationSettings;
         private ComboBox? cbTranslationEngine;
-        private TextBox? tbGoogleAPIKey;
         private TextBox? tbLibreTranslateURL;
         private ComboBox? cbSourceLanguage;
         private ComboBox? cbTargetLanguage;
@@ -723,21 +722,24 @@ namespace MORT
             });
             cbTranslationEngine.SelectedIndex = 0;
 
-            // Google API Key
-            Label lblGoogleAPI = new Label()
+            // API Keys info (using existing keys from main app)
+            Label lblAPIInfo = new Label()
             {
-                Text = "Google API ключ:",
+                Text = "ℹ️ API ключи используются из основных настроек программы",
                 Location = new Point(20, 70),
-                Size = new Size(120, 20),
-                ForeColor = Color.Black
+                Size = new Size(450, 20),
+                ForeColor = Color.DarkBlue,
+                Font = new Font("Segoe UI", 9, FontStyle.Italic)
             };
 
-            tbGoogleAPIKey = new TextBox()
+            Button btnOpenMainSettings = new Button()
             {
-                Location = new Point(150, 68),
-                Size = new Size(300, 25),
-                PasswordChar = '*'
+                Text = "📝 Открыть настройки API",
+                Location = new Point(150, 100),
+                Size = new Size(180, 30),
+                ForeColor = Color.Black
             };
+            btnOpenMainSettings.Click += (s, e) => OpenMainAPISettings();
 
             // LibreTranslate URL
             Label lblLibreTranslate = new Label()
@@ -802,7 +804,7 @@ namespace MORT
             gbTranslationSettings.Controls.AddRange(new Control[] 
             { 
                 lblTranslationEngine, cbTranslationEngine,
-                lblGoogleAPI, tbGoogleAPIKey,
+                lblAPIInfo, btnOpenMainSettings,
                 lblLibreTranslate, tbLibreTranslateURL,
                 lblSourceLang, cbSourceLanguage,
                 lblTargetLang, cbTargetLanguage,
@@ -1002,6 +1004,28 @@ namespace MORT
 
         #region Event Handlers
 
+        private void OpenMainAPISettings()
+        {
+            try
+            {
+                // Открываем основное окно настроек программы
+                MessageBox.Show("Настройки API ключей находятся в главном окне программы на вкладке 'Переводчик'.\n\n" +
+                              "Доступные переводчики:\n" +
+                              "• Google Translate API\n" +
+                              "• DeepL API\n" +
+                              "• Gemini API\n" +
+                              "• Naver API\n" +
+                              "• LibreTranslate (локальный)",
+                              "API Настройки", 
+                              MessageBoxButtons.OK, 
+                              MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void BtnStart_Click(object sender, EventArgs e)
         {
             // Start AutoVoiceTranslator
@@ -1151,7 +1175,6 @@ namespace MORT
                     
                     // Translation Settings
                     writer.WriteLine($"TranslationEngine={cbTranslationEngine?.SelectedIndex ?? 0}");
-                    writer.WriteLine($"GoogleAPIKey={tbGoogleAPIKey?.Text ?? ""}");
                     writer.WriteLine($"LibreTranslateURL={tbLibreTranslateURL?.Text ?? "http://localhost:5000"}");
                     writer.WriteLine($"SourceLanguage={cbSourceLanguage?.SelectedIndex ?? 0}");
                     writer.WriteLine($"TargetLanguage={cbTargetLanguage?.SelectedIndex ?? 0}");
@@ -1267,10 +1290,6 @@ namespace MORT
                     case "TranslationEngine":
                         if (cbTranslationEngine != null && int.TryParse(value, out int transEngine))
                             cbTranslationEngine.SelectedIndex = Math.Max(0, Math.Min(transEngine, cbTranslationEngine.Items.Count - 1));
-                        break;
-                    case "GoogleAPIKey":
-                        if (tbGoogleAPIKey != null)
-                            tbGoogleAPIKey.Text = value;
                         break;
                     case "LibreTranslateURL":
                         if (tbLibreTranslateURL != null)
