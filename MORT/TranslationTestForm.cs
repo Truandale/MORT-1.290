@@ -317,23 +317,69 @@ namespace MORT
                 // Determine translation type based on selected engine
                 SettingManager.TransType transType = GetTranslationType();
                 
-                // For Google Sheets, check if it's initialized
-                if (transType == SettingManager.TransType.google)
-                {
-                    if (transManager?.sheets == null)
-                    {
-                        return "Ошибка: Google Sheets API не настроен. Сначала настройте Google Sheets в основных настройках.";
-                    }
-                }
+                // Get language codes from form selection
+                string sourceLanguage = GetLanguageCode(cbSourceLanguage?.SelectedItem?.ToString() ?? "RU");
+                string targetLanguage = GetLanguageCode(cbTargetLanguage?.SelectedItem?.ToString() ?? "EN");
                 
-                // For Google Translate, set up language codes based on form selection
-                if (transType == SettingManager.TransType.google_url)
+                // Set up language codes for each translator
+                switch (transType)
                 {
-                    string sourceLanguage = GetLanguageCode(cbSourceLanguage?.SelectedItem?.ToString() ?? "RU");
-                    string targetLanguage = GetLanguageCode(cbTargetLanguage?.SelectedItem?.ToString() ?? "EN");
-                    
-                    // Set the translation codes for Google Basic API
-                    GoogleBasicTranslateAPI.instance?.SetTransCode(sourceLanguage, targetLanguage);
+                    case SettingManager.TransType.google_url:
+                        GoogleBasicTranslateAPI.instance?.SetTransCode(sourceLanguage, targetLanguage);
+                        break;
+                        
+                    case SettingManager.TransType.papago_web:
+                        transManager.InitPapagoWeb(sourceLanguage, targetLanguage);
+                        // Direct call to PapagoWebAPI like in main translator
+                        var papagoResult = await transManager.TranslatePapagoWebAsync(sourceText);
+                        if (papagoResult.IsError)
+                        {
+                            throw new Exception(papagoResult.Result);
+                        }
+                        return papagoResult.Result;
+                        
+                    case SettingManager.TransType.naver:
+                        // Naver uses its own language codes in Form1
+                        var mainForm = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                        if (mainForm != null)
+                        {
+                            // Set language codes through main form settings
+                            mainForm.MySettingManager.NaverTransCode = sourceLanguage;
+                            mainForm.MySettingManager.NaverResultCode = targetLanguage;
+                        }
+                        break;
+                        
+                    case SettingManager.TransType.deepl:
+                        // DeepL web uses basic language codes
+                        break;
+                        
+                    case SettingManager.TransType.deeplApi:
+                        // DeepL API uses specific language mapping
+                        transManager.InitDeepLAPI(sourceLanguage, targetLanguage, SettingManager.DeepLAPIEndpointType.Free);
+                        break;
+                        
+                    case SettingManager.TransType.gemini:
+                        // Gemini needs API key from main form
+                        var form1 = Application.OpenForms.OfType<Form1>().FirstOrDefault();
+                        if (form1 != null)
+                        {
+                            // Get API key from form (if available)
+                            string apiKey = ""; // Will be loaded from file
+                            transManager.InitializeGeminiModel("gemini-pro", apiKey);
+                        }
+                        break;
+                        
+                    case SettingManager.TransType.customApi:
+                        // Custom API uses advanced settings with URL
+                        transManager.InitCustomApi("http://localhost:5000", sourceLanguage, targetLanguage);
+                        break;
+                        
+                    case SettingManager.TransType.google:
+                        if (transManager?.sheets == null)
+                        {
+                            return "Ошибка: Google Sheets API не настроен. Сначала настройте Google Sheets в основных настройках.";
+                        }
+                        break;
                 }
                 
                 // Perform translation using real API

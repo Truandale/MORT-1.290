@@ -170,6 +170,11 @@ namespace MORT
             _papagoWebAPI.Init(transCode, resultCode);
         }
 
+        public async Task<(string Result, bool IsError)> TranslatePapagoWebAsync(string text)
+        {
+            return await _papagoWebAPI.TranslateAsync(text);
+        }
+
         public void ShowDeeplWebView()
         {
             _deepLTranslateAPI.ShowWebview();

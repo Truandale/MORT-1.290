@@ -23,17 +23,17 @@ namespace MORT.TransAPI
         private static readonly Regex patternVersion = new Regex(@"v\d\.\d\.\d_[^""]+", RegexOptions.Compiled | RegexOptions.Singleline);
 
         private double _nextUpdate = 0;
-        private string _version; // HMAC 키
+        private string _version = ""; // HMAC 키
 
-        private string _transCode;
-        private string _resultCode;
+        private string _transCode = "";
+        private string _resultCode = "";
 
         private DateTime _dtNextAvailableTime = DateTime.MinValue;
         private Random _rand = new Random();
 
-        public class TestPA
+        public class PapagoResponse
         {
-            public string TranslatedText { get; set; }
+            public string translatedText { get; set; } = "";
         }
                
         public async Task<(string Result, bool IsError)> TranslateAsync(string text)
@@ -95,6 +95,17 @@ namespace MORT.TransAPI
                 if (response != null)
                 {
                     errorMessage = $"Error - {response.StatusCode}";
+                    
+                    // Попытаемся прочитать содержимое ошибки
+                    try
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        if (!string.IsNullOrEmpty(errorContent))
+                        {
+                            errorMessage += $": {errorContent}";
+                        }
+                    }
+                    catch { }
                 }
 
                 return (errorMessage, true);
@@ -104,16 +115,20 @@ namespace MORT.TransAPI
 
             using var streamReader = new StreamReader(contentStream);
             var responseText = streamReader.ReadToEnd();
+            
+            // Отладка - показываем что получили
+            Console.WriteLine($"Papago Response: {responseText}");
+            
             string result = "error";
             try
             {
-                var pa = JsonConvert.DeserializeObject<TestPA> (responseText);
+                var pa = JsonConvert.DeserializeObject<PapagoResponse>(responseText);
 
-                result = pa.TranslatedText;
+                result = pa?.translatedText ?? "Translation failed";
             }
-            catch (JsonReaderException)
+            catch (JsonReaderException ex)
             {
-                return ("Invalid JSON", true);
+                return ($"Invalid JSON: {ex.Message}\nResponse: {responseText}", true);
             }
             catch (Exception ex)
             {
