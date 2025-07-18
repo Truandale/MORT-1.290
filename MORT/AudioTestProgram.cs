@@ -5,8 +5,10 @@ namespace MORT
 {
     class AudioTestProgram
     {
+        // Тестовая точка входа для отладки аудио устройств
+        // Переименована чтобы избежать конфликта с основным Main()
         [STAThread]
-        static void Main()
+        static void TestMain()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
