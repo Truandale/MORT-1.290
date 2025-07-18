@@ -8,92 +8,83 @@ namespace NAudioTest
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("=== NAudio Device Enumeration Test ===");
+            Console.WriteLine("=== Тест улучшенного поиска VB-Cable ===");
             Console.WriteLine();
             
-            try
+            TestVBCableDetection();
+            
+            Console.WriteLine();
+            Console.WriteLine("Нажмите любую клавишу для выхода...");
+            Console.ReadKey();
+        }
+        
+        static void TestVBCableDetection()
+        {
+            Console.WriteLine("1. Поиск VB-Cable устройств воспроизведения:");
+            var foundVBCable = false;
+            
+            for (int deviceId = 0; deviceId < WaveOut.DeviceCount; deviceId++)
             {
-                // Test WaveIn devices
-                Console.WriteLine("Testing WaveIn devices...");
-                int waveInDevices = WaveIn.DeviceCount;
-                Console.WriteLine($"WaveIn devices found: {waveInDevices}");
-                
-                for (int i = 0; i < waveInDevices; i++)
-                {
-                    try
-                    {
-                        var deviceInfo = WaveIn.GetCapabilities(i);
-                        Console.WriteLine($"WaveIn [{i}]: {deviceInfo.ProductName} - Channels: {deviceInfo.Channels}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error getting WaveIn device {i}: {ex.Message}");
-                    }
-                }
-                
-                Console.WriteLine();
-                
-                // Test WaveOut devices
-                Console.WriteLine("Testing WaveOut devices...");
-                int waveOutDevices = WaveOut.DeviceCount;
-                Console.WriteLine($"WaveOut devices found: {waveOutDevices}");
-                
-                for (int i = 0; i < waveOutDevices; i++)
-                {
-                    try
-                    {
-                        var deviceInfo = WaveOut.GetCapabilities(i);
-                        Console.WriteLine($"WaveOut [{i}]: {deviceInfo.ProductName} - Channels: {deviceInfo.Channels}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error getting WaveOut device {i}: {ex.Message}");
-                    }
-                }
-                
-                Console.WriteLine();
-                
-                // Test WASAPI devices
-                Console.WriteLine("Testing WASAPI devices...");
                 try
                 {
-                    using (var deviceEnumerator = new MMDeviceEnumerator())
+                    var capabilities = WaveOut.GetCapabilities(deviceId);
+                    var deviceName = capabilities.ProductName?.ToLower() ?? "";
+                    
+                    Console.WriteLine($"   Устройство {deviceId}: {capabilities.ProductName}");
+                    
+                    // Улучшенный поиск VB-Cable
+                    if (deviceName.Contains("vb-audio") || 
+                        deviceName.Contains("cable") || 
+                        deviceName.Contains("vaio") ||
+                        deviceName.Contains("voicemeeter"))
                     {
-                        var playbackDevices = deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-                        Console.WriteLine($"WASAPI Playback devices found: {playbackDevices.Count}");
-                        
-                        foreach (var device in playbackDevices)
-                        {
-                            Console.WriteLine($"WASAPI Playback: {device.FriendlyName} - {device.DeviceFriendlyName}");
-                        }
-                        
-                        var recordingDevices = deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
-                        Console.WriteLine($"WASAPI Recording devices found: {recordingDevices.Count}");
-                        
-                        foreach (var device in recordingDevices)
-                        {
-                            Console.WriteLine($"WASAPI Recording: {device.FriendlyName} - {device.DeviceFriendlyName}");
-                        }
+                        Console.WriteLine($"   >>> НАЙДЕН VB-Cable: {capabilities.ProductName}");
+                        foundVBCable = true;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error enumerating WASAPI devices: {ex.Message}");
-                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                    Console.WriteLine($"   Ошибка при получении устройства {deviceId}: {ex.Message}");
                 }
-                
-                Console.WriteLine();
-                Console.WriteLine("NAudio device enumeration test completed successfully!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Fatal error during NAudio device enumeration: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
             
             Console.WriteLine();
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+            Console.WriteLine("2. Поиск VB-Cable устройств записи:");
+            
+            for (int deviceId = 0; deviceId < WaveIn.DeviceCount; deviceId++)
+            {
+                try
+                {
+                    var capabilities = WaveIn.GetCapabilities(deviceId);
+                    var deviceName = capabilities.ProductName?.ToLower() ?? "";
+                    
+                    Console.WriteLine($"   Устройство {deviceId}: {capabilities.ProductName}");
+                    
+                    // Улучшенный поиск VB-Cable
+                    if (deviceName.Contains("vb-audio") || 
+                        deviceName.Contains("cable") || 
+                        deviceName.Contains("vaio") ||
+                        deviceName.Contains("voicemeeter"))
+                    {
+                        Console.WriteLine($"   >>> НАЙДЕН VB-Cable: {capabilities.ProductName}");
+                        foundVBCable = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"   Ошибка при получении устройства {deviceId}: {ex.Message}");
+                }
+            }
+            
+            Console.WriteLine();
+            if (foundVBCable)
+            {
+                Console.WriteLine("✅ VB-Cable устройства НАЙДЕНЫ с улучшенным поиском!");
+            }
+            else
+            {
+                Console.WriteLine("❌ VB-Cable устройства НЕ найдены.");
+            }
         }
     }
 }

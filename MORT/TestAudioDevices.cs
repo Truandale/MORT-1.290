@@ -33,6 +33,13 @@ namespace MORT
                     Console.WriteLine($"WaveOut [{i}]: {capabilities.ProductName} - Channels: {capabilities.Channels}");
                 }
                 
+                // Show detailed device list in MessageBox for user
+                var tester = new AudioDeviceTester();
+                string allDevices = tester.GetAllAudioDevices();
+                MessageBox.Show(allDevices, "Все доступные аудиоустройства", 
+                              MessageBoxButtons.OK, MessageBoxIcon.Information);
+                tester.Dispose();
+                
                 // Test WASAPI devices
                 using (var deviceEnumerator = new MMDeviceEnumerator())
                 {

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CloudVision")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b66cf0b4a592a7544944d31f28e3fa30a1e072fd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eac7f83c3dd96e09b784342f5ffc65d0e7b45c3f")]
 [assembly: System.Reflection.AssemblyProductAttribute("CloudVision")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CloudVision")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

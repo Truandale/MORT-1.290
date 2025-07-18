@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using NAudio.Wave;
 using NAudio.CoreAudioApi;
@@ -88,10 +89,14 @@ namespace MORT
         // Settings Manager Reference
         private SettingManager? settingManager;
         
+        // Audio Device Tester
+        private AudioDeviceTester? audioTester;
+        
         #endregion
 
         public AdvancedAudioSettings()
         {
+            audioTester = new AudioDeviceTester();
             InitializeComponent();
             InitializeCustomControls();
             LoadSettings();
@@ -99,6 +104,7 @@ namespace MORT
 
         public AdvancedAudioSettings(SettingManager settingManager)
         {
+            audioTester = new AudioDeviceTester();
             this.settingManager = settingManager;
             InitializeComponent();
             InitializeCustomControls();
@@ -498,7 +504,28 @@ namespace MORT
                 Text = "Тест",
                 Location = new Point(440, 27),
                 Size = new Size(60, 25),
-                ForeColor = Color.Black
+                ForeColor = Color.Black,
+                BackColor = Color.LightBlue, // Делаем кнопку более заметной
+                Name = "btnTestMicrophone",
+                Enabled = true,
+                Visible = true,
+                TabStop = true,
+                UseVisualStyleBackColor = false
+            };
+            
+            // Немедленно подключаем обработчик с полным тестированием микрофона
+            btnTestMicrophone.Click += async (s, e) => {
+                await TestMicrophoneDevice();
+            };
+            
+            // Добавляем дополнительные события для диагностики
+            btnTestMicrophone.MouseEnter += (s, e) => {
+                System.Diagnostics.Debug.WriteLine("Мышь вошла в зону кнопки микрофона");
+                btnTestMicrophone.BackColor = Color.Blue;
+            };
+            btnTestMicrophone.MouseLeave += (s, e) => {
+                System.Diagnostics.Debug.WriteLine("Мышь покинула зону кнопки микрофона");
+                btnTestMicrophone.BackColor = Color.LightBlue;
             };
 
             // Speakers
@@ -522,7 +549,28 @@ namespace MORT
                 Text = "Тест",
                 Location = new Point(440, 67),
                 Size = new Size(60, 25),
-                ForeColor = Color.Black
+                ForeColor = Color.Black,
+                BackColor = Color.LightGreen, // Делаем кнопку более заметной
+                Name = "btnTestSpeakers",
+                Enabled = true,
+                Visible = true,
+                TabStop = true,
+                UseVisualStyleBackColor = false
+            };
+            
+            // Немедленно подключаем обработчик с полным тестированием динамиков
+            btnTestSpeakers.Click += async (s, e) => {
+                await TestSpeakersDevice();
+            };
+            
+            // Добавляем дополнительные события для диагностики
+            btnTestSpeakers.MouseEnter += (s, e) => {
+                System.Diagnostics.Debug.WriteLine("Мышь вошла в зону кнопки динамиков");
+                btnTestSpeakers.BackColor = Color.Green;
+            };
+            btnTestSpeakers.MouseLeave += (s, e) => {
+                System.Diagnostics.Debug.WriteLine("Мышь покинула зону кнопки динамиков");
+                btnTestSpeakers.BackColor = Color.LightGreen;
             };
 
             // Headphones
@@ -562,7 +610,28 @@ namespace MORT
                 Text = "Тест",
                 Location = new Point(440, 147),
                 Size = new Size(60, 25),
-                ForeColor = Color.Black
+                ForeColor = Color.Black,
+                BackColor = Color.LightYellow, // Делаем кнопку более заметной
+                Name = "btnTestVBCable",
+                Enabled = true,
+                Visible = true,
+                TabStop = true,
+                UseVisualStyleBackColor = false
+            };
+            
+            // Немедленно подключаем обработчик с полным тестированием VB-Cable
+            btnTestVBCable.Click += async (s, e) => {
+                await TestVBCableDevice();
+            };
+            
+            // Добавляем дополнительные события для диагностики
+            btnTestVBCable.MouseEnter += (s, e) => {
+                System.Diagnostics.Debug.WriteLine("Мышь вошла в зону кнопки VB-Cable");
+                btnTestVBCable.BackColor = Color.Yellow;
+            };
+            btnTestVBCable.MouseLeave += (s, e) => {
+                System.Diagnostics.Debug.WriteLine("Мышь покинула зону кнопки VB-Cable");
+                btnTestVBCable.BackColor = Color.LightYellow;
             };
 
             // Status info
@@ -1044,7 +1113,7 @@ namespace MORT
             }
         }
 
-        private void BtnStart_Click(object sender, EventArgs e)
+        private void BtnStart_Click(object? sender, EventArgs e)
         {
             // Start AutoVoiceTranslator
             if (btnStart != null) btnStart.Enabled = false;
@@ -1059,7 +1128,7 @@ namespace MORT
             // TODO: Implement start logic
         }
 
-        private void BtnStop_Click(object sender, EventArgs e)
+        private void BtnStop_Click(object? sender, EventArgs e)
         {
             // Stop AutoVoiceTranslator
             if (btnStart != null) btnStart.Enabled = true;
@@ -1074,7 +1143,7 @@ namespace MORT
             // TODO: Implement stop logic
         }
 
-        private void BtnPause_Click(object sender, EventArgs e)
+        private void BtnPause_Click(object? sender, EventArgs e)
         {
             // Toggle pause
             if (btnPause?.Text.Contains("Пауза") == true)
@@ -1099,7 +1168,7 @@ namespace MORT
             // TODO: Implement pause logic
         }
 
-        private void BtnApply_Click(object sender, EventArgs e)
+        private void BtnApply_Click(object? sender, EventArgs e)
         {
             // Apply settings
             SaveSettings();
@@ -1107,18 +1176,229 @@ namespace MORT
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void BtnOK_Click(object sender, EventArgs e)
+        private void BtnOK_Click(object? sender, EventArgs e)
         {
             // Save and close
             SaveSettings();
             this.Close();
         }
 
-        private void BtnTestTranslation_Click(object sender, EventArgs e)
+        private void BtnTestTranslation_Click(object? sender, EventArgs e)
         {
             // Открываем окно тестирования перевода
             TranslationTestForm testForm = new TranslationTestForm();
             testForm.ShowDialog();
+        }
+
+        private void BtnTestMicrophone_Click(object? sender, EventArgs e)
+        {
+            // Отладочное сообщение
+            MessageBox.Show("Кнопка тест микрофона нажата!", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
+            // Проверяем состояние кнопки
+            if (sender is Button btn)
+            {
+                MessageBox.Show($"Кнопка состояние: Visible={btn.Visible}, Enabled={btn.Enabled}, Text='{btn.Text}'", "Отладка кнопки");
+            }
+            
+            try
+            {
+                if (cbMicrophone?.SelectedIndex < 0)
+                {
+                    MessageBox.Show("Пожалуйста, выберите микрофон для тестирования.", 
+                        "Тест микрофона", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string deviceName = cbMicrophone?.SelectedItem?.ToString() ?? "";
+                
+                // Используем NAudio для тестирования микрофона
+                int deviceIndex = cbMicrophone?.SelectedIndex ?? 0;
+                
+                using (var waveIn = new WaveInEvent())
+                {
+                    waveIn.DeviceNumber = deviceIndex;
+                    waveIn.WaveFormat = new WaveFormat(44100, 1); // 44.1kHz, mono
+                    
+                    // Создаем буфер для записи
+                    var bufferedWaveProvider = new BufferedWaveProvider(waveIn.WaveFormat);
+                    bool recordingStarted = false;
+                    
+                    waveIn.DataAvailable += (s, args) =>
+                    {
+                        if (!recordingStarted)
+                        {
+                            recordingStarted = true;
+                            this.Invoke(() => {
+                                MessageBox.Show($"Микрофон '{deviceName}' работает!\nОбнаружен входящий аудиосигнал.", 
+                                    "Тест микрофона", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            });
+                        }
+                        bufferedWaveProvider.AddSamples(args.Buffer, 0, args.BytesRecorded);
+                    };
+                    
+                    waveIn.StartRecording();
+                    
+                    // Ждем 2 секунды для обнаружения сигнала
+                    System.Threading.Thread.Sleep(2000);
+                    
+                    waveIn.StopRecording();
+                    
+                    if (!recordingStarted)
+                    {
+                        MessageBox.Show($"Микрофон '{deviceName}' не обнаружил входящий сигнал.\nПроверьте подключение и уровень громкости.", 
+                            "Тест микрофона", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                
+                Util.ShowLog($"Microphone test completed: {deviceName}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при тестировании микрофона: {ex.Message}", 
+                    "Тест микрофона", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Util.ShowLog($"Microphone test error: {ex}");
+            }
+        }
+
+        private void BtnTestSpeakers_Click(object? sender, EventArgs e)
+        {
+            // Отладочное сообщение
+            MessageBox.Show("Кнопка тест динамиков нажата!", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
+            try
+            {
+                if (cbSpeakers?.SelectedIndex < 0)
+                {
+                    MessageBox.Show("Пожалуйста, выберите устройство воспроизведения для тестирования.", 
+                        "Тест динамиков", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string deviceName = cbSpeakers?.SelectedItem?.ToString() ?? "";
+                int deviceIndex = cbSpeakers?.SelectedIndex ?? 0;
+                
+                // Генерируем тестовый звук (синусоида 440 Hz на 1 секунду)
+                int sampleRate = 44100;
+                int duration = 1; // секунда
+                int samples = sampleRate * duration;
+                
+                float[] testSignal = new float[samples];
+                for (int i = 0; i < samples; i++)
+                {
+                    testSignal[i] = (float)(Math.Sin(2 * Math.PI * 440 * i / sampleRate) * 0.3); // 440 Hz, 30% громкости
+                }
+                
+                using (var waveOut = new WaveOutEvent())
+                {
+                    waveOut.DeviceNumber = deviceIndex;
+                    
+                    // Конвертируем float в 16-bit PCM
+                    var waveFormat = new WaveFormat(sampleRate, 16, 1);
+                    var buffer = new byte[samples * 2];
+                    
+                    for (int i = 0; i < samples; i++)
+                    {
+                        short sample = (short)(testSignal[i] * short.MaxValue);
+                        buffer[i * 2] = (byte)(sample & 0xFF);
+                        buffer[i * 2 + 1] = (byte)((sample >> 8) & 0xFF);
+                    }
+                    
+                    var memoryStream = new MemoryStream(buffer);
+                    var rawSourceWaveStream = new RawSourceWaveStream(memoryStream, waveFormat);
+                    
+                    waveOut.Init(rawSourceWaveStream);
+                    waveOut.Play();
+                    
+                    MessageBox.Show($"Воспроизводится тестовый звук через '{deviceName}'.\nВы должны услышать тон 440 Hz.", 
+                        "Тест динамиков", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    
+                    while (waveOut.PlaybackState == PlaybackState.Playing)
+                    {
+                        System.Threading.Thread.Sleep(100);
+                    }
+                }
+                
+                Util.ShowLog($"Speaker test completed: {deviceName}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при тестировании динамиков: {ex.Message}", 
+                    "Тест динамиков", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Util.ShowLog($"Speaker test error: {ex}");
+            }
+        }
+
+        private void BtnTestVBCable_Click(object? sender, EventArgs e)
+        {
+            // Отладочное сообщение
+            MessageBox.Show("Кнопка тест VB-Cable нажата!", "Отладка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
+            try
+            {
+                if (cbVBCable?.SelectedIndex < 0)
+                {
+                    MessageBox.Show("Пожалуйста, выберите VB-Cable устройство для тестирования.", 
+                        "Тест VB-Cable", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string deviceName = cbVBCable?.SelectedItem?.ToString() ?? "";
+                
+                // Проверяем доступность VB-Cable устройств
+                bool foundVBCableInput = false;
+                bool foundVBCableOutput = false;
+                
+                // Проверяем устройства записи (CABLE Output)
+                using (var deviceEnumerator = new MMDeviceEnumerator())
+                {
+                    var captureDevices = deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                    foreach (var device in captureDevices)
+                    {
+                        if (device.FriendlyName.ToLower().Contains("cable"))
+                        {
+                            foundVBCableOutput = true;
+                            break;
+                        }
+                    }
+                    
+                    // Проверяем устройства воспроизведения (CABLE Input)
+                    var renderDevices = deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+                    foreach (var device in renderDevices)
+                    {
+                        if (device.FriendlyName.ToLower().Contains("cable"))
+                        {
+                            foundVBCableInput = true;
+                            break;
+                        }
+                    }
+                }
+                
+                string testResult = $"Результат тестирования VB-Cable:\n\n";
+                testResult += $"Выбранное устройство: {deviceName}\n";
+                testResult += $"CABLE Input (воспроизведение): {(foundVBCableInput ? "✓ Найден" : "✗ Не найден")}\n";
+                testResult += $"CABLE Output (запись): {(foundVBCableOutput ? "✓ Найден" : "✗ Не найден")}\n\n";
+                
+                if (foundVBCableInput && foundVBCableOutput)
+                {
+                    testResult += "✓ VB-Cable настроен правильно и готов к использованию!";
+                    MessageBox.Show(testResult, "Тест VB-Cable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    testResult += "⚠ VB-Cable не найден или настроен неправильно.\n";
+                    testResult += "Убедитесь, что VB-Audio Virtual Cable установлен и активен.";
+                    MessageBox.Show(testResult, "Тест VB-Cable", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                
+                Util.ShowLog($"VB-Cable test completed: Input={foundVBCableInput}, Output={foundVBCableOutput}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при тестировании VB-Cable: {ex.Message}", 
+                    "Тест VB-Cable", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Util.ShowLog($"VB-Cable test error: {ex}");
+            }
         }
 
         #endregion
@@ -1534,5 +1814,172 @@ namespace MORT
                     "Ошибка тестирования", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        
+        #region Audio Device Testing Methods
+        
+        /// <summary>
+        /// Тестирование выбранного микрофона
+        /// </summary>
+        private async Task TestMicrophoneDevice()
+        {
+            try
+            {
+                if (cbMicrophone?.SelectedIndex < 0)
+                {
+                    MessageBox.Show("Пожалуйста, выберите микрофон для тестирования.", 
+                        "Микрофон не выбран", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                
+                int deviceIndex = cbMicrophone!.SelectedIndex;
+                var deviceCaps = WaveIn.GetCapabilities(deviceIndex);
+                
+                // Показываем информацию о тестируемом устройстве
+                string message = $"Тестирование микрофона:\n{deviceCaps.ProductName}\n\n" +
+                                "Будет выполнена запись звука в течение 3 секунд, " +
+                                "затем воспроизведение записанного звука.\n\n" +
+                                "Говорите в микрофон после нажатия ОК.";
+                                
+                if (MessageBox.Show(message, "Тест микрофона", MessageBoxButtons.OKCancel, 
+                    MessageBoxIcon.Information) == DialogResult.Cancel)
+                {
+                    return;
+                }
+                
+                bool success = await audioTester!.TestMicrophoneAsync(deviceIndex, 3);
+                
+                if (success)
+                {
+                    MessageBox.Show($"✅ Микрофон '{deviceCaps.ProductName}' работает корректно!\n\n" +
+                                   "Если вы слышали воспроизведение записанного звука, " +
+                                   "микрофон настроен правильно.", 
+                                   "Тест успешен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show($"❌ Ошибка при тестировании микрофона '{deviceCaps.ProductName}'.\n\n" +
+                                   "Проверьте подключение микрофона и настройки Windows.", 
+                                   "Тест не пройден", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при тестировании микрофона: {ex.Message}", 
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
+        /// <summary>
+        /// Тестирование выбранных динамиков
+        /// </summary>
+        private async Task TestSpeakersDevice()
+        {
+            try
+            {
+                if (cbSpeakers?.SelectedIndex < 0)
+                {
+                    MessageBox.Show("Пожалуйста, выберите динамики для тестирования.", 
+                        "Динамики не выбраны", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                
+                int deviceIndex = cbSpeakers!.SelectedIndex;
+                var deviceCaps = WaveOut.GetCapabilities(deviceIndex);
+                
+                // Показываем информацию о тестируемом устройстве
+                string message = $"Тестирование динамиков:\n{deviceCaps.ProductName}\n\n" +
+                                "Будет воспроизведен тестовый тон 440Hz в течение 3 секунд.\n\n" +
+                                "Убедитесь, что громкость установлена на комфортный уровень.";
+                                
+                if (MessageBox.Show(message, "Тест динамиков", MessageBoxButtons.OKCancel, 
+                    MessageBoxIcon.Information) == DialogResult.Cancel)
+                {
+                    return;
+                }
+                
+                bool success = await audioTester!.TestSpeakersAsync(deviceIndex, 440.0f, 3);
+                
+                if (success)
+                {
+                    MessageBox.Show($"✅ Динамики '{deviceCaps.ProductName}' работают корректно!\n\n" +
+                                   "Если вы слышали тестовый тон, динамики настроены правильно.", 
+                                   "Тест успешен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show($"❌ Ошибка при тестировании динамиков '{deviceCaps.ProductName}'.\n\n" +
+                                   "Проверьте подключение динамиков и настройки Windows.", 
+                                   "Тест не пройден", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при тестировании динамиков: {ex.Message}", 
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
+        /// <summary>
+        /// Тестирование VB-Cable
+        /// </summary>
+        private async Task TestVBCableDevice()
+        {
+            try
+            {
+                // Показываем информацию о тесте VB-Cable
+                string message = "Тестирование VB-Cable:\n\n" +
+                                "Будет выполнена проверка loopback соединения:\n" +
+                                "1. Поиск VB-Cable устройств\n" +
+                                "2. Воспроизведение тестового сигнала в VB-Cable Output\n" +
+                                "3. Запись сигнала с VB-Cable Input\n" +
+                                "4. Анализ полученного сигнала\n\n" +
+                                "Убедитесь, что VB-Cable установлен и настроен.";
+                                
+                if (MessageBox.Show(message, "Тест VB-Cable", MessageBoxButtons.OKCancel, 
+                    MessageBoxIcon.Information) == DialogResult.Cancel)
+                {
+                    return;
+                }
+                
+                bool success = await audioTester!.TestVBCableAsync(5);
+                
+                if (success)
+                {
+                    MessageBox.Show("✅ VB-Cable работает корректно!\n\n" +
+                                   "Loopback соединение установлено, сигнал передается правильно.\n" +
+                                   "VB-Cable готов для использования в Discord/играх.", 
+                                   "Тест успешен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("❌ VB-Cable не работает или не найден!\n\n" +
+                                   "Возможные причины:\n" +
+                                   "• VB-Cable не установлен\n" +
+                                   "• VB-Cable не настроен как устройство по умолчанию\n" +
+                                   "• Проблемы с драйверами аудио\n\n" +
+                                   "Установите VB-Cable и перезапустите приложение.", 
+                                   "Тест не пройден", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при тестировании VB-Cable: {ex.Message}", 
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
+        /// <summary>
+        /// Освобождение ресурсов
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                audioTester?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+        
+        #endregion
     }
 }
