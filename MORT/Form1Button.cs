@@ -295,5 +295,26 @@ namespace MORT
 
 
         #endregion
+
+        #region ::::::::: NAudio Testing ::::::::::
+
+        private void OnClick_TestAudioDevices(object sender, EventArgs e)
+        {
+            try
+            {
+                // Show message box with device count
+                TestAudioDevices.TestDeviceEnumeration();
+                
+                // Also show results in a more user-friendly way
+                string message = TestAudioDevices.GetDeviceEnumerationResults();
+                MessageBox.Show(message, "NAudio Device Test Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error testing audio devices: {ex.Message}", "Audio Device Test Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        #endregion
     }
 }

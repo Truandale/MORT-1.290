@@ -1,0 +1,14 @@
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\bin\Release\net9.0-windows10.0.22621.0\CloudVision.dll.config
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\bin\Release\net9.0-windows10.0.22621.0\CloudVision.deps.json
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\bin\Release\net9.0-windows10.0.22621.0\CloudVision.dll
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\bin\Release\net9.0-windows10.0.22621.0\CloudVision.pdb
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\CloudVision.csproj.AssemblyReference.cache
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\CloudVision.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\CloudVision.AssemblyInfoInputs.cache
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\CloudVision.AssemblyInfo.cs
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\CloudVision.csproj.CoreCompileInputs.cache
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\CloudVision.sourcelink.json
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\CloudVision.dll
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\refint\CloudVision.dll
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\CloudVision.pdb
+C:\Users\Predator\Documents\MORT\MORT-1.290\MORT-1.290\CloudVision\obj\Release\net9.0-windows10.0.22621.0\ref\CloudVision.dll

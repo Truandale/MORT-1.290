@@ -2,6 +2,8 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using NAudio.Wave;
+using NAudio.CoreAudioApi;
 
 namespace MORT
 {
@@ -572,17 +574,32 @@ namespace MORT
                 ForeColor = Color.DarkBlue
             };
 
+            // Test All Devices button
+            Button btnTestAllDevices = new Button()
+            {
+                Text = "🔍 Тест всех устройств",
+                Location = new Point(20, 240),
+                Size = new Size(200, 30),
+                ForeColor = Color.Black,
+                BackColor = Color.LightGreen
+            };
+            btnTestAllDevices.Click += OnClick_TestAllAudioDevices;
+
             gbAudioDevices.Controls.AddRange(new Control[] 
             { 
                 lblMicrophone, cbMicrophone, btnTestMicrophone,
                 lblSpeakers, cbSpeakers, btnTestSpeakers,
                 lblHeadphones, cbHeadphones,
                 lblVBCable, cbVBCable, btnTestVBCable,
-                lblDeviceInfo
+                lblDeviceInfo,
+                btnTestAllDevices
             });
             
             devicesTab.Controls.Add(gbAudioDevices);
             mainTabControl?.TabPages.Add(devicesTab);
+            
+            // Загружаем аудио устройства
+            LoadAudioDevices();
         }
 
         private void CreateVADTab()
@@ -1343,5 +1360,179 @@ namespace MORT
         }
 
         #endregion
+
+        private void LoadAudioDevices()
+        {
+            // Создаем лог-файл для отладки
+            string logPath = Path.Combine(Environment.CurrentDirectory, "audio_debug.log");
+            
+            try
+            {
+                // Проверяем, что мы в UI-потоке
+                bool isUIThread = !this.InvokeRequired;
+                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] LoadAudioDevices() started in UI thread: {isUIThread}\n");
+                
+                // Если не в UI-потоке, выполняем через Invoke
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action(LoadAudioDevices));
+                    return;
+                }
+                
+                // Отладочная информация
+                System.Diagnostics.Debug.WriteLine("LoadAudioDevices() started");
+                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] LoadAudioDevices() started\n");
+                
+                // Проверяем, что ComboBox-ы не равны null
+                System.Diagnostics.Debug.WriteLine($"ComboBox states - Microphone: {cbMicrophone != null}, Speakers: {cbSpeakers != null}, Headphones: {cbHeadphones != null}, VBCable: {cbVBCable != null}");
+                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ComboBox states - Microphone: {cbMicrophone != null}, Speakers: {cbSpeakers != null}, Headphones: {cbHeadphones != null}, VBCable: {cbVBCable != null}\n");
+                
+                // Очищаем все ComboBox
+                cbMicrophone?.Items.Clear();
+                cbSpeakers?.Items.Clear();
+                cbHeadphones?.Items.Clear();
+                cbVBCable?.Items.Clear();
+
+                // Загружаем входные устройства (микрофоны)
+                int waveInCount = WaveIn.DeviceCount;
+                System.Diagnostics.Debug.WriteLine($"WaveIn.DeviceCount = {waveInCount}");
+                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] WaveIn.DeviceCount = {waveInCount}\n");
+                
+                for (int i = 0; i < waveInCount; i++)
+                {
+                    var deviceInfo = WaveIn.GetCapabilities(i);
+                    string deviceName = $"{deviceInfo.ProductName} (ID:{i})";
+                    System.Diagnostics.Debug.WriteLine($"Adding WaveIn device: {deviceName}");
+                    File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Adding WaveIn device: {deviceName}\n");
+                    cbMicrophone?.Items.Add(deviceName);
+                    cbVBCable?.Items.Add(deviceName);
+                }
+
+                // Загружаем выходные устройства (динамики/наушники)
+                int waveOutCount = WaveOut.DeviceCount;
+                System.Diagnostics.Debug.WriteLine($"WaveOut.DeviceCount = {waveOutCount}");
+                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] WaveOut.DeviceCount = {waveOutCount}\n");
+                
+                for (int i = 0; i < waveOutCount; i++)
+                {
+                    var deviceInfo = WaveOut.GetCapabilities(i);
+                    string deviceName = $"{deviceInfo.ProductName} (ID:{i})";
+                    System.Diagnostics.Debug.WriteLine($"Adding WaveOut device: {deviceName}");
+                    File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Adding WaveOut device: {deviceName}\n");
+                    cbSpeakers?.Items.Add(deviceName);
+                    cbHeadphones?.Items.Add(deviceName);
+                }
+
+                // Добавляем устройства по умолчанию
+                System.Diagnostics.Debug.WriteLine("Adding default devices");
+                cbMicrophone?.Items.Insert(0, "Микрофон по умолчанию");
+                cbSpeakers?.Items.Insert(0, "Динамики по умолчанию");
+                cbHeadphones?.Items.Insert(0, "Наушники по умолчанию");
+                cbVBCable?.Items.Insert(0, "VB-Cable по умолчанию");
+
+                // Устанавливаем значения по умолчанию
+                System.Diagnostics.Debug.WriteLine("Setting default selections");
+                if (cbMicrophone?.Items.Count > 0) cbMicrophone.SelectedIndex = 0;
+                if (cbSpeakers?.Items.Count > 0) cbSpeakers.SelectedIndex = 0;
+                if (cbHeadphones?.Items.Count > 0) cbHeadphones.SelectedIndex = 0;
+                if (cbVBCable?.Items.Count > 0) cbVBCable.SelectedIndex = 0;
+                
+                System.Diagnostics.Debug.WriteLine($"Final counts - Microphone: {cbMicrophone?.Items.Count}, Speakers: {cbSpeakers?.Items.Count}, Headphones: {cbHeadphones?.Items.Count}, VBCable: {cbVBCable?.Items.Count}");
+                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Final counts - Microphone: {cbMicrophone?.Items.Count}, Speakers: {cbSpeakers?.Items.Count}, Headphones: {cbHeadphones?.Items.Count}, VBCable: {cbVBCable?.Items.Count}\n");
+                System.Diagnostics.Debug.WriteLine("LoadAudioDevices() completed successfully");
+                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] LoadAudioDevices() completed successfully\n");
+                
+                // Принудительно обновляем UI
+                cbMicrophone?.Refresh();
+                cbSpeakers?.Refresh();
+                cbHeadphones?.Refresh();
+                cbVBCable?.Refresh();
+                this.Refresh();
+                File.AppendAllText(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] UI refresh completed\n");
+
+                // Попытка загрузить WASAPI устройства (более современный API)
+                try
+                {
+                    using (var enumerator = new MMDeviceEnumerator())
+                    {
+                        // Входные устройства
+                        var inputDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                        foreach (var device in inputDevices)
+                        {
+                            string deviceName = $"{device.FriendlyName} (WASAPI)";
+                            if (cbMicrophone != null && !cbMicrophone.Items.Contains(deviceName))
+                                cbMicrophone.Items.Add(deviceName);
+                            if (cbVBCable != null && !cbVBCable.Items.Contains(deviceName))
+                                cbVBCable.Items.Add(deviceName);
+                        }
+
+                        // Выходные устройства
+                        var outputDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+                        foreach (var device in outputDevices)
+                        {
+                            string deviceName = $"{device.FriendlyName} (WASAPI)";
+                            if (cbSpeakers != null && !cbSpeakers.Items.Contains(deviceName))
+                                cbSpeakers.Items.Add(deviceName);
+                            if (cbHeadphones != null && !cbHeadphones.Items.Contains(deviceName))
+                                cbHeadphones.Items.Add(deviceName);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // WASAPI может не работать на некоторых системах
+                    System.Diagnostics.Debug.WriteLine($"WASAPI enumeration failed: {ex.Message}");
+                }
+
+                // Устанавливаем значения по умолчанию
+                if (cbMicrophone?.Items.Count > 0) cbMicrophone.SelectedIndex = 0;
+                if (cbSpeakers?.Items.Count > 0) cbSpeakers.SelectedIndex = 0;
+                if (cbHeadphones?.Items.Count > 0) cbHeadphones.SelectedIndex = 0;
+                if (cbVBCable?.Items.Count > 0) cbVBCable.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                string logFilePath = Path.Combine(Environment.CurrentDirectory, "audio_debug.log");
+                System.Diagnostics.Debug.WriteLine($"Exception in LoadAudioDevices: {ex.Message}");
+                File.AppendAllText(logFilePath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Exception in LoadAudioDevices: {ex.Message}\n");
+                File.AppendAllText(logFilePath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Stack trace: {ex.StackTrace}\n");
+                
+                MessageBox.Show($"Ошибка загрузки аудио устройств: {ex.Message}", 
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                // Добавляем хотя бы базовые устройства
+                cbMicrophone?.Items.Add("Микрофон по умолчанию");
+                cbSpeakers?.Items.Add("Динамики по умолчанию");
+                cbHeadphones?.Items.Add("Наушники по умолчанию");
+                cbVBCable?.Items.Add("VB-Cable");
+                
+                if (cbMicrophone?.Items.Count > 0) cbMicrophone.SelectedIndex = 0;
+                if (cbSpeakers?.Items.Count > 0) cbSpeakers.SelectedIndex = 0;
+                if (cbHeadphones?.Items.Count > 0) cbHeadphones.SelectedIndex = 0;
+                if (cbVBCable?.Items.Count > 0) cbVBCable.SelectedIndex = 0;
+            }
+        }
+
+        private void OnClick_TestAllAudioDevices(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Используем встроенный класс для тестирования
+                TestAudioDevices.TestDeviceEnumeration();
+                
+                // Получаем результаты и показываем пользователю
+                string message = TestAudioDevices.GetDeviceEnumerationResults();
+                MessageBox.Show(message, "Результаты тестирования всех аудио устройств", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
+                // Обновляем список устройств после тестирования
+                LoadAudioDevices();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при тестировании аудио устройств: {ex.Message}", 
+                    "Ошибка тестирования", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

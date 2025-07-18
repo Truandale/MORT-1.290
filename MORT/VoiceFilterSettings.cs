@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
+using NAudio.Wave;
+using NAudio.CoreAudioApi;
 
 namespace MORT
 {
@@ -348,17 +350,55 @@ namespace MORT
                 cbOutputDevice.Items.Clear();
                 cbVirtualOutput.Items.Clear();
 
-                // Добавление базовых устройств (без NAudio)
+                // Загружаем входные устройства (микрофоны) через WaveIn
                 cbInputDevice.Items.Add("Микрофон по умолчанию");
-                cbInputDevice.Items.Add("Системный микрофон");
-                cbInputDevice.Items.Add("Voicemod Virtual Microphone");
-                cbInputDevice.Items.Add("VB-Audio Virtual Cable");
+                for (int i = 0; i < WaveIn.DeviceCount; i++)
+                {
+                    var deviceInfo = WaveIn.GetCapabilities(i);
+                    cbInputDevice.Items.Add($"{deviceInfo.ProductName} (ID:{i})");
+                }
 
+                // Загружаем выходные устройства (динамики) через WaveOut
                 cbOutputDevice.Items.Add("Динамики по умолчанию");
-                cbOutputDevice.Items.Add("Наушники по умолчанию");
-                cbOutputDevice.Items.Add("Voicemod Virtual Audio Device");
-                cbOutputDevice.Items.Add("VB-Audio Virtual Cable");
+                for (int i = 0; i < WaveOut.DeviceCount; i++)
+                {
+                    var deviceInfo = WaveOut.GetCapabilities(i);
+                    cbOutputDevice.Items.Add($"{deviceInfo.ProductName} (ID:{i})");
+                }
 
+                // Попытка загрузить WASAPI устройства (более современный API)
+                try
+                {
+                    using (var enumerator = new MMDeviceEnumerator())
+                    {
+                        // Входные устройства
+                        var inputDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                        foreach (var device in inputDevices)
+                        {
+                            string deviceName = $"{device.FriendlyName} (WASAPI)";
+                            if (!cbInputDevice.Items.Contains(deviceName))
+                                cbInputDevice.Items.Add(deviceName);
+                        }
+
+                        // Выходные устройства
+                        var outputDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+                        foreach (var device in outputDevices)
+                        {
+                            string deviceName = $"{device.FriendlyName} (WASAPI)";
+                            if (!cbOutputDevice.Items.Contains(deviceName))
+                                cbOutputDevice.Items.Add(deviceName);
+                            if (!cbVirtualOutput.Items.Contains(deviceName))
+                                cbVirtualOutput.Items.Add(deviceName);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // WASAPI может не работать на некоторых системах
+                    System.Diagnostics.Debug.WriteLine($"WASAPI enumeration failed: {ex.Message}");
+                }
+
+                // Добавляем специальные VB-Cable устройства
                 cbVirtualOutput.Items.Add("VB-Audio Virtual Cable");
                 cbVirtualOutput.Items.Add("VB-Audio Hi-Fi Cable");
                 cbVirtualOutput.Items.Add("Voicemod Virtual Audio Device");
@@ -373,6 +413,16 @@ namespace MORT
             {
                 MessageBox.Show($"Ошибка загрузки аудиоустройств: {ex.Message}", 
                     "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    
+                // Добавляем базовые устройства в случае ошибки
+                cbInputDevice.Items.Add("Микрофон по умолчанию");
+                cbOutputDevice.Items.Add("Динамики по умолчанию");
+                cbVirtualOutput.Items.Add("VB-Audio Virtual Cable");
+                cbVirtualOutput.Items.Add("Отключено");
+                
+                if (cbInputDevice.Items.Count > 0) cbInputDevice.SelectedIndex = 0;
+                if (cbOutputDevice.Items.Count > 0) cbOutputDevice.SelectedIndex = 0;
+                if (cbVirtualOutput.Items.Count > 0) cbVirtualOutput.SelectedIndex = cbVirtualOutput.Items.Count - 1;
             }
         }
 

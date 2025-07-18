@@ -1422,6 +1422,9 @@ namespace MORT
 
         private void button1_Click(object sender, EventArgs e)
         {
+            // Test NAudio device enumeration first
+            TestAudioDevices.TestDeviceEnumeration();
+            
             // Open AutoVoiceTranslator settings form
             try
             {
