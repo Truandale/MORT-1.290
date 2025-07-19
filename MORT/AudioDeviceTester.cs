@@ -350,7 +350,7 @@ namespace MORT
                     // Создаем усилитель громкости для лучшего мониторинга
                     var volumeProvider = new VolumeWaveProvider16(bufferedWaveProvider)
                     {
-                        Volume = 2.0f // Увеличиваем громкость в 2 раза для лучшего мониторинга
+                        Volume = 0.5f // Снижаем громкость до 50% для предотвращения переполнения
                     };
                     
                     // Настройка воспроизведения в реальном времени
@@ -379,7 +379,10 @@ namespace MORT
                         for (int i = 0; i < e.BytesRecorded - 1; i += 2)
                         {
                             short sample = (short)(e.Buffer[i] | (e.Buffer[i + 1] << 8));
-                            int amplitude = Math.Abs(sample);
+                            // Полностью безопасное вычисление абсолютного значения с ограничением
+                            int amplitude = sample >= 0 ? sample : -(int)sample;
+                            // Ограничиваем максимальное значение для предотвращения проблем
+                            amplitude = Math.Min(amplitude, 32767);
                             if (amplitude > maxAmplitude)
                                 maxAmplitude = amplitude;
                         }
@@ -651,8 +654,8 @@ namespace MORT
                     
                     progressForm.SetStatus("VB-Cable найден! Тестирование loopback...");
                     
-                    // Создаем генератор тестового сигнала (более громкий)
-                    sineWaveProvider = new SineWaveProvider(1000.0f, 0.5f); // 1kHz тон, 50% громкости
+                    // Создаем генератор тестового сигнала (умеренная громкость)
+                    sineWaveProvider = new SineWaveProvider(1000.0f, 0.1f); // 1kHz тон, 10% громкости
                     
                     // Настройка воспроизведения в VB-Cable Input (для передачи сигнала)
                     waveOut = new WaveOutEvent()
@@ -678,7 +681,8 @@ namespace MORT
                         for (int i = 0; i < e.BytesRecorded; i += 2)
                         {
                             short sample = (short)((e.Buffer[i + 1] << 8) | e.Buffer[i]);
-                            float level = Math.Abs(sample) / 32768.0f;
+                            // Полностью безопасное вычисление абсолютного значения
+                            float level = (sample >= 0 ? sample : -(int)sample) / 32768.0f;
                             if (level > maxLevel) maxLevel = level;
                             
                             // Понижаем порог обнаружения и требуем меньше образцов
@@ -828,7 +832,7 @@ namespace MORT
 
         public WaveFormat WaveFormat => WaveFormat.CreateIeeeFloatWaveFormat(44100, 1);
 
-        public SineWaveProvider(float frequency, float amplitude = 0.25f)
+        public SineWaveProvider(float frequency, float amplitude = 0.1f)
         {
             this.frequency = frequency;
             this.amplitude = amplitude;

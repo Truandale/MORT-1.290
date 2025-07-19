@@ -16,6 +16,9 @@
     <Compile Update="AlphaDialog\AlphaColorPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="AudioDeviceTestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Color Picker\BinaryColorPickerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -100,6 +103,12 @@
     <Compile Update="TabControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="TestButtonForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="TestNAudio.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="TransAPI\DeeplWebView.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,6 +119,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="TransFormOver.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="TranslationTestForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="UIAdvencedOption.cs">
