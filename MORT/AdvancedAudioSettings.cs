@@ -8,6 +8,8 @@ using NAudio.CoreAudioApi;
 using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Globalization;
 
 namespace MORT
 {
@@ -1297,7 +1299,8 @@ namespace MORT
                 lblStatus.ForeColor = Color.LightGreen;
             }
             
-            // TODO: Implement start logic
+            // Запускаем реальный мониторинг аудио
+            StartRealTimeMonitoring();
         }
 
         private void BtnStop_Click(object? sender, EventArgs e)
@@ -1312,7 +1315,8 @@ namespace MORT
                 lblStatus.ForeColor = Color.Red;
             }
             
-            // TODO: Implement stop logic
+            // Останавливаем реальный мониторинг аудио
+            StopRealTimeMonitoring();
         }
 
         private void BtnPause_Click(object? sender, EventArgs e)
@@ -1987,6 +1991,242 @@ namespace MORT
             }
         }
         
+        // Real-time monitoring fields
+        private WaveInEvent? monitoringWaveIn;
+        private WasapiLoopbackCapture? speakerMonitoring;
+        private System.Windows.Forms.Timer? levelUpdateTimer;
+        private bool isMonitoring = false;
+        private float currentMicLevel = 0f;
+        private float currentSpeakerLevel = 0f;
+        
+        // Speech detection fields
+        private bool isRecognizing = false;
+        private string lastRecognizedText = "";
+        private float speechThreshold = 0.1f; // Порог для определения речи
+        private DateTime lastSpeechTime = DateTime.MinValue;
+        
+        // Translation fields
+        private System.Windows.Forms.Timer? translationDelayTimer;
+        private const int TRANSLATION_DELAY_MS = 2000; // Задержка перед переводом
+        private List<byte> audioBuffer = new List<byte>();
+
+        /// <summary>
+        /// Запуск реального мониторинга аудио
+        /// </summary>
+        private void StartRealTimeMonitoring()
+        {
+            try
+            {
+                if (isMonitoring)
+                {
+                    MessageBox.Show("Мониторинг уже запущен!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                // Проверяем, выбран ли микрофон
+                if (cbMicrophone?.SelectedIndex < 0)
+                {
+                    MessageBox.Show("Пожалуйста, выберите микрофон на вкладке 'Аудио устройства'.", 
+                        "Микрофон не выбран", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string deviceName = cbMicrophone?.SelectedItem?.ToString() ?? "";
+                int deviceIndex = GetActualDeviceIndex(cbMicrophone?.SelectedIndex ?? 0, deviceName, true);
+
+                // Настройка записи для мониторинга
+                monitoringWaveIn = new WaveInEvent()
+                {
+                    DeviceNumber = deviceIndex,
+                    WaveFormat = new WaveFormat(44100, 16, 1), // 44.1kHz, 16-bit, mono
+                    BufferMilliseconds = 20  // Низкая задержка для real-time
+                };
+
+                // Обработчик для анализа уровня звука микрофона
+                monitoringWaveIn.DataAvailable += (s, e) =>
+                {
+                    float maxLevel = 0f;
+                    
+                    // Анализируем амплитуду звука
+                    for (int i = 0; i < e.BytesRecorded - 1; i += 2)
+                    {
+                        short sample = (short)(e.Buffer[i] | (e.Buffer[i + 1] << 8));
+                        // Безопасное вычисление абсолютного значения для избежания переполнения
+                        float level = (sample == short.MinValue) ? 1.0f : Math.Abs(sample) / 32768f;
+                        if (level > maxLevel)
+                            maxLevel = level;
+                    }
+                    
+                    currentMicLevel = maxLevel;
+                    
+                    // Обнаружение речи
+                    if (maxLevel > speechThreshold)
+                    {
+                        lastSpeechTime = DateTime.Now;
+                        if (!isRecognizing)
+                        {
+                            isRecognizing = true;
+                            audioBuffer.Clear();
+                            
+                            // Запускаем таймер для обработки речи после тишины
+                            translationDelayTimer?.Stop();
+                            translationDelayTimer = new System.Windows.Forms.Timer() { Interval = TRANSLATION_DELAY_MS };
+                            translationDelayTimer.Tick += (sender, args) => ProcessSpeechBuffer();
+                            translationDelayTimer.Start();
+                        }
+                        
+                        // Добавляем аудио данные в буфер
+                        audioBuffer.AddRange(e.Buffer.Take(e.BytesRecorded));
+                    }
+                };
+
+                // Настройка мониторинга динамика (loopback)
+                try
+                {
+                    speakerMonitoring = new WasapiLoopbackCapture();
+                    speakerMonitoring.DataAvailable += (s, e) =>
+                    {
+                        float maxSpeakerLevel = 0f;
+                        
+                        // Анализируем амплитуду звука с динамика
+                        for (int i = 0; i < e.BytesRecorded - 1; i += 2)
+                        {
+                            short sample = (short)(e.Buffer[i] | (e.Buffer[i + 1] << 8));
+                            float level = (sample == short.MinValue) ? 1.0f : Math.Abs(sample) / 32768f;
+                            if (level > maxSpeakerLevel)
+                                maxSpeakerLevel = level;
+                        }
+                        
+                        currentSpeakerLevel = maxSpeakerLevel;
+                    };
+                    speakerMonitoring.StartRecording();
+                }
+                catch (Exception)
+                {
+                    // Если loopback не поддерживается, просто игнорируем
+                    currentSpeakerLevel = 0f;
+                }
+
+                // Таймер для обновления progress bar'ов
+                levelUpdateTimer = new System.Windows.Forms.Timer()
+                {
+                    Interval = 50 // Обновление 20 раз в секунду
+                };
+                levelUpdateTimer.Tick += (s, e) =>
+                {
+                    // Обновляем progress bar микрофона
+                    if (pbMicLevel != null)
+                    {
+                        int levelPercent = (int)(currentMicLevel * 100);
+                        pbMicLevel.Value = Math.Min(levelPercent, 100);
+                    }
+                    
+                    // Обновляем progress bar динамика
+                    if (pbSpeakerLevel != null)
+                    {
+                        int speakerLevelPercent = (int)(currentSpeakerLevel * 100);
+                        pbSpeakerLevel.Value = Math.Min(speakerLevelPercent, 100);
+                    }
+                    
+                    // Проверяем тишину для завершения распознавания
+                    if (isRecognizing && DateTime.Now.Subtract(lastSpeechTime).TotalMilliseconds > 1000)
+                    {
+                        // Прошло больше секунды тишины - завершаем распознавание
+                        translationDelayTimer?.Stop();
+                        ProcessSpeechBuffer();
+                    }
+                };
+
+                // Запускаем мониторинг
+                monitoringWaveIn.StartRecording();
+                levelUpdateTimer.Start();
+                isMonitoring = true;
+
+                // Обновляем статус
+                if (lblLatency != null)
+                {
+                    lblLatency.Text = "Задержка: 20ms";
+                    lblLatency.ForeColor = Color.Green;
+                }
+
+                MessageBox.Show($"Мониторинг запущен для микрофона:\n{deviceName}\n\nТеперь говорите в микрофон и наблюдайте за индикатором уровня!", 
+                    "Мониторинг запущен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при запуске мониторинга:\n{ex.Message}", 
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                // Возвращаем кнопки в исходное состояние
+                if (btnStart != null) btnStart.Enabled = true;
+                if (btnStop != null) btnStop.Enabled = false;
+                if (btnPause != null) btnPause.Enabled = false;
+                if (lblStatus != null)
+                {
+                    lblStatus.Text = "Статус: Ошибка";
+                    lblStatus.ForeColor = Color.Red;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Остановка реального мониторинга аудио
+        /// </summary>
+        private void StopRealTimeMonitoring()
+        {
+            try
+            {
+                if (!isMonitoring)
+                {
+                    return;
+                }
+
+                // Останавливаем мониторинг микрофона
+                monitoringWaveIn?.StopRecording();
+                monitoringWaveIn?.Dispose();
+                monitoringWaveIn = null;
+
+                // Останавливаем мониторинг динамика
+                speakerMonitoring?.StopRecording();
+                speakerMonitoring?.Dispose();
+                speakerMonitoring = null;
+
+                // Останавливаем таймеры
+                levelUpdateTimer?.Stop();
+                levelUpdateTimer?.Dispose();
+                levelUpdateTimer = null;
+                
+                translationDelayTimer?.Stop();
+                translationDelayTimer?.Dispose();
+                translationDelayTimer = null;
+
+                // Сбрасываем состояние
+                isMonitoring = false;
+                isRecognizing = false;
+                currentMicLevel = 0f;
+                currentSpeakerLevel = 0f;
+                audioBuffer.Clear();
+
+                // Сбрасываем progress bar'ы
+                if (pbMicLevel != null) pbMicLevel.Value = 0;
+                if (pbSpeakerLevel != null) pbSpeakerLevel.Value = 0;
+
+                // Обновляем статус
+                if (lblLatency != null)
+                {
+                    lblLatency.Text = "Задержка: N/A";
+                    lblLatency.ForeColor = Color.Gray;
+                }
+
+                MessageBox.Show("Мониторинг остановлен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при остановке мониторинга:\n{ex.Message}", 
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         #region Audio Device Testing Methods
         
         /// <summary>
@@ -2323,6 +2563,9 @@ namespace MORT
         {
             if (disposing)
             {
+                // Останавливаем мониторинг
+                StopRealTimeMonitoring();
+                
                 audioTester?.Dispose();
                 audioRouter?.Dispose();
                 routingStatusTimer?.Dispose();
@@ -2844,6 +3087,120 @@ namespace MORT
             public string RegistryPath { get; set; } = "";
         }
 
+        #endregion
+        
+        #region Speech Processing Methods
+        
+        /// <summary>
+        /// Обработка накопленного аудио буфера
+        /// </summary>
+        private void ProcessSpeechBuffer()
+        {
+            try
+            {
+                translationDelayTimer?.Stop();
+                
+                if (audioBuffer.Count == 0)
+                {
+                    isRecognizing = false;
+                    return;
+                }
+
+                // Симуляция распознавания речи
+                string recognizedText = SimulateSpeechRecognition();
+                
+                if (!string.IsNullOrEmpty(recognizedText))
+                {
+                    lastRecognizedText = recognizedText;
+                    
+                    // Запускаем перевод
+                    _ = Task.Run(() => TranslateAndSpeak(recognizedText));
+                }
+                
+                isRecognizing = false;
+                audioBuffer.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при обработке речи: {ex.Message}", "Ошибка", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                isRecognizing = false;
+            }
+        }
+        
+        /// <summary>
+        /// Симуляция распознавания речи (заглушка)
+        /// </summary>
+        private string SimulateSpeechRecognition()
+        {
+            // Здесь должен быть реальный STT движок
+            // Пока возвращаем тестовую строку
+            if (audioBuffer.Count > 1000) // Минимальный размер аудио
+            {
+                return "Тестовое распознавание речи: " + DateTime.Now.ToString("HH:mm:ss");
+            }
+            return "";
+        }
+        
+        /// <summary>
+        /// Перевод и озвучивание текста
+        /// </summary>
+        private async Task TranslateAndSpeak(string text)
+        {
+            try
+            {
+                // Здесь должна быть интеграция с MORT TransManager
+                string translatedText = await TranslateText(text);
+                
+                if (!string.IsNullOrEmpty(translatedText))
+                {
+                    // Выводим результат в UI thread
+                    this.Invoke(new Action(() =>
+                    {
+                        MessageBox.Show($"Распознано: {text}\nПереведено: {translatedText}", 
+                            "Результат распознавания", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }));
+                    
+                    // Здесь должно быть TTS озвучивание
+                    await SpeakText(translatedText);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    MessageBox.Show($"Ошибка при переводе: {ex.Message}", "Ошибка", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }));
+            }
+        }
+        
+        /// <summary>
+        /// Перевод текста (заглушка)
+        /// </summary>
+        private async Task<string> TranslateText(string text)
+        {
+            // Здесь должна быть интеграция с TransManager
+            await Task.Delay(500); // Симуляция задержки API
+            
+            // Простая имитация перевода
+            if (text.Contains("Тестовое"))
+            {
+                return "Test speech recognition: " + DateTime.Now.ToString("HH:mm:ss");
+            }
+            
+            return "Translated: " + text;
+        }
+        
+        /// <summary>
+        /// Озвучивание текста (заглушка)
+        /// </summary>
+        private async Task SpeakText(string text)
+        {
+            // Здесь должно быть TTS озвучивание
+            await Task.Delay(100);
+        }
+        
         #endregion
     }
 }
