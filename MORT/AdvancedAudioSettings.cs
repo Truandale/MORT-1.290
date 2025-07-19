@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NAudio.Wave;
 using NAudio.CoreAudioApi;
+using Microsoft.Win32;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MORT
 {
@@ -117,6 +120,9 @@ namespace MORT
             
             // Подключаем обработчик логирования после инициализации
             audioRouter.OnLog += LogMessage;
+            
+            // Принудительно загружаем голоса TTS при открытии формы
+            LoadTTSVoices();
         }
 
         public AdvancedAudioSettings(SettingManager settingManager)
@@ -130,6 +136,9 @@ namespace MORT
             
             // Подключаем обработчик логирования после инициализации
             audioRouter.OnLog += LogMessage;
+            
+            // Принудительно загружаем голоса TTS при открытии формы
+            LoadTTSVoices();
         }
 
         private void InitializeComponent()
@@ -2502,6 +2511,337 @@ namespace MORT
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка логирования: {ex.Message}");
             }
+        }
+
+        #endregion
+        
+        #region TTS Voice Loading Methods
+        
+        /// <summary>
+        /// Загружает доступные TTS голоса из реестра Windows
+        /// </summary>
+        private void LoadTTSVoices()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("LoadTTSVoices() started");
+                
+                // Очищаем ComboBox'ы
+                cbTTSVoiceRU?.Items.Clear();
+                cbTTSVoiceEN?.Items.Clear();
+                
+                // Получаем голоса из обеих путей реестра
+                var voicesFromSpeech = GetVoicesFromRegistry(@"SOFTWARE\WOW6432Node\Microsoft\SPEECH\Voices\Tokens");
+                var voicesFromSpeechOneCore = GetVoicesFromRegistry(@"SOFTWARE\WOW6432Node\Microsoft\Speech_OneCore\Voices\Tokens");
+                
+                // Объединяем все голоса
+                var allVoices = new List<VoiceInfo>();
+                allVoices.AddRange(voicesFromSpeech);
+                allVoices.AddRange(voicesFromSpeechOneCore);
+                
+                // Удаляем дубликаты по имени
+                var uniqueVoices = allVoices
+                    .GroupBy(v => v.Name)
+                    .Select(g => g.First())
+                    .OrderBy(v => v.Name)
+                    .ToList();
+                
+                System.Diagnostics.Debug.WriteLine($"Found {uniqueVoices.Count} unique voices");
+                
+                // Разделяем голоса по языкам
+                var russianVoices = uniqueVoices.Where(v => IsRussianVoice(v)).ToList();
+                var englishVoices = uniqueVoices.Where(v => IsEnglishVoice(v)).ToList();
+                var otherVoices = uniqueVoices.Where(v => !IsRussianVoice(v) && !IsEnglishVoice(v)).ToList();
+                
+                // Заполняем ComboBox для русских голосов
+                cbTTSVoiceRU?.Items.Add("Голос по умолчанию");
+                foreach (var voice in russianVoices)
+                {
+                    cbTTSVoiceRU?.Items.Add(voice.Name);
+                    System.Diagnostics.Debug.WriteLine($"Added Russian voice: {voice.Name}");
+                }
+                
+                // Заполняем ComboBox для английских голосов
+                cbTTSVoiceEN?.Items.Add("Голос по умолчанию");
+                foreach (var voice in englishVoices)
+                {
+                    cbTTSVoiceEN?.Items.Add(voice.Name);
+                    System.Diagnostics.Debug.WriteLine($"Added English voice: {voice.Name}");
+                }
+                
+                // Добавляем голоса других языков в оба списка
+                foreach (var voice in otherVoices)
+                {
+                    cbTTSVoiceRU?.Items.Add($"{voice.Name} ({voice.Language})");
+                    cbTTSVoiceEN?.Items.Add($"{voice.Name} ({voice.Language})");
+                    System.Diagnostics.Debug.WriteLine($"Added other language voice: {voice.Name} ({voice.Language})");
+                }
+                
+                // Устанавливаем значения по умолчанию
+                if (cbTTSVoiceRU?.Items.Count > 0) cbTTSVoiceRU.SelectedIndex = 0;
+                if (cbTTSVoiceEN?.Items.Count > 0) cbTTSVoiceEN.SelectedIndex = 0;
+                
+                System.Diagnostics.Debug.WriteLine($"LoadTTSVoices() completed. RU: {cbTTSVoiceRU?.Items.Count}, EN: {cbTTSVoiceEN?.Items.Count}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке TTS голосов: {ex.Message}");
+                MessageBox.Show($"Ошибка при загрузке TTS голосов: {ex.Message}", 
+                    "Ошибка загрузки голосов", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+        
+        /// <summary>
+        /// Получает голоса из указанного пути реестра
+        /// </summary>
+        /// <param name="registryPath">Путь в реестре</param>
+        /// <returns>Список голосов</returns>
+        private List<VoiceInfo> GetVoicesFromRegistry(string registryPath)
+        {
+            var voices = new List<VoiceInfo>();
+            
+            try
+            {
+                using (var key = Registry.LocalMachine.OpenSubKey(registryPath))
+                {
+                    if (key != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Searching voices in: {registryPath}");
+                        
+                        foreach (string subKeyName in key.GetSubKeyNames())
+                        {
+                            using (var voiceKey = key.OpenSubKey(subKeyName))
+                            {
+                                if (voiceKey != null)
+                                {
+                                    try
+                                    {
+                                        var voiceName = voiceKey.GetValue("") as string ?? subKeyName;
+                                        var language = GetVoiceLanguage(voiceKey);
+                                        var gender = GetVoiceGender(voiceKey);
+                                        
+                                        var voiceInfo = new VoiceInfo
+                                        {
+                                            Name = voiceName,
+                                            Language = language,
+                                            Gender = gender,
+                                            RegistryPath = $"{registryPath}\\{subKeyName}"
+                                        };
+                                        
+                                        voices.Add(voiceInfo);
+                                        System.Diagnostics.Debug.WriteLine($"Found voice: {voiceName} ({language}, {gender})");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"Ошибка при обработке голоса {subKeyName}: {ex.Message}");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Registry path not found: {registryPath}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при чтении реестра {registryPath}: {ex.Message}");
+            }
+            
+            return voices;
+        }
+        
+        /// <summary>
+        /// Определяет язык голоса из реестра
+        /// </summary>
+        /// <param name="voiceKey">Ключ реестра голоса</param>
+        /// <returns>Язык голоса</returns>
+        private string GetVoiceLanguage(RegistryKey voiceKey)
+        {
+            try
+            {
+                // Ищем информацию о языке в подключах
+                using (var attributesKey = voiceKey.OpenSubKey("Attributes"))
+                {
+                    if (attributesKey != null)
+                    {
+                        var language = attributesKey.GetValue("Language") as string;
+                        if (!string.IsNullOrEmpty(language))
+                        {
+                            return ConvertLanguageCode(language);
+                        }
+                    }
+                }
+                
+                // Пытаемся определить язык по имени голоса
+                var voiceName = voiceKey.GetValue("") as string ?? "";
+                return GuessLanguageFromName(voiceName);
+            }
+            catch
+            {
+                return "Unknown";
+            }
+        }
+        
+        /// <summary>
+        /// Определяет пол голоса из реестра
+        /// </summary>
+        /// <param name="voiceKey">Ключ реестра голоса</param>
+        /// <returns>Пол голоса</returns>
+        private string GetVoiceGender(RegistryKey voiceKey)
+        {
+            try
+            {
+                using (var attributesKey = voiceKey.OpenSubKey("Attributes"))
+                {
+                    if (attributesKey != null)
+                    {
+                        var gender = attributesKey.GetValue("Gender") as string;
+                        if (!string.IsNullOrEmpty(gender))
+                        {
+                            return gender;
+                        }
+                    }
+                }
+                
+                // Пытаемся определить пол по имени
+                var voiceName = voiceKey.GetValue("") as string ?? "";
+                return GuessGenderFromName(voiceName);
+            }
+            catch
+            {
+                return "Unknown";
+            }
+        }
+        
+        /// <summary>
+        /// Конвертирует код языка в читаемое название
+        /// </summary>
+        /// <param name="languageCode">Код языка</param>
+        /// <returns>Название языка</returns>
+        private string ConvertLanguageCode(string languageCode)
+        {
+            var languageCodes = new Dictionary<string, string>
+            {
+                { "409", "English" },
+                { "en-US", "English" },
+                { "en-GB", "English" },
+                { "419", "Russian" },
+                { "ru-RU", "Russian" },
+                { "ru", "Russian" },
+                { "407", "German" },
+                { "de-DE", "German" },
+                { "40C", "French" },
+                { "fr-FR", "French" },
+                { "410", "Italian" },
+                { "it-IT", "Italian" },
+                { "40A", "Spanish" },
+                { "es-ES", "Spanish" },
+                { "411", "Japanese" },
+                { "ja-JP", "Japanese" },
+                { "804", "Chinese" },
+                { "zh-CN", "Chinese" }
+            };
+            
+            return languageCodes.TryGetValue(languageCode, out var language) ? language : languageCode;
+        }
+        
+        /// <summary>
+        /// Определяет язык по имени голоса
+        /// </summary>
+        /// <param name="voiceName">Имя голоса</param>
+        /// <returns>Язык</returns>
+        private string GuessLanguageFromName(string voiceName)
+        {
+            if (string.IsNullOrEmpty(voiceName))
+                return "Unknown";
+                
+            voiceName = voiceName.ToLower();
+            
+            if (voiceName.Contains("russian") || voiceName.Contains("ru") || 
+                voiceName.Contains("pavel") || voiceName.Contains("irina") || voiceName.Contains("татьяна"))
+                return "Russian";
+                
+            if (voiceName.Contains("english") || voiceName.Contains("en") || 
+                voiceName.Contains("david") || voiceName.Contains("mark") || voiceName.Contains("zira"))
+                return "English";
+                
+            if (voiceName.Contains("german") || voiceName.Contains("de") || voiceName.Contains("katja"))
+                return "German";
+                
+            if (voiceName.Contains("french") || voiceName.Contains("fr") || voiceName.Contains("hortense"))
+                return "French";
+                
+            if (voiceName.Contains("chinese") || voiceName.Contains("zh") || voiceName.Contains("huihui"))
+                return "Chinese";
+                
+            if (voiceName.Contains("japanese") || voiceName.Contains("ja") || voiceName.Contains("ayumi"))
+                return "Japanese";
+                
+            return "Unknown";
+        }
+        
+        /// <summary>
+        /// Определяет пол по имени голоса
+        /// </summary>
+        /// <param name="voiceName">Имя голоса</param>
+        /// <returns>Пол</returns>
+        private string GuessGenderFromName(string voiceName)
+        {
+            if (string.IsNullOrEmpty(voiceName))
+                return "Unknown";
+                
+            voiceName = voiceName.ToLower();
+            
+            // Мужские имена
+            if (voiceName.Contains("david") || voiceName.Contains("mark") || voiceName.Contains("pavel") ||
+                voiceName.Contains("male") || voiceName.Contains("man"))
+                return "Male";
+                
+            // Женские имена
+            if (voiceName.Contains("zira") || voiceName.Contains("irina") || voiceName.Contains("татьяна") ||
+                voiceName.Contains("katja") || voiceName.Contains("hortense") || voiceName.Contains("huihui") ||
+                voiceName.Contains("ayumi") || voiceName.Contains("female") || voiceName.Contains("woman"))
+                return "Female";
+                
+            return "Unknown";
+        }
+        
+        /// <summary>
+        /// Проверяет, является ли голос русским
+        /// </summary>
+        /// <param name="voice">Информация о голосе</param>
+        /// <returns>true если русский голос</returns>
+        private bool IsRussianVoice(VoiceInfo voice)
+        {
+            return voice.Language.Equals("Russian", StringComparison.OrdinalIgnoreCase);
+        }
+        
+        /// <summary>
+        /// Проверяет, является ли голос английским
+        /// </summary>
+        /// <param name="voice">Информация о голосе</param>
+        /// <returns>true если английский голос</returns>
+        private bool IsEnglishVoice(VoiceInfo voice)
+        {
+            return voice.Language.Equals("English", StringComparison.OrdinalIgnoreCase);
+        }
+        
+        #endregion
+        
+        #region Voice Info Class
+        
+        /// <summary>
+        /// Информация о TTS голосе
+        /// </summary>
+        private class VoiceInfo
+        {
+            public string Name { get; set; } = "";
+            public string Language { get; set; } = "";
+            public string Gender { get; set; } = "";
+            public string RegistryPath { get; set; } = "";
         }
 
         #endregion
