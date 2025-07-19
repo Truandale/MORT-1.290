@@ -35,8 +35,7 @@ namespace NAudioTest
                     // Улучшенный поиск VB-Cable
                     if (deviceName.Contains("vb-audio") || 
                         deviceName.Contains("cable") || 
-                        deviceName.Contains("vaio") ||
-                        deviceName.Contains("voicemeeter"))
+                        deviceName.Contains("vaio"))
                     {
                         Console.WriteLine($"   >>> НАЙДЕН VB-Cable: {capabilities.ProductName}");
                         foundVBCable = true;
@@ -63,8 +62,7 @@ namespace NAudioTest
                     // Улучшенный поиск VB-Cable
                     if (deviceName.Contains("vb-audio") || 
                         deviceName.Contains("cable") || 
-                        deviceName.Contains("vaio") ||
-                        deviceName.Contains("voicemeeter"))
+                        deviceName.Contains("vaio"))
                     {
                         Console.WriteLine($"   >>> НАЙДЕН VB-Cable: {capabilities.ProductName}");
                         foundVBCable = true;

@@ -92,23 +92,44 @@ namespace MORT
         // Audio Device Tester
         private AudioDeviceTester? audioTester;
         
+        // Experimental Audio Router
+        private AudioRouter? audioRouter;
+        
+        // Audio Routing Controls
+        private GroupBox? gbAudioRouting;
+        private CheckBox? cbEnableRouting;
+        private ComboBox? cbRoutingInput;
+        private ComboBox? cbRoutingOutput;
+        private Button? btnStartRouting;
+        private Button? btnStopRouting;
+        private TextBox? tbRoutingLog;
+        private Timer? routingStatusTimer;
+        
         #endregion
 
         public AdvancedAudioSettings()
         {
             audioTester = new AudioDeviceTester();
+            audioRouter = new AudioRouter();
             InitializeComponent();
             InitializeCustomControls();
             LoadSettings();
+            
+            // Подключаем обработчик логирования после инициализации
+            audioRouter.OnLog += LogMessage;
         }
 
         public AdvancedAudioSettings(SettingManager settingManager)
         {
             audioTester = new AudioDeviceTester();
+            audioRouter = new AudioRouter();
             this.settingManager = settingManager;
             InitializeComponent();
             InitializeCustomControls();
             LoadSettings();
+            
+            // Подключаем обработчик логирования после инициализации
+            audioRouter.OnLog += LogMessage;
         }
 
         private void InitializeComponent()
@@ -143,6 +164,7 @@ namespace MORT
             CreateSTTTab();
             CreateTTSTab();
             CreateAudioDevicesTab();
+            CreateAudioRoutingTab(); // Новая экспериментальная вкладка
             CreateVADTab();
             CreateTranslationTab();
             CreateMonitoringTab();
@@ -669,6 +691,143 @@ namespace MORT
             
             // Загружаем аудио устройства
             LoadAudioDevices();
+        }
+
+        private void CreateAudioRoutingTab()
+        {
+            TabPage routingTab = new TabPage("🔄 Перенаправление (ЭКСПЕРИМЕНТАЛЬНО)");
+            
+            gbAudioRouting = new GroupBox()
+            {
+                Text = "Экспериментальное перенаправление звука",
+                Location = new Point(10, 10),
+                Size = new Size(720, 400),
+                ForeColor = Color.Black
+            };
+
+            // Warning label
+            Label lblWarning = new Label()
+            {
+                Text = "⚠️ ЭКСПЕРИМЕНТАЛЬНАЯ ФУНКЦИЯ! Может вызывать задержки и нагрузку на CPU.\nИспользуйте VB-Audio Virtual Cable для профессионального аудио-роутинга.",
+                Location = new Point(20, 25),
+                Size = new Size(680, 40),
+                ForeColor = Color.DarkRed,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold)
+            };
+
+            // Enable routing checkbox
+            cbEnableRouting = new CheckBox()
+            {
+                Text = "🔄 Включить перенаправление аудио",
+                Location = new Point(20, 75),
+                Size = new Size(250, 20),
+                ForeColor = Color.Black,
+                Checked = false
+            };
+            cbEnableRouting.CheckedChanged += OnRoutingEnabledChanged;
+
+            // Input device selection
+            Label lblRoutingInput = new Label()
+            {
+                Text = "Источник (откуда):",
+                Location = new Point(20, 110),
+                Size = new Size(120, 20),
+                ForeColor = Color.Black
+            };
+
+            cbRoutingInput = new ComboBox()
+            {
+                Location = new Point(150, 108),
+                Size = new Size(300, 25),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Enabled = false
+            };
+
+            // Output device selection
+            Label lblRoutingOutput = new Label()
+            {
+                Text = "Назначение (куда):",
+                Location = new Point(20, 145),
+                Size = new Size(120, 20),
+                ForeColor = Color.Black
+            };
+
+            cbRoutingOutput = new ComboBox()
+            {
+                Location = new Point(150, 143),
+                Size = new Size(300, 25),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Enabled = false
+            };
+
+            // Control buttons
+            btnStartRouting = new Button()
+            {
+                Text = "▶️ Запустить",
+                Location = new Point(470, 108),
+                Size = new Size(100, 30),
+                ForeColor = Color.White,
+                BackColor = Color.Green,
+                Enabled = false
+            };
+            btnStartRouting.Click += OnStartRouting;
+
+            btnStopRouting = new Button()
+            {
+                Text = "⏹️ Остановить",
+                Location = new Point(580, 108),
+                Size = new Size(100, 30),
+                ForeColor = Color.White,
+                BackColor = Color.Red,
+                Enabled = false
+            };
+            btnStopRouting.Click += OnStopRouting;
+
+            // Log output
+            Label lblLog = new Label()
+            {
+                Text = "Журнал перенаправления:",
+                Location = new Point(20, 185),
+                Size = new Size(200, 20),
+                ForeColor = Color.Black
+            };
+
+            tbRoutingLog = new TextBox()
+            {
+                Location = new Point(20, 210),
+                Size = new Size(680, 120),
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                ReadOnly = true,
+                BackColor = Color.Black,
+                ForeColor = Color.LimeGreen,
+                Font = new Font("Consolas", 9),
+                Text = "📝 Журнал перенаправления аудио...\r\n"
+            };
+
+            // Status update timer
+            routingStatusTimer = new Timer()
+            {
+                Interval = 1000, // Update every second
+                Enabled = false
+            };
+            routingStatusTimer.Tick += OnRoutingStatusTick;
+
+            gbAudioRouting.Controls.AddRange(new Control[] 
+            { 
+                lblWarning,
+                cbEnableRouting,
+                lblRoutingInput, cbRoutingInput,
+                lblRoutingOutput, cbRoutingOutput,
+                btnStartRouting, btnStopRouting,
+                lblLog, tbRoutingLog
+            });
+            
+            routingTab.Controls.Add(gbAudioRouting);
+            mainTabControl?.TabPages.Add(routingTab);
+            
+            // Load audio devices for routing
+            LoadRoutingDevices();
         }
 
         private void CreateVADTab()
@@ -1213,7 +1372,7 @@ namespace MORT
                 string deviceName = cbMicrophone?.SelectedItem?.ToString() ?? "";
                 
                 // Используем NAudio для тестирования микрофона
-                int deviceIndex = cbMicrophone?.SelectedIndex ?? 0;
+                int deviceIndex = GetActualDeviceIndex(cbMicrophone?.SelectedIndex ?? 0, deviceName, true);
                 
                 using (var waveIn = new WaveInEvent())
                 {
@@ -1276,7 +1435,7 @@ namespace MORT
                 }
 
                 string deviceName = cbSpeakers?.SelectedItem?.ToString() ?? "";
-                int deviceIndex = cbSpeakers?.SelectedIndex ?? 0;
+                int deviceIndex = GetActualDeviceIndex(cbSpeakers?.SelectedIndex ?? 0, deviceName, false);
                 
                 // Генерируем тестовый звук (синусоида 440 Hz на 1 секунду)
                 int sampleRate = 44100;
@@ -1818,6 +1977,67 @@ namespace MORT
         #region Audio Device Testing Methods
         
         /// <summary>
+        /// Получает реальный индекс NAudio устройства из выбранного элемента комбобокса
+        /// </summary>
+        /// <param name="comboBoxIndex">Индекс в комбобоксе</param>
+        /// <param name="selectedText">Текст выбранного элемента</param>
+        /// <param name="isInputDevice">true для устройств ввода (микрофоны), false для вывода</param>
+        /// <returns>Реальный индекс NAudio устройства или -1 если ошибка</returns>
+        private int GetActualDeviceIndex(int comboBoxIndex, string selectedText, bool isInputDevice)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"GetActualDeviceIndex: comboBoxIndex={comboBoxIndex}, selectedText='{selectedText}', isInputDevice={isInputDevice}");
+                
+                // Если выбрано устройство "по умолчанию" (первый элемент)
+                if (comboBoxIndex == 0 && selectedText.Contains("по умолчанию"))
+                {
+                    // Возвращаем индекс -1 для устройства по умолчанию (NAudio использует -1 для default device)
+                    System.Diagnostics.Debug.WriteLine("Returning -1 for default device");
+                    return -1;
+                }
+                
+                // Ищем индекс в тексте вида "(ID:X)"
+                var match = System.Text.RegularExpressions.Regex.Match(selectedText, @"\(ID:(\d+)\)");
+                if (match.Success && int.TryParse(match.Groups[1].Value, out int realIndex))
+                {
+                    // Проверяем, что индекс в допустимых пределах
+                    int maxCount = isInputDevice ? WaveIn.DeviceCount : WaveOut.DeviceCount;
+                    if (realIndex >= 0 && realIndex < maxCount)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Found ID in text: {realIndex}");
+                        return realIndex;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ID {realIndex} is out of range (0-{maxCount-1})");
+                    }
+                }
+                
+                // Если не удалось извлечь индекс из текста, пытаемся вычислить
+                // Учитываем, что первый элемент - "по умолчанию", поэтому вычитаем 1
+                int calculatedIndex = comboBoxIndex - 1;
+                int deviceCount = isInputDevice ? WaveIn.DeviceCount : WaveOut.DeviceCount;
+                
+                System.Diagnostics.Debug.WriteLine($"Calculated index: {calculatedIndex}, device count: {deviceCount}");
+                
+                if (calculatedIndex >= 0 && calculatedIndex < deviceCount)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Using calculated index: {calculatedIndex}");
+                    return calculatedIndex;
+                }
+                
+                System.Diagnostics.Debug.WriteLine("Failed to determine device index");
+                return -1; // Ошибка - некорректный индекс
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetActualDeviceIndex: {ex.Message}");
+                return -1;
+            }
+        }
+        
+        /// <summary>
         /// Тестирование выбранного микрофона
         /// </summary>
         private async Task TestMicrophoneDevice()
@@ -1831,14 +2051,52 @@ namespace MORT
                     return;
                 }
                 
-                int deviceIndex = cbMicrophone!.SelectedIndex;
-                var deviceCaps = WaveIn.GetCapabilities(deviceIndex);
+                // Получаем правильный индекс устройства
+                int deviceIndex = GetActualDeviceIndex(cbMicrophone!.SelectedIndex, cbMicrophone.SelectedItem?.ToString() ?? "", true);
+                string selectedDeviceName = cbMicrophone.SelectedItem?.ToString() ?? "";
+                
+                System.Diagnostics.Debug.WriteLine($"TestMicrophoneDevice: selectedIndex={cbMicrophone.SelectedIndex}, deviceIndex={deviceIndex}, selectedText='{selectedDeviceName}'");
+                
+                string deviceDisplayName;
+                if (deviceIndex == -1)
+                {
+                    deviceDisplayName = "Микрофон по умолчанию";
+                }
+                else
+                {
+                    if (deviceIndex < 0 || deviceIndex >= WaveIn.DeviceCount)
+                    {
+                        MessageBox.Show($"Некорректный индекс устройства: {deviceIndex}. Доступные устройства: 0-{WaveIn.DeviceCount - 1}", 
+                            "Ошибка индекса", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    
+                    var deviceCaps = WaveIn.GetCapabilities(deviceIndex);
+                    deviceDisplayName = deviceCaps.ProductName;
+                }
+                
+                // Проверяем, является ли это виртуальным аудио устройством (только VB-Cable, НЕ Voicemeeter)
+                bool isVirtualDevice = (selectedDeviceName.Contains("CABLE") || 
+                                      selectedDeviceName.Contains("VB-Audio")) &&
+                                      !selectedDeviceName.Contains("Voicemeeter") &&
+                                      !selectedDeviceName.Contains("VoiceMeeter");
                 
                 // Показываем информацию о тестируемом устройстве
-                string message = $"Тестирование микрофона:\n{deviceCaps.ProductName}\n\n" +
-                                "Будет выполнена запись звука в течение 3 секунд, " +
-                                "затем воспроизведение записанного звука.\n\n" +
-                                "Говорите в микрофон после нажатия ОК.";
+                string message;
+                if (isVirtualDevice)
+                {
+                    message = $"Тестирование виртуального микрофона:\n{deviceDisplayName}\n\n" +
+                             "Будет выполнена запись звука в течение 3 секунд, " +
+                             "затем воспроизведение через физические динамики для контроля.\n\n" +
+                             "Говорите в микрофон после нажатия ОК.";
+                }
+                else
+                {
+                    message = $"Тестирование микрофона:\n{deviceDisplayName}\n\n" +
+                             "Будет включен МОНИТОРИНГ В РЕАЛЬНОМ ВРЕМЕНИ в течение 3 секунд.\n" +
+                             "Вы должны будете слышать свой голос в выбранных динамиках!\n\n" +
+                             "Говорите в микрофон после нажатия ОК.";
+                }
                                 
                 if (MessageBox.Show(message, "Тест микрофона", MessageBoxButtons.OKCancel, 
                     MessageBoxIcon.Information) == DialogResult.Cancel)
@@ -1846,20 +2104,76 @@ namespace MORT
                     return;
                 }
                 
-                bool success = await audioTester!.TestMicrophoneAsync(deviceIndex, 3);
-                
-                if (success)
+                // Выбираем метод тестирования в зависимости от типа устройства
+                bool success;
+                if (isVirtualDevice)
                 {
-                    MessageBox.Show($"✅ Микрофон '{deviceCaps.ProductName}' работает корректно!\n\n" +
-                                   "Если вы слышали воспроизведение записанного звука, " +
-                                   "микрофон настроен правильно.", 
-                                   "Тест успешен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    // Для виртуальных устройств (только VB-Cable) используем playback метод
+                    success = await audioTester!.TestMicrophoneWithPlaybackAsync(deviceIndex, -1, 3);
                 }
                 else
                 {
-                    MessageBox.Show($"❌ Ошибка при тестировании микрофона '{deviceCaps.ProductName}'.\n\n" +
-                                   "Проверьте подключение микрофона и настройки Windows.", 
-                                   "Тест не пройден", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Для обычных микрофонов сначала проверим выходное устройство тестовым тоном
+                    int speakerDeviceIndex = -1; // По умолчанию используем устройство по умолчанию
+                    
+                    // Проверяем доступные устройства воспроизведения
+                    if (cbSpeakers?.SelectedIndex >= 0 && cbSpeakers?.SelectedItem != null)
+                    {
+                        speakerDeviceIndex = GetActualDeviceIndex(cbSpeakers.SelectedIndex, cbSpeakers.SelectedItem.ToString() ?? "", false);
+                        System.Diagnostics.Debug.WriteLine($"Using speakers device index: {speakerDeviceIndex} ({cbSpeakers.SelectedItem})");
+                    }
+                    else if (cbHeadphones?.SelectedIndex >= 0 && cbHeadphones?.SelectedItem != null)
+                    {
+                        speakerDeviceIndex = GetActualDeviceIndex(cbHeadphones.SelectedIndex, cbHeadphones.SelectedItem.ToString() ?? "", false);
+                        System.Diagnostics.Debug.WriteLine($"Using headphones device index: {speakerDeviceIndex} ({cbHeadphones.SelectedItem})");
+                    }
+                    
+                    // СНАЧАЛА тестируем динамики тестовым тоном
+                    if (MessageBox.Show($"Сначала проверим работу динамиков.\n\nВы должны услышать тестовый тон через выбранное устройство воспроизведения.\n\nПродолжить?", 
+                        "Тест динамиков", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        bool speakerTest = await audioTester!.TestSpeakersAsync(speakerDeviceIndex, 1000, 2);
+                        if (!speakerTest)
+                        {
+                            MessageBox.Show("❌ Динамики не работают!\n\nПроверьте:\n- Выбор правильного устройства воспроизведения\n- Громкость в Windows\n- Подключение динамиков", 
+                                "Ошибка динамиков", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        
+                        MessageBox.Show("✅ Динамики работают! Теперь тестируем микрофон.", 
+                            "Динамики OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"Testing microphone {deviceIndex} with speaker {speakerDeviceIndex}");
+                    success = await audioTester!.TestMicrophoneWithRealTimeMonitoringAsync(deviceIndex, speakerDeviceIndex, 3);
+                }
+                
+                if (success)
+                {
+                    if (isVirtualDevice)
+                    {
+                        MessageBox.Show($"✅ Виртуальный микрофон '{deviceDisplayName}' работает корректно!\n\n" +
+                                       "Если вы слышали воспроизведение через физические динамики, " +
+                                       "VB-Cable настроен правильно для аудио перевода.", 
+                                       "Тест VB-Cable успешен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"✅ Микрофон '{deviceDisplayName}' работает корректно!\n\n" +
+                                       "Если вы слышали свой голос в динамиках в реальном времени, " +
+                                       "микрофон и мониторинг настроены правильно.", 
+                                       "Тест успешен", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                else
+                {
+                    string errorMessage = isVirtualDevice ? 
+                        $"❌ Ошибка при тестировании VB-Cable '{deviceDisplayName}'.\n\n" +
+                        "Проверьте установку VB-Cable и настройки виртуального аудио драйвера." :
+                        $"❌ Ошибка при тестировании микрофона '{deviceDisplayName}'.\n\n" +
+                        "Проверьте подключение микрофона и настройки Windows.";
+                        
+                    MessageBox.Show(errorMessage, "Тест не пройден", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
@@ -1883,11 +2197,32 @@ namespace MORT
                     return;
                 }
                 
-                int deviceIndex = cbSpeakers!.SelectedIndex;
-                var deviceCaps = WaveOut.GetCapabilities(deviceIndex);
+                // Получаем правильный индекс устройства
+                int deviceIndex = GetActualDeviceIndex(cbSpeakers!.SelectedIndex, cbSpeakers.SelectedItem?.ToString() ?? "", false);
+                string selectedDeviceName = cbSpeakers.SelectedItem?.ToString() ?? "";
+                
+                System.Diagnostics.Debug.WriteLine($"TestSpeakersDevice: selectedIndex={cbSpeakers.SelectedIndex}, deviceIndex={deviceIndex}, selectedText='{selectedDeviceName}'");
+                
+                string deviceDisplayName;
+                if (deviceIndex == -1)
+                {
+                    deviceDisplayName = "Динамики по умолчанию";
+                }
+                else
+                {
+                    if (deviceIndex < 0 || deviceIndex >= WaveOut.DeviceCount)
+                    {
+                        MessageBox.Show($"Некорректный индекс устройства: {deviceIndex}. Доступные устройства: 0-{WaveOut.DeviceCount - 1}", 
+                            "Ошибка индекса", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    
+                    var deviceCaps = WaveOut.GetCapabilities(deviceIndex);
+                    deviceDisplayName = deviceCaps.ProductName;
+                }
                 
                 // Показываем информацию о тестируемом устройстве
-                string message = $"Тестирование динамиков:\n{deviceCaps.ProductName}\n\n" +
+                string message = $"Тестирование динамиков:\n{deviceDisplayName}\n\n" +
                                 "Будет воспроизведен тестовый тон 440Hz в течение 3 секунд.\n\n" +
                                 "Убедитесь, что громкость установлена на комфортный уровень.";
                                 
@@ -1901,13 +2236,13 @@ namespace MORT
                 
                 if (success)
                 {
-                    MessageBox.Show($"✅ Динамики '{deviceCaps.ProductName}' работают корректно!\n\n" +
+                    MessageBox.Show($"✅ Динамики '{deviceDisplayName}' работают корректно!\n\n" +
                                    "Если вы слышали тестовый тон, динамики настроены правильно.", 
                                    "Тест успешен", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show($"❌ Ошибка при тестировании динамиков '{deviceCaps.ProductName}'.\n\n" +
+                    MessageBox.Show($"❌ Ошибка при тестировании динамиков '{deviceDisplayName}'.\n\n" +
                                    "Проверьте подключение динамиков и настройки Windows.", 
                                    "Тест не пройден", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -1976,10 +2311,199 @@ namespace MORT
             if (disposing)
             {
                 audioTester?.Dispose();
+                audioRouter?.Dispose();
+                routingStatusTimer?.Dispose();
             }
             base.Dispose(disposing);
         }
         
+        #endregion
+
+        #region Audio Routing Methods
+
+        /// <summary>
+        /// Загрузка устройств для перенаправления
+        /// </summary>
+        private void LoadRoutingDevices()
+        {
+            try
+            {
+                cbRoutingInput?.Items.Clear();
+                cbRoutingOutput?.Items.Clear();
+
+                // Загружаем входные устройства (микрофоны)
+                for (int i = 0; i < WaveInEvent.DeviceCount; i++)
+                {
+                    var capability = WaveInEvent.GetCapabilities(i);
+                    cbRoutingInput?.Items.Add($"{i}: {capability.ProductName}");
+                }
+
+                // Загружаем выходные устройства (динамики)
+                for (int i = 0; i < WaveOut.DeviceCount; i++)
+                {
+                    var capability = WaveOut.GetCapabilities(i);
+                    cbRoutingOutput?.Items.Add($"{i}: {capability.ProductName}");
+                }
+
+                // Выбираем первые устройства по умолчанию
+                if (cbRoutingInput?.Items.Count > 0)
+                    cbRoutingInput.SelectedIndex = 0;
+                if (cbRoutingOutput?.Items.Count > 0)
+                    cbRoutingOutput.SelectedIndex = 0;
+
+                LogMessage("🔄 Устройства для перенаправления загружены.");
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Ошибка загрузки устройств: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Обработчик изменения состояния перенаправления
+        /// </summary>
+        private void OnRoutingEnabledChanged(object? sender, EventArgs e)
+        {
+            bool enabled = cbEnableRouting?.Checked ?? false;
+            
+            cbRoutingInput!.Enabled = enabled;
+            cbRoutingOutput!.Enabled = enabled;
+            btnStartRouting!.Enabled = enabled && !audioRouter!.IsRouting;
+            btnStopRouting!.Enabled = enabled && audioRouter!.IsRouting;
+
+            if (enabled)
+            {
+                LogMessage("✅ Перенаправление аудио активировано. Выберите устройства и нажмите 'Запустить'.");
+            }
+            else
+            {
+                if (audioRouter!.IsRouting)
+                {
+                    audioRouter.StopRouting();
+                }
+                LogMessage("❌ Перенаправление аудио деактивировано.");
+            }
+        }
+
+        /// <summary>
+        /// Запуск перенаправления
+        /// </summary>
+        private async void OnStartRouting(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (cbRoutingInput?.SelectedIndex < 0 || cbRoutingOutput?.SelectedIndex < 0)
+                {
+                    LogMessage("❌ Выберите входное и выходное устройства.");
+                    return;
+                }
+
+                int inputIndex = cbRoutingInput?.SelectedIndex ?? -1;
+                int outputIndex = cbRoutingOutput?.SelectedIndex ?? -1;
+                
+                if (inputIndex < 0 || outputIndex < 0)
+                {
+                    LogMessage("❌ Неверные индексы устройств.");
+                    return;
+                }
+                
+                string inputName = cbRoutingInput?.SelectedItem?.ToString() ?? "Неизвестно";
+                string outputName = cbRoutingOutput?.SelectedItem?.ToString() ?? "Неизвестно";
+
+                bool success = await audioRouter!.StartRoutingAsync(inputIndex, outputIndex, inputName, outputName);
+                
+                if (success)
+                {
+                    btnStartRouting!.Enabled = false;
+                    btnStopRouting!.Enabled = true;
+                    routingStatusTimer!.Enabled = true;
+                    
+                    LogMessage("🎉 Перенаправление успешно запущено!");
+                }
+                else
+                {
+                    LogMessage("❌ Не удалось запустить перенаправление.");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Ошибка запуска: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Остановка перенаправления
+        /// </summary>
+        private void OnStopRouting(object? sender, EventArgs e)
+        {
+            try
+            {
+                audioRouter?.StopRouting();
+                btnStartRouting!.Enabled = true;
+                btnStopRouting!.Enabled = false;
+                routingStatusTimer!.Enabled = false;
+                
+                LogMessage("⏹️ Перенаправление остановлено пользователем.");
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Ошибка остановки: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Обновление статуса перенаправления
+        /// </summary>
+        private void OnRoutingStatusTick(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (audioRouter?.IsRouting == true)
+                {
+                    string stats = audioRouter.GetBufferStats();
+                    LogMessage($"📊 Статус: {audioRouter.CurrentRoute} | {stats}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"⚠️ Ошибка обновления статуса: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Логирование сообщений в текстовое поле
+        /// </summary>
+        private void LogMessage(string message)
+        {
+            try
+            {
+                if (tbRoutingLog?.InvokeRequired == true)
+                {
+                    tbRoutingLog.Invoke(new Action<string>(LogMessage), message);
+                    return;
+                }
+
+                string timestamp = DateTime.Now.ToString("HH:mm:ss");
+                string logEntry = $"[{timestamp}] {message}\r\n";
+                
+                tbRoutingLog?.AppendText(logEntry);
+                tbRoutingLog?.ScrollToCaret();
+                
+                // Ограничиваем размер лога (последние 1000 строк)
+                if (tbRoutingLog?.Lines.Length > 1000)
+                {
+                    var lines = tbRoutingLog.Lines;
+                    var trimmedLines = new string[500];
+                    Array.Copy(lines, lines.Length - 500, trimmedLines, 0, 500);
+                    tbRoutingLog.Lines = trimmedLines;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка логирования: {ex.Message}");
+            }
+        }
+
         #endregion
     }
 }

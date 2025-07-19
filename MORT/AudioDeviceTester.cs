@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NAudio.Wave;
@@ -170,6 +171,286 @@ namespace MORT
         }
 
         /// <summary>
+        /// Тестирование микрофона с воспроизведением через отдельное устройство
+        /// </summary>
+        /// <param name="inputDeviceNumber">Номер устройства записи (микрофон)</param>
+        /// <param name="outputDeviceNumber">Номер устройства воспроизведения (динамики), -1 для устройства по умолчанию</param>
+        /// <param name="duration">Длительность теста в секундах</param>
+        public async Task<bool> TestMicrophoneWithPlaybackAsync(int inputDeviceNumber, int outputDeviceNumber, int duration = 3)
+        {
+            try
+            {
+                cancellationTokenSource = new CancellationTokenSource();
+                
+                // Показываем прогресс
+                string inputDeviceName = inputDeviceNumber == -1 ? "По умолчанию" : WaveIn.GetCapabilities(inputDeviceNumber).ProductName;
+                string outputDeviceName = outputDeviceNumber == -1 ? "По умолчанию" : WaveOut.GetCapabilities(outputDeviceNumber).ProductName;
+                
+                using (var progressForm = new AudioTestProgressForm($"Тест: {inputDeviceName} → {outputDeviceName}", duration))
+                {
+                    progressForm.Show();
+                    progressForm.SetStatus("Инициализация...");
+                    
+                    // Список для сохранения записанных данных
+                    var recordedData = new List<byte>();
+                    var recordingFormat = new WaveFormat(44100, 16, 1); // 44.1kHz, 16-bit, mono
+                    
+                    // Настройка записи
+                    waveIn = new WaveInEvent()
+                    {
+                        DeviceNumber = inputDeviceNumber,
+                        WaveFormat = recordingFormat
+                    };
+                    
+                    // Обработчик для сохранения записанных данных
+                    waveIn.DataAvailable += (s, e) =>
+                    {
+                        // Сохраняем данные в список для последующего воспроизведения
+                        for (int i = 0; i < e.BytesRecorded; i++)
+                        {
+                            recordedData.Add(e.Buffer[i]);
+                        }
+                    };
+                    
+                    progressForm.SetStatus("🎤 Запись звука... Говорите в микрофон!");
+                    
+                    // Начинаем запись
+                    waveIn.StartRecording();
+                    isRecording = true;
+                    
+                    // Ждем запись с обновлением прогресса
+                    for (int i = 0; i < duration; i++)
+                    {
+                        await Task.Delay(1000, cancellationTokenSource.Token);
+                        progressForm.SetStatus($"🎤 Запись... ({duration - i - 1} сек осталось)");
+                    }
+                    
+                    // Останавливаем запись
+                    waveIn.StopRecording();
+                    isRecording = false;
+                    
+                    progressForm.SetStatus($"🔊 Воспроизведение через {outputDeviceName}...");
+                    
+                    // Проверяем, есть ли записанные данные
+                    if (recordedData.Count > 0)
+                    {
+                        // Создаем буфер для воспроизведения из записанных данных
+                        bufferedWaveProvider = new BufferedWaveProvider(recordingFormat)
+                        {
+                            BufferLength = recordedData.Count * 2, // Увеличиваем буфер
+                            DiscardOnBufferOverflow = false // Не отбрасываем данные
+                        };
+                        
+                        // Добавляем все записанные данные в буфер воспроизведения
+                        bufferedWaveProvider.AddSamples(recordedData.ToArray(), 0, recordedData.Count);
+                        
+                        // Настройка воспроизведения
+                        waveOut = new WaveOutEvent()
+                        {
+                            DeviceNumber = outputDeviceNumber
+                        };
+                        waveOut.Init(bufferedWaveProvider);
+                        
+                        // Начинаем воспроизведение
+                        waveOut.Play();
+                        isPlaying = true;
+                        
+                        progressForm.SetStatus($"🔊 Воспроизведение записи... Слушайте!");
+                        
+                        // Ждем воспроизведение с обновлением прогресса
+                        for (int i = 0; i < duration; i++)
+                        {
+                            await Task.Delay(1000, cancellationTokenSource.Token);
+                            progressForm.SetStatus($"🔊 Воспроизведение... ({duration - i - 1} сек осталось)");
+                        }
+                        
+                        waveOut.Stop();
+                        isPlaying = false;
+                        
+                        progressForm.SetStatus($"✅ Тест завершен! Записано {recordedData.Count} байт данных");
+                        await Task.Delay(1500);
+                        
+                        return true;
+                    }
+                    else
+                    {
+                        progressForm.SetStatus("❌ Ошибка: не удалось записать звук с микрофона");
+                        await Task.Delay(2500);
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при тестировании микрофона: {ex.Message}", 
+                              "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                StopAll();
+            }
+        }
+
+        /// <summary>
+        /// Тестирование микрофона с мониторингом в реальном времени
+        /// Позволяет слышать свой голос в динамиках во время записи
+        /// </summary>
+        /// <param name="inputDeviceNumber">Номер устройства записи (микрофон)</param>
+        /// <param name="outputDeviceNumber">Номер устройства воспроизведения (динамики), -1 для устройства по умолчанию</param>
+        /// <param name="duration">Длительность теста в секундах</param>
+        public async Task<bool> TestMicrophoneWithRealTimeMonitoringAsync(int inputDeviceNumber, int outputDeviceNumber, int duration = 3)
+        {
+            try
+            {
+                cancellationTokenSource = new CancellationTokenSource();
+                
+                // Показываем прогресс
+                string inputDeviceName = inputDeviceNumber == -1 ? "По умолчанию" : WaveIn.GetCapabilities(inputDeviceNumber).ProductName;
+                string outputDeviceName = outputDeviceNumber == -1 ? "По умолчанию" : WaveOut.GetCapabilities(outputDeviceNumber).ProductName;
+                
+                // Детальная диагностика устройств
+                System.Diagnostics.Debug.WriteLine($"=== Начало тестирования микрофона с мониторингом ===");
+                System.Diagnostics.Debug.WriteLine($"Входное устройство: {inputDeviceNumber} ({inputDeviceName})");
+                System.Diagnostics.Debug.WriteLine($"Выходное устройство: {outputDeviceNumber} ({outputDeviceName})");
+                System.Diagnostics.Debug.WriteLine($"Доступно WaveIn устройств: {WaveIn.DeviceCount}");
+                System.Diagnostics.Debug.WriteLine($"Доступно WaveOut устройств: {WaveOut.DeviceCount}");
+                
+                using (var progressForm = new AudioTestProgressForm($"Мониторинг: {inputDeviceName} → {outputDeviceName}", duration))
+                {
+                    progressForm.Show();
+                    progressForm.SetStatus("Инициализация...");
+                    
+                    // Проверка валидности устройств
+                    if (inputDeviceNumber >= WaveIn.DeviceCount)
+                    {
+                        throw new ArgumentException($"Неверный индекс входного устройства: {inputDeviceNumber} (макс: {WaveIn.DeviceCount - 1})");
+                    }
+                    if (outputDeviceNumber >= WaveOut.DeviceCount)
+                    {
+                        throw new ArgumentException($"Неверный индекс выходного устройства: {outputDeviceNumber} (макс: {WaveOut.DeviceCount - 1})");
+                    }
+                    
+                    // Настройка записи
+                    waveIn = new WaveInEvent()
+                    {
+                        DeviceNumber = inputDeviceNumber,
+                        WaveFormat = new WaveFormat(44100, 16, 1), // 44.1kHz, 16-bit, mono
+                        BufferMilliseconds = 20  // Минимальная задержка для real-time
+                    };
+                    
+                    System.Diagnostics.Debug.WriteLine($"Настроена запись: {waveIn.WaveFormat}");
+                    
+                    bufferedWaveProvider = new BufferedWaveProvider(waveIn.WaveFormat)
+                    {
+                        BufferLength = waveIn.WaveFormat.AverageBytesPerSecond / 10, // 100ms буфер для низкой задержки
+                        DiscardOnBufferOverflow = true
+                    };
+                    
+                    // Создаем усилитель громкости для лучшего мониторинга
+                    var volumeProvider = new VolumeWaveProvider16(bufferedWaveProvider)
+                    {
+                        Volume = 2.0f // Увеличиваем громкость в 2 раза для лучшего мониторинга
+                    };
+                    
+                    // Настройка воспроизведения в реальном времени
+                    waveOut = new WaveOutEvent()
+                    {
+                        DeviceNumber = outputDeviceNumber,
+                        DesiredLatency = 50  // Низкая задержка для мониторинга
+                    };
+                    
+                    System.Diagnostics.Debug.WriteLine($"Настроено воспроизведение: устройство {outputDeviceNumber}, задержка {waveOut.DesiredLatency}ms");
+                    
+                    waveOut.Init(volumeProvider); // Используем усилитель громкости
+                    
+                    // Счетчики для диагностики
+                    int samplesReceived = 0;
+                    int bytesReceived = 0;
+                    int maxAmplitude = 0; // Для проверки уровня сигнала
+                    
+                    // Обработчик для передачи звука в реальном времени
+                    waveIn.DataAvailable += (s, e) =>
+                    {
+                        samplesReceived++;
+                        bytesReceived += e.BytesRecorded;
+                        
+                        // Проверяем амплитуду сигнала для диагностики
+                        for (int i = 0; i < e.BytesRecorded - 1; i += 2)
+                        {
+                            short sample = (short)(e.Buffer[i] | (e.Buffer[i + 1] << 8));
+                            int amplitude = Math.Abs(sample);
+                            if (amplitude > maxAmplitude)
+                                maxAmplitude = amplitude;
+                        }
+                        
+                        // Передаем звук напрямую в буфер для мгновенного воспроизведения
+                        bufferedWaveProvider.AddSamples(e.Buffer, 0, e.BytesRecorded);
+                        
+                        // Периодическая диагностика
+                        if (samplesReceived % 50 == 0) // Каждые ~1 секунду
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Получено {samplesReceived} блоков данных, {bytesReceived} байт, макс. амплитуда: {maxAmplitude}");
+                        }
+                    };
+                    
+                    progressForm.SetStatus("🎤 Говорите в микрофон - вы должны слышать себя в динамиках!");
+                    
+                    // Начинаем запись И воспроизведение одновременно
+                    System.Diagnostics.Debug.WriteLine("Запускаем запись...");
+                    waveIn.StartRecording();
+                    isRecording = true;
+                    
+                    System.Diagnostics.Debug.WriteLine("Запускаем воспроизведение...");
+                    waveOut.Play();
+                    isPlaying = true;
+                    
+                    System.Diagnostics.Debug.WriteLine("Мониторинг активен!");
+                    
+                    // Обновляем прогресс каждую секунду
+                    for (int i = 0; i < duration; i++)
+                    {
+                        await Task.Delay(1000, cancellationTokenSource.Token);
+                        progressForm.SetStatus($"🎤 Мониторинг активен ({duration - i - 1} сек осталось)... Говорите!");
+                        System.Diagnostics.Debug.WriteLine($"Секунда {i + 1}: получено {samplesReceived} блоков, {bytesReceived} байт");
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"Тест завершен. Итого: {samplesReceived} блоков, {bytesReceived} байт, макс. амплитуда: {maxAmplitude}");
+                    
+                    string resultMessage;
+                    if (bytesReceived == 0)
+                    {
+                        resultMessage = "❌ Микрофон не получает данные! Проверьте подключение и настройки Windows.";
+                    }
+                    else if (maxAmplitude < 100)
+                    {
+                        resultMessage = $"⚠️ Микрофон работает, но сигнал очень слабый (макс: {maxAmplitude}). Проверьте громкость микрофона в Windows.";
+                    }
+                    else
+                    {
+                        resultMessage = $"✅ Тест завершен! Обработано {bytesReceived} байт звука (макс. амплитуда: {maxAmplitude})";
+                    }
+                    
+                    progressForm.SetStatus(resultMessage);
+                    await Task.Delay(2500);
+                    
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка в TestMicrophoneWithRealTimeMonitoringAsync: {ex}");
+                MessageBox.Show($"Ошибка при тестировании микрофона с мониторингом: {ex.Message}", 
+                              "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            finally
+            {
+                StopAll();
+            }
+        }
+
+        /// <summary>
         /// Получить список всех доступных аудиоустройств
         /// </summary>
         public string GetAllAudioDevices()
@@ -194,58 +475,101 @@ namespace MORT
         }
 
         /// <summary>
-        /// Поиск VB-Cable устройств с расширенными критериями
+        /// Поиск VB-Cable устройств с правильной логикой для loopback теста
         /// </summary>
         private (int inputDevice, int outputDevice, string details) FindVBCableDevices()
         {
-            int vbCableInputDevice = -1;
-            int vbCableOutputDevice = -1;
+            int vbCableInputDevice = -1;  // Для записи с CABLE Output
+            int vbCableOutputDevice = -1; // Для воспроизведения в CABLE Input
             var details = new StringBuilder();
             
-            details.AppendLine("Поиск VB-Cable устройств...");
+            details.AppendLine("Поиск VB-Cable устройств для loopback теста...");
             
-            // Расширенный поиск устройств записи
+            // Поиск устройства для ЗАПИСИ - должно быть "CABLE Output"
             for (int i = 0; i < WaveIn.DeviceCount; i++)
             {
                 var caps = WaveIn.GetCapabilities(i);
                 string productName = caps.ProductName.ToLower();
                 details.AppendLine($"Проверка записи [{i}]: {caps.ProductName}");
                 
-                if (productName.Contains("vb-cable") || 
-                    productName.Contains("cable input") ||
-                    productName.Contains("virtual cable") ||
-                    productName.Contains("vac") ||
-                    productName.Contains("voicemeeter") ||
-                    productName.Contains("vb-audio") ||
-                    productName.Contains("cable") ||
-                    productName.Contains("vaio"))
+                // Ищем именно CABLE Output для записи
+                if (productName.Contains("cable output") ||
+                    (productName.Contains("cable") && productName.Contains("output") && productName.Contains("vb-audio")))
                 {
                     vbCableInputDevice = i;
-                    details.AppendLine($"✓ Найден VB-Cable INPUT: {caps.ProductName}");
+                    details.AppendLine($"✓ Найден VB-Cable для записи: {caps.ProductName}");
                     break;
                 }
             }
             
-            // Расширенный поиск устройств воспроизведения
+            // Поиск устройства для ВОСПРОИЗВЕДЕНИЯ - должно быть "CABLE Input"  
             for (int i = 0; i < WaveOut.DeviceCount; i++)
             {
                 var caps = WaveOut.GetCapabilities(i);
                 string productName = caps.ProductName.ToLower();
                 details.AppendLine($"Проверка вывода [{i}]: {caps.ProductName}");
                 
-                if (productName.Contains("vb-cable") || 
-                    productName.Contains("cable input") ||
-                    productName.Contains("virtual cable") ||
-                    productName.Contains("vac") ||
-                    productName.Contains("voicemeeter") ||
-                    productName.Contains("vb-audio") ||
-                    productName.Contains("cable") ||
-                    productName.Contains("vaio"))
+                // Ищем CABLE Input для воспроизведения
+                if (productName.Contains("cable input") ||
+                    (productName.Contains("cable") && productName.Contains("input") && productName.Contains("vb-audio")))
                 {
                     vbCableOutputDevice = i;
-                    details.AppendLine($"✓ Найден VB-Cable OUTPUT: {caps.ProductName}");
+                    details.AppendLine($"✓ Найден VB-Cable для воспроизведения: {caps.ProductName}");
                     break;
                 }
+            }
+            
+            // Если точные CABLE устройства не найдены, ищем альтернативы
+            if (vbCableInputDevice == -1 || vbCableOutputDevice == -1)
+            {
+                details.AppendLine("\n⚠ Точные CABLE Input/Output устройства не найдены!");
+                details.AppendLine("Ищем альтернативные VB-Cable устройства...");
+                
+                // Поиск любого устройства с "VB-Audio Virtual"
+                if (vbCableInputDevice == -1)
+                {
+                    for (int i = 0; i < WaveIn.DeviceCount; i++)
+                    {
+                        var caps = WaveIn.GetCapabilities(i);
+                        string productName = caps.ProductName.ToLower();
+                        
+                        if (productName.Contains("vb-audio") && productName.Contains("virtual"))
+                        {
+                            vbCableInputDevice = i;
+                            details.AppendLine($"✓ Найден альтернативный VB-Cable для записи: {caps.ProductName}");
+                            break;
+                        }
+                    }
+                }
+                
+                if (vbCableOutputDevice == -1)
+                {
+                    for (int i = 0; i < WaveOut.DeviceCount; i++)
+                    {
+                        var caps = WaveOut.GetCapabilities(i);
+                        string productName = caps.ProductName.ToLower();
+                        
+                        if (productName.Contains("vb-audio") && productName.Contains("virtual"))
+                        {
+                            vbCableOutputDevice = i;
+                            details.AppendLine($"✓ Найден альтернативный VB-Cable для воспроизведения: {caps.ProductName}");
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            details.AppendLine($"\nРезультат поиска:");
+            details.AppendLine($"- Устройство записи: {(vbCableInputDevice != -1 ? vbCableInputDevice.ToString() : "НЕ НАЙДЕНО")}");
+            details.AppendLine($"- Устройство воспроизведения: {(vbCableOutputDevice != -1 ? vbCableOutputDevice.ToString() : "НЕ НАЙДЕНО")}");
+            
+            if (vbCableInputDevice != -1 && vbCableOutputDevice != -1)
+            {
+                details.AppendLine("\n✅ VB-Cable устройства найдены для loopback теста!");
+            }
+            else
+            {
+                details.AppendLine("\n❌ Не удалось найти подходящие VB-Cable устройства для loopback теста!");
             }
             
             return (vbCableInputDevice, vbCableOutputDevice, details.ToString());
@@ -265,36 +589,79 @@ namespace MORT
                     progressForm.Show();
                     progressForm.SetStatus("Поиск VB-Cable устройств...");
                     
-                    // Ищем VB-Cable устройства с расширенным поиском
+                    // Показываем детальную информацию ПЕРЕД поиском
+                    string allDevicesInfo = GetAllAudioDevices();
+                    MessageBox.Show($"ДОСТУПНЫЕ АУДИОУСТРОЙСТВА:\n\n{allDevicesInfo}", 
+                                  "Отладка: Все устройства", 
+                                  MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    
+                    // Ищем VB-Cable устройства с правильной логикой
                     var (vbCableInputDevice, vbCableOutputDevice, searchDetails) = FindVBCableDevices();
+                    
+                    // Показываем детали поиска
+                    MessageBox.Show($"РЕЗУЛЬТАТ ПОИСКА VB-CABLE:\n\n{searchDetails}\n" +
+                                  $"Найденные устройства:\n" +
+                                  $"- Устройство записи (Input): {vbCableInputDevice}\n" +
+                                  $"- Устройство воспроизведения (Output): {vbCableOutputDevice}", 
+                                  "Отладка: Поиск VB-Cable", 
+                                  MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
                     if (vbCableInputDevice == -1 || vbCableOutputDevice == -1)
                     {
-                        // Показываем детальную информацию о поиске
-                        string allDevices = GetAllAudioDevices();
-                        string errorMsg = $"VB-Cable не найден!\n\n{searchDetails}\n{allDevices}";
-                        
-                        MessageBox.Show(errorMsg, "Детали поиска VB-Cable", 
-                                      MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        
                         progressForm.SetStatus("VB-Cable не найден! Проверьте установку.");
                         await Task.Delay(3000);
                         return false;
                     }
                     
+                    // Показываем что будем тестировать
+                    string inputDeviceName = "НЕИЗВЕСТНО";
+                    string outputDeviceName = "НЕИЗВЕСТНО";
+                    
+                    try
+                    {
+                        if (vbCableInputDevice >= 0 && vbCableInputDevice < WaveIn.DeviceCount)
+                        {
+                            var inputCaps = WaveIn.GetCapabilities(vbCableInputDevice);
+                            inputDeviceName = inputCaps.ProductName;
+                        }
+                        
+                        if (vbCableOutputDevice >= 0 && vbCableOutputDevice < WaveOut.DeviceCount)
+                        {
+                            var outputCaps = WaveOut.GetCapabilities(vbCableOutputDevice);
+                            outputDeviceName = outputCaps.ProductName;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка получения имен устройств: {ex.Message}", "Ошибка", 
+                                      MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    
+                    var testConfirm = MessageBox.Show($"LOOPBACK ТЕСТ:\n\n" +
+                                                    $"Воспроизведение в: [{vbCableOutputDevice}] {outputDeviceName}\n" +
+                                                    $"Запись с: [{vbCableInputDevice}] {inputDeviceName}\n\n" +
+                                                    $"Продолжить тест?", 
+                                                    "Подтверждение теста", 
+                                                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    
+                    if (testConfirm != DialogResult.Yes)
+                    {
+                        return false;
+                    }
+                    
                     progressForm.SetStatus("VB-Cable найден! Тестирование loopback...");
                     
-                    // Создаем генератор тестового сигнала
-                    sineWaveProvider = new SineWaveProvider(1000.0f); // 1kHz тон
+                    // Создаем генератор тестового сигнала (более громкий)
+                    sineWaveProvider = new SineWaveProvider(1000.0f, 0.5f); // 1kHz тон, 50% громкости
                     
-                    // Настройка воспроизведения в VB-Cable
+                    // Настройка воспроизведения в VB-Cable Input (для передачи сигнала)
                     waveOut = new WaveOutEvent()
                     {
                         DeviceNumber = vbCableOutputDevice
                     };
                     waveOut.Init(sineWaveProvider);
                     
-                    // Настройка записи с VB-Cable
+                    // Настройка записи с VB-Cable Output (для приема сигнала)
                     waveIn = new WaveInEvent()
                     {
                         DeviceNumber = vbCableInputDevice,
@@ -303,6 +670,7 @@ namespace MORT
                     
                     bool signalDetected = false;
                     float maxLevel = 0;
+                    int sampleCount = 0;
                     
                     waveIn.DataAvailable += (s, e) =>
                     {
@@ -312,7 +680,16 @@ namespace MORT
                             short sample = (short)((e.Buffer[i + 1] << 8) | e.Buffer[i]);
                             float level = Math.Abs(sample) / 32768.0f;
                             if (level > maxLevel) maxLevel = level;
-                            if (level > 0.01f) signalDetected = true; // Порог обнаружения сигнала
+                            
+                            // Понижаем порог обнаружения и требуем меньше образцов
+                            if (level > 0.005f) // Снижен порог с 0.01f до 0.005f
+                            {
+                                sampleCount++;
+                                if (sampleCount > 100) // Требуем только 100 образцов вместо большего количества
+                                {
+                                    signalDetected = true;
+                                }
+                            }
                         }
                     };
                     
@@ -320,16 +697,27 @@ namespace MORT
                     waveIn.StartRecording();
                     isRecording = true;
                     
-                    await Task.Delay(500); // Небольшая задержка
+                    progressForm.SetStatus("Запуск записи...");
+                    await Task.Delay(500); // Даем время на запуск записи
                     
                     // Начинаем воспроизведение
                     waveOut.Play();
                     isPlaying = true;
                     
-                    progressForm.SetStatus("Анализ loopback сигнала...");
+                    progressForm.SetStatus("Анализ loopback сигнала... (вы должны слышать тон)");
                     
-                    // Ждем и анализируем
-                    await Task.Delay(duration * 1000, cancellationTokenSource.Token);
+                    // Ждем и анализируем с промежуточными проверками
+                    for (int i = 0; i < duration; i++)
+                    {
+                        await Task.Delay(1000, cancellationTokenSource.Token);
+                        progressForm.SetStatus($"Анализ... {i+1}/{duration}с, max: {maxLevel:P1}, samples: {sampleCount}");
+                        
+                        // Ранняя проверка успеха
+                        if (signalDetected && maxLevel > 0.005f)
+                        {
+                            break;
+                        }
+                    }
                     
                     // Останавливаем
                     waveOut.Stop();
@@ -337,15 +725,45 @@ namespace MORT
                     isPlaying = false;
                     isRecording = false;
                     
-                    if (signalDetected && maxLevel > 0.01f)
+                    // Более либеральная проверка успеха
+                    if (signalDetected && maxLevel > 0.005f)
                     {
-                        progressForm.SetStatus($"VB-Cable работает! Уровень сигнала: {maxLevel:P1}");
+                        progressForm.SetStatus($"✓ VB-Cable работает! Уровень: {maxLevel:P1}, образцов: {sampleCount}");
                         await Task.Delay(2000);
                         return true;
                     }
+                    else if (maxLevel > 0.001f) // Даже если сигнал очень слабый
+                    {
+                        progressForm.SetStatus($"⚠ VB-Cable частично работает. Слабый сигнал: {maxLevel:P1}");
+                        
+                        var result = MessageBox.Show($"Обнаружен слабый сигнал loopback: {maxLevel:P1}\n" +
+                                                   $"Образцов сигнала: {sampleCount}\n\n" +
+                                                   "VB-Cable может работать, но сигнал слабый.\n" +
+                                                   "Считать тест успешным?",
+                                                   "Слабый сигнал VB-Cable",
+                                                   MessageBoxButtons.YesNo,
+                                                   MessageBoxIcon.Question);
+                        
+                        return result == DialogResult.Yes;
+                    }
                     else
                     {
-                        progressForm.SetStatus("VB-Cable не работает - сигнал не обнаружен!");
+                        progressForm.SetStatus("✗ VB-Cable: loopback сигнал не обнаружен!");
+                        
+                        string diagnostics = $"Диагностика:\n" +
+                                           $"- Максимальный уровень: {maxLevel:P1}\n" +
+                                           $"- Образцов сигнала: {sampleCount}\n" +
+                                           $"- Устройство воспроизведения: {vbCableOutputDevice} ({outputDeviceName})\n" +
+                                           $"- Устройство записи: {vbCableInputDevice} ({inputDeviceName})\n\n" +
+                                           "Возможные причины:\n" +
+                                           "• VB-Cable не настроен как устройство по умолчанию\n" +
+                                           "• Проблемы с драйверами аудио\n" +
+                                           "• VB-Cable не установлен правильно\n" +
+                                           "• Неправильное сопоставление устройств Input/Output";
+                        
+                        MessageBox.Show(diagnostics, "Диагностика VB-Cable", 
+                                      MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        
                         await Task.Delay(3000);
                         return false;
                     }

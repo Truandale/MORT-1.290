@@ -1422,33 +1422,6 @@ namespace MORT
 
         private void button1_Click(object sender, EventArgs e)
         {
-            // Создаем простую тестовую кнопку прямо здесь
-            Button testBtn = new Button()
-            {
-                Text = "ПРОСТОЙ ТЕСТ",
-                Size = new Size(150, 50),
-                Location = new Point(100, 100),
-                BackColor = Color.Red,
-                ForeColor = Color.White
-            };
-            
-            testBtn.Click += (s, ev) => {
-                MessageBox.Show("ПРОСТАЯ КНОПКА РАБОТАЕТ!", "Тест", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            };
-            
-            Form testForm = new Form()
-            {
-                Text = "Простой тест кнопки",
-                Size = new Size(300, 200),
-                StartPosition = FormStartPosition.CenterParent
-            };
-            
-            testForm.Controls.Add(testBtn);
-            testForm.ShowDialog(this);
-
-            // Test NAudio device enumeration first
-            TestAudioDevices.TestDeviceEnumeration();
-            
             // Open AutoVoiceTranslator settings form
             try
             {
