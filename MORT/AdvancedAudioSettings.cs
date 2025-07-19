@@ -116,13 +116,15 @@ namespace MORT
             audioRouter = new AudioRouter();
             InitializeComponent();
             InitializeCustomControls();
+            
+            // Принудительно загружаем голоса TTS при открытии формы
+            LoadTTSVoices();
+            
+            // Загружаем настройки ПОСЛЕ загрузки голосов
             LoadSettings();
             
             // Подключаем обработчик логирования после инициализации
             audioRouter.OnLog += LogMessage;
-            
-            // Принудительно загружаем голоса TTS при открытии формы
-            LoadTTSVoices();
         }
 
         public AdvancedAudioSettings(SettingManager settingManager)
@@ -132,13 +134,15 @@ namespace MORT
             this.settingManager = settingManager;
             InitializeComponent();
             InitializeCustomControls();
+            
+            // Принудительно загружаем голоса TTS при открытии формы
+            LoadTTSVoices();
+            
+            // Загружаем настройки ПОСЛЕ загрузки голосов
             LoadSettings();
             
             // Подключаем обработчик логирования после инициализации
             audioRouter.OnLog += LogMessage;
-            
-            // Принудительно загружаем голоса TTS при открытии формы
-            LoadTTSVoices();
         }
 
         private void InitializeComponent()
@@ -2576,10 +2580,6 @@ namespace MORT
                     cbTTSVoiceEN?.Items.Add($"{voice.Name} ({voice.Language})");
                     System.Diagnostics.Debug.WriteLine($"Added other language voice: {voice.Name} ({voice.Language})");
                 }
-                
-                // Устанавливаем значения по умолчанию
-                if (cbTTSVoiceRU?.Items.Count > 0) cbTTSVoiceRU.SelectedIndex = 0;
-                if (cbTTSVoiceEN?.Items.Count > 0) cbTTSVoiceEN.SelectedIndex = 0;
                 
                 System.Diagnostics.Debug.WriteLine($"LoadTTSVoices() completed. RU: {cbTTSVoiceRU?.Items.Count}, EN: {cbTTSVoiceEN?.Items.Count}");
             }
