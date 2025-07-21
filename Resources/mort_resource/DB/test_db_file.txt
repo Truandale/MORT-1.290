@@ -1,0 +1,2 @@
+Test file in DB folder
+This should also be copied automatically.

@@ -54,6 +54,11 @@
     <ProjectReference Include="..\GSTrans\GSTrans.csproj" />
   </ItemGroup>
 
+  <!-- Копирование ресурсов mort_resource -->
+  <ItemGroup>
+    <None Include="Resources\mort_resource\**\*" CopyToOutputDirectory="Always" LinkBase="/" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -77,6 +82,18 @@
     <Copy SourceFiles="@(NAudioFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
     <!-- Also copy to x64 output directory if it exists -->
     <Copy SourceFiles="@(NAudioFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)')" />
+  </Target>
+
+  <!-- Копирование ресурсов mort_resource (дополнительное обеспечение) -->
+  <Target Name="CopyMortResources" AfterTargets="Build">
+    <Message Text="Копирование ресурсов mort_resource..." Importance="high" />
+    <ItemGroup>
+      <MortResourceFiles Include="Resources\mort_resource\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(MortResourceFiles)" 
+          DestinationFiles="@(MortResourceFiles->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+    <Message Text="Ресурсы mort_resource скопированы в $(OutputPath)" Importance="high" />
   </Target>
 
 </Project>

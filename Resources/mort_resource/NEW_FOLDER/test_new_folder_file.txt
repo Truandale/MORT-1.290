@@ -1,0 +1,2 @@
+Test file in new folder
+This demonstrates that new folders are also included automatically.

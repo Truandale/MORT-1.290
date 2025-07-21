@@ -1,0 +1,87 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/MORT/MORT.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary",
+                "--verbosity",
+                "normal"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "build-debug",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/MORT/MORT.csproj",
+                "--configuration",
+                "Debug",
+                "--verbosity",
+                "normal"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "build-release",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/MORT/MORT.csproj",
+                "--configuration",
+                "Release",
+                "--verbosity",
+                "normal"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "${workspaceFolder}/MORT/MORT.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "rebuild",
+            "dependsOrder": "sequence",
+            "dependsOn": ["clean", "build"]
+        }
+    ]
+}
