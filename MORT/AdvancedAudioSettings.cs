@@ -96,6 +96,24 @@ namespace MORT
         private int silenceDurationMs = 1000; // Время тишины перед обработкой (1 сек)
         private int debugCounter = 0; // Счетчик для отладки
         
+        // Universal Mode Tab - Универсальный режим системного аудиоперевода
+        private GroupBox? gbUniversalMode;
+        private CheckBox? cbEnableUniversal;
+        private Button? btnStartUniversal;
+        private Button? btnStopUniversal;
+        private Button? btnToggleTranslation;
+        private Label? lblUniversalStatus;
+        private TextBox? tbUniversalLog;
+        private ComboBox? cbPhysicalMicrophone;
+        private ComboBox? cbPhysicalSpeakers;
+        private Label? lblPhysicalDevices;
+        private Label? lblVirtualDevices;
+        private Label? lblVBCableStatus;
+        private Timer? universalStatusTimer;
+        
+        // Universal Mode Manager
+        private UniversalAudioTranslateManager? universalManager;
+        
         // Control Buttons
         private Button? btnStart;
         private Button? btnStop;
@@ -183,6 +201,7 @@ namespace MORT
             CreateTTSTab();
             CreateAudioDevicesTab();
             CreateAudioRoutingTab(); // Новая экспериментальная вкладка
+            CreateUniversalTab(); // Универсальный режим системного аудиоперевода
             CreateVADTab();
             CreateTranslationTab();
             CreateMonitoringTab();
@@ -1369,6 +1388,198 @@ namespace MORT
             
             monitoringTab.Controls.Add(gbMonitoring);
             mainTabControl?.TabPages.Add(monitoringTab);
+        }
+
+        private void CreateUniversalTab()
+        {
+            TabPage universalTab = new TabPage("🌐 Универсальный режим");
+            
+            gbUniversalMode = new GroupBox()
+            {
+                Text = "🚀 Системный аудиоперевод для всех приложений",
+                Location = new Point(10, 10),
+                Size = new Size(740, 450),
+                ForeColor = Color.Black
+            };
+
+            // Info label
+            Label lblInfo = new Label()
+            {
+                Text = "💡 Универсальный режим позволяет переводить звук из ВСЕХ приложений:\n" +
+                       "   • Discord, Skype, Teams, игры - весь голосовой чат переводится автоматически\n" +
+                       "   • Не нужно настраивать каждое приложение отдельно\n" +
+                       "   • Требует установленный VB-Cable для работы",
+                Location = new Point(20, 25),
+                Size = new Size(700, 80),
+                ForeColor = Color.DarkBlue,
+                Font = new Font("Segoe UI", 9, FontStyle.Regular)
+            };
+
+            // VB-Cable status
+            lblVBCableStatus = new Label()
+            {
+                Text = "🔍 Проверка VB-Cable...",
+                Location = new Point(20, 115),
+                Size = new Size(350, 20),
+                ForeColor = Color.Orange,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold)
+            };
+
+            // Physical devices section
+            lblPhysicalDevices = new Label()
+            {
+                Text = "🎧 Физические устройства:",
+                Location = new Point(20, 145),
+                Size = new Size(200, 20),
+                ForeColor = Color.Black,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold)
+            };
+
+            Label lblPhysicalMic = new Label()
+            {
+                Text = "Микрофон:",
+                Location = new Point(40, 170),
+                Size = new Size(80, 20),
+                ForeColor = Color.Black
+            };
+
+            cbPhysicalMicrophone = new ComboBox()
+            {
+                Location = new Point(125, 168),
+                Size = new Size(250, 25),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                BackColor = Color.White
+            };
+
+            Label lblPhysicalSpk = new Label()
+            {
+                Text = "Динамики:",
+                Location = new Point(40, 200),
+                Size = new Size(80, 20),
+                ForeColor = Color.Black
+            };
+
+            cbPhysicalSpeakers = new ComboBox()
+            {
+                Location = new Point(125, 198),
+                Size = new Size(250, 25),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                BackColor = Color.White
+            };
+
+            // Universal mode controls
+            cbEnableUniversal = new CheckBox()
+            {
+                Text = "🌐 Включить универсальный режим",
+                Location = new Point(20, 240),
+                Size = new Size(250, 25),
+                ForeColor = Color.DarkGreen,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+            };
+            cbEnableUniversal.CheckedChanged += OnUniversalModeToggle;
+
+            btnStartUniversal = new Button()
+            {
+                Text = "🚀 Включить универсальный режим",
+                Location = new Point(20, 275),
+                Size = new Size(200, 35),
+                BackColor = Color.LightGreen,
+                ForeColor = Color.DarkGreen,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold),
+                Enabled = false
+            };
+            btnStartUniversal.Click += OnStartUniversalClick;
+
+            btnStopUniversal = new Button()
+            {
+                Text = "🛑 Выключить универсальный режим",
+                Location = new Point(230, 275),
+                Size = new Size(200, 35),
+                BackColor = Color.LightCoral,
+                ForeColor = Color.DarkRed,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold),
+                Enabled = false
+            };
+            btnStopUniversal.Click += OnStopUniversalClick;
+
+            btnToggleTranslation = new Button()
+            {
+                Text = "🎯 Переключить перевод",
+                Location = new Point(440, 275),
+                Size = new Size(160, 35),
+                BackColor = Color.LightBlue,
+                ForeColor = Color.DarkBlue,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold),
+                Enabled = false
+            };
+            btnToggleTranslation.Click += OnToggleTranslationClick;
+
+            // Status
+            lblUniversalStatus = new Label()
+            {
+                Text = "📊 Статус: Выключен",
+                Location = new Point(20, 325),
+                Size = new Size(580, 20),
+                ForeColor = Color.Gray,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold)
+            };
+
+            // Log
+            Label lblUniversalLog = new Label()
+            {
+                Text = "📝 Журнал универсального режима:",
+                Location = new Point(20, 355),
+                Size = new Size(300, 20),
+                ForeColor = Color.Black
+            };
+
+            tbUniversalLog = new TextBox()
+            {
+                Location = new Point(20, 380),
+                Size = new Size(700, 60),
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                ReadOnly = true,
+                BackColor = Color.Black,
+                ForeColor = Color.LimeGreen,
+                Font = new Font("Consolas", 9),
+                Text = "🌐 Универсальный режим готов к запуску...\r\n"
+            };
+
+            gbUniversalMode.Controls.AddRange(new Control[] 
+            { 
+                lblInfo, lblVBCableStatus,
+                lblPhysicalDevices,
+                lblPhysicalMic, cbPhysicalMicrophone,
+                lblPhysicalSpk, cbPhysicalSpeakers,
+                cbEnableUniversal,
+                btnStartUniversal, btnStopUniversal, btnToggleTranslation,
+                lblUniversalStatus,
+                lblUniversalLog, tbUniversalLog
+            });
+            
+            universalTab.Controls.Add(gbUniversalMode);
+            mainTabControl?.TabPages.Add(universalTab);
+            
+            // Status update timer
+            universalStatusTimer = new Timer()
+            {
+                Interval = 2000, // Update every 2 seconds
+                Enabled = false
+            };
+            universalStatusTimer.Tick += OnUniversalStatusTick;
+            
+            // Initialize universal manager
+            if (universalManager == null && settingManager != null)
+            {
+                universalManager = new UniversalAudioTranslateManager(settingManager);
+                universalManager.OnLog += LogUniversalMessage;
+                universalManager.OnUniversalModeChanged += OnUniversalModeStateChanged;
+                universalManager.OnTranslationStateChanged += OnTranslationStateChanged;
+            }
+            
+            // Load devices
+            LoadUniversalDevices();
         }
 
         private void CreateControlButtons()
@@ -3190,6 +3401,8 @@ namespace MORT
                 audioTester?.Dispose();
                 audioRouter?.Dispose();
                 routingStatusTimer?.Dispose();
+                universalManager?.Dispose();
+                universalStatusTimer?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -3378,6 +3591,343 @@ namespace MORT
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка логирования: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region Universal Mode Methods
+
+        /// <summary>
+        /// Загрузка устройств для универсального режима
+        /// </summary>
+        private void LoadUniversalDevices()
+        {
+            try
+            {
+                if (universalManager != null)
+                {
+                    // Обновляем статус VB-Cable
+                    var vbCableInfo = universalManager.GetSystemStatus();
+                    if (lblVBCableStatus != null)
+                    {
+                        if (vbCableInfo.Contains("VB-Cable"))
+                        {
+                            lblVBCableStatus.Text = "✅ VB-Cable обнаружен";
+                            lblVBCableStatus.ForeColor = Color.DarkGreen;
+                            if (btnStartUniversal != null)
+                                btnStartUniversal.Enabled = true;
+                        }
+                        else
+                        {
+                            lblVBCableStatus.Text = "❌ VB-Cable не найден - установите VB-Cable";
+                            lblVBCableStatus.ForeColor = Color.Red;
+                        }
+                    }
+                }
+
+                // Загружаем физические устройства
+                LoadPhysicalDevices();
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"❌ Ошибка загрузки устройств: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Загрузка физических аудиоустройств
+        /// </summary>
+        private void LoadPhysicalDevices()
+        {
+            try
+            {
+                cbPhysicalMicrophone?.Items.Clear();
+                cbPhysicalSpeakers?.Items.Clear();
+
+                // Загружаем микрофоны
+                for (int i = 0; i < WaveInEvent.DeviceCount; i++)
+                {
+                    var caps = WaveInEvent.GetCapabilities(i);
+                    if (!caps.ProductName.ToLower().Contains("cable") && 
+                        !caps.ProductName.ToLower().Contains("virtual"))
+                    {
+                        cbPhysicalMicrophone?.Items.Add($"{caps.ProductName} [{i}]");
+                    }
+                }
+
+                // Загружаем динамики
+                for (int i = 0; i < NAudio.Wave.WaveOut.DeviceCount; i++)
+                {
+                    var caps = NAudio.Wave.WaveOut.GetCapabilities(i);
+                    if (!caps.ProductName.ToLower().Contains("cable") && 
+                        !caps.ProductName.ToLower().Contains("virtual"))
+                    {
+                        cbPhysicalSpeakers?.Items.Add($"{caps.ProductName} [{i}]");
+                    }
+                }
+
+                // Выбираем первые доступные устройства
+                if (cbPhysicalMicrophone?.Items.Count > 0)
+                    cbPhysicalMicrophone.SelectedIndex = 0;
+                
+                if (cbPhysicalSpeakers?.Items.Count > 0)
+                    cbPhysicalSpeakers.SelectedIndex = 0;
+
+                LogUniversalMessage("📋 Физические устройства загружены");
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"❌ Ошибка загрузки физических устройств: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Переключение универсального режима через чекбокс
+        /// </summary>
+        private async void OnUniversalModeToggle(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (cbEnableUniversal?.Checked == true)
+                {
+                    await StartUniversalMode();
+                }
+                else
+                {
+                    await StopUniversalMode();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"❌ Ошибка переключения режима: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Запуск универсального режима по кнопке
+        /// </summary>
+        private async void OnStartUniversalClick(object? sender, EventArgs e)
+        {
+            await StartUniversalMode();
+        }
+
+        /// <summary>
+        /// Остановка универсального режима по кнопке
+        /// </summary>
+        private async void OnStopUniversalClick(object? sender, EventArgs e)
+        {
+            await StopUniversalMode();
+        }
+
+        /// <summary>
+        /// Переключение состояния перевода
+        /// </summary>
+        private async void OnToggleTranslationClick(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (universalManager != null)
+                {
+                    await universalManager.ToggleTranslationAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"❌ Ошибка переключения перевода: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Запуск универсального режима
+        /// </summary>
+        private async Task StartUniversalMode()
+        {
+            try
+            {
+                if (universalManager == null) return;
+
+                LogUniversalMessage("🚀 Запуск универсального режима...");
+
+                bool success = await universalManager.EnableUniversalModeAsync();
+                
+                if (success)
+                {
+                    // Активируем интерфейс
+                    if (btnStartUniversal != null) btnStartUniversal.Enabled = false;
+                    if (btnStopUniversal != null) btnStopUniversal.Enabled = true;
+                    if (btnToggleTranslation != null) btnToggleTranslation.Enabled = true;
+                    if (cbEnableUniversal != null && !cbEnableUniversal.Checked) cbEnableUniversal.Checked = true;
+                    
+                    // Запускаем таймер обновления статуса
+                    if (universalStatusTimer != null) universalStatusTimer.Enabled = true;
+                    
+                    LogUniversalMessage("✅ Универсальный режим активирован!");
+                }
+                else
+                {
+                    LogUniversalMessage("❌ Не удалось запустить универсальный режим");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"❌ Ошибка запуска универсального режима: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Остановка универсального режима
+        /// </summary>
+        private async Task StopUniversalMode()
+        {
+            try
+            {
+                if (universalManager == null) return;
+
+                LogUniversalMessage("🛑 Остановка универсального режима...");
+
+                bool success = await universalManager.DisableUniversalModeAsync();
+                
+                if (success)
+                {
+                    // Деактивируем интерфейс
+                    if (btnStartUniversal != null) btnStartUniversal.Enabled = true;
+                    if (btnStopUniversal != null) btnStopUniversal.Enabled = false;
+                    if (btnToggleTranslation != null) btnToggleTranslation.Enabled = false;
+                    if (cbEnableUniversal != null && cbEnableUniversal.Checked) cbEnableUniversal.Checked = false;
+                    
+                    // Останавливаем таймер
+                    if (universalStatusTimer != null) universalStatusTimer.Enabled = false;
+                    
+                    LogUniversalMessage("✅ Универсальный режим деактивирован");
+                }
+                else
+                {
+                    LogUniversalMessage("❌ Ошибка остановки универсального режима");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"❌ Ошибка остановки универсального режима: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Обновление статуса универсального режима
+        /// </summary>
+        private void OnUniversalStatusTick(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (universalManager != null && lblUniversalStatus != null)
+                {
+                    string status = universalManager.GetSystemStatus();
+                    lblUniversalStatus.Text = status.Replace("\n", " | ");
+                    
+                    // Обновляем цвет статуса
+                    if (universalManager.IsUniversalModeActive)
+                    {
+                        lblUniversalStatus.ForeColor = universalManager.IsTranslationActive ? Color.DarkGreen : Color.Orange;
+                    }
+                    else
+                    {
+                        lblUniversalStatus.ForeColor = Color.Gray;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"⚠️ Ошибка обновления статуса: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Обработчик изменения состояния универсального режима
+        /// </summary>
+        private void OnUniversalModeStateChanged(bool isActive)
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action<bool>(OnUniversalModeStateChanged), isActive);
+                    return;
+                }
+
+                if (btnStartUniversal != null) btnStartUniversal.Enabled = !isActive;
+                if (btnStopUniversal != null) btnStopUniversal.Enabled = isActive;
+                if (btnToggleTranslation != null) btnToggleTranslation.Enabled = isActive;
+                
+                if (cbEnableUniversal != null)
+                {
+                    cbEnableUniversal.CheckedChanged -= OnUniversalModeToggle;
+                    cbEnableUniversal.Checked = isActive;
+                    cbEnableUniversal.CheckedChanged += OnUniversalModeToggle;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"❌ Ошибка обновления интерфейса: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Обработчик изменения состояния перевода
+        /// </summary>
+        private void OnTranslationStateChanged(bool isActive)
+        {
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action<bool>(OnTranslationStateChanged), isActive);
+                    return;
+                }
+
+                if (btnToggleTranslation != null)
+                {
+                    btnToggleTranslation.Text = isActive ? "⏹️ Остановить перевод" : "🎯 Запустить перевод";
+                    btnToggleTranslation.BackColor = isActive ? Color.LightCoral : Color.LightBlue;
+                    btnToggleTranslation.ForeColor = isActive ? Color.DarkRed : Color.DarkBlue;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUniversalMessage($"❌ Ошибка обновления кнопки перевода: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Логирование сообщений универсального режима
+        /// </summary>
+        private void LogUniversalMessage(string message)
+        {
+            try
+            {
+                if (tbUniversalLog?.InvokeRequired == true)
+                {
+                    tbUniversalLog.Invoke(new Action<string>(LogUniversalMessage), message);
+                    return;
+                }
+
+                string timestamp = DateTime.Now.ToString("HH:mm:ss");
+                string logEntry = $"[{timestamp}] {message}\r\n";
+                
+                tbUniversalLog?.AppendText(logEntry);
+                tbUniversalLog?.ScrollToCaret();
+                
+                // Ограничиваем размер лога
+                if (tbUniversalLog?.Lines.Length > 500)
+                {
+                    var lines = tbUniversalLog.Lines;
+                    var trimmedLines = new string[250];
+                    Array.Copy(lines, lines.Length - 250, trimmedLines, 0, 250);
+                    tbUniversalLog.Lines = trimmedLines;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка логирования универсального режима: {ex.Message}");
             }
         }
 

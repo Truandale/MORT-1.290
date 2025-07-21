@@ -1214,6 +1214,15 @@ namespace MORT
                         case KeyInputLabel.KeyType.PapagoWeb:
                             ApplyTransTypeFromHotKey(SettingManager.TransType.papago_web, LocalizeString("Switching Papago Web"));
                             break;
+                        case KeyInputLabel.KeyType.UniversalToggle:
+                            ToggleUniversalAudioMode();
+                            break;
+                        case KeyInputLabel.KeyType.UniversalTranslationToggle:
+                            ToggleUniversalTranslation();
+                            break;
+                        case KeyInputLabel.KeyType.OpenAudioSettings:
+                            OpenAudioSettingsForm();
+                            break;
                     }
                 }
             }
@@ -1443,6 +1452,68 @@ namespace MORT
             }
         }
 
+
+        #endregion
+
+        #region Universal Audio Mode Methods
+
+        /// <summary>
+        /// Переключение универсального режима аудиоперевода
+        /// </summary>
+        private void ToggleUniversalAudioMode()
+        {
+            try
+            {
+                Util.ShowLog("🌐 Переключение универсального режима аудиоперевода...");
+                
+                // Открываем окно Audio Translator и переключаем универсальный режим
+                using (AdvancedAudioSettings audioForm = new AdvancedAudioSettings(MySettingManager))
+                {
+                    // TODO: Добавить метод для программного переключения универсального режима
+                    audioForm.ShowDialog(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                Util.ShowLog($"❌ Ошибка переключения универсального режима: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Переключение состояния перевода в универсальном режиме
+        /// </summary>
+        private void ToggleUniversalTranslation()
+        {
+            try
+            {
+                Util.ShowLog("🎯 Переключение перевода в универсальном режиме...");
+                
+                // TODO: Добавить прямое управление переводом через универсальный менеджер
+                FormManager.Instace.AddText("🎯 Переключение универсального перевода (горячая клавиша)");
+            }
+            catch (Exception ex)
+            {
+                Util.ShowLog($"❌ Ошибка переключения перевода: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Открытие окна настроек аудиоперевода горячей клавишей
+        /// </summary>
+        private void OpenAudioSettingsForm()
+        {
+            try
+            {
+                Util.ShowLog("🎛️ Открытие настроек аудиоперевода горячей клавишей...");
+                
+                // Вызываем существующий метод
+                button1_Click(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                Util.ShowLog($"❌ Ошибка открытия настроек: {ex.Message}");
+            }
+        }
 
         #endregion
 

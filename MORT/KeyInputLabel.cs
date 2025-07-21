@@ -9,7 +9,8 @@ namespace MORT
         public enum KeyType
         {
             None, Translate, OpenDic, QuickOCR, SnapShot, TranslateOnce, Hide,
-            OpenSetting, LayerTransparency, DBTranslate, NaverTranslate, GoogleTranslate, GoogleSheetTranslate, EzTrans, DeepL, PapagoWeb
+            OpenSetting, LayerTransparency, DBTranslate, NaverTranslate, GoogleTranslate, GoogleSheetTranslate, EzTrans, DeepL, PapagoWeb,
+            UniversalToggle, UniversalTranslationToggle, OpenAudioSettings
         }
         public KeyType keyType = KeyType.None;
         public bool isFocus;
