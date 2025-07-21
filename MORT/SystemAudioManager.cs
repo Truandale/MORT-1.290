@@ -149,6 +149,10 @@ namespace MORT
         /// <summary>
         /// Найти VB-Cable устройства
         /// Ищет сначала по FriendlyName, затем по техническому имени для отказоустойчивости
+        /// 
+        /// ВАЖНО: 
+        /// - InputId (микрофон/запись) = "CABLE Output" в DataFlow.Capture
+        /// - OutputId (динамики/воспроизведение) = "CABLE Input" в DataFlow.Render
         /// </summary>
         public (string? inputId, string? outputId, string inputName, string outputName) FindVBCableDevices()
         {
@@ -161,37 +165,22 @@ namespace MORT
                 string vbInputName = "";
                 string vbOutputName = "";
 
-                // Поиск VB-Cable Input (микрофон) с приоритетом
+                // Поиск VB-Cable Input (устройство записи/микрофон) с приоритетом
                 var inputDevices = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
                 
-                // Приоритет 1: CABLE Input (обычный) по FriendlyName
+                // Приоритет 1: CABLE Output (правильное устройство записи) по FriendlyName
                 foreach (var device in inputDevices)
                 {
                     string deviceName = device.FriendlyName.ToLower();
-                    if (deviceName.Contains("cable input") && !deviceName.Contains("16ch"))
+                    if (deviceName.Contains("cable output"))
                     {
                         vbInputId = device.ID;
                         vbInputName = device.FriendlyName;
                         break;
                     }
                 }
-                
-                // Приоритет 2: CABLE In 16ch по FriendlyName (если обычного нет)
-                if (vbInputId == null)
-                {
-                    foreach (var device in inputDevices)
-                    {
-                        string deviceName = device.FriendlyName.ToLower();
-                        if (deviceName.Contains("cable") && deviceName.Contains("16ch"))
-                        {
-                            vbInputId = device.ID;
-                            vbInputName = device.FriendlyName;
-                            break;
-                        }
-                    }
-                }
 
-                // Приоритет 3: Отказоустойчивый поиск по техническому имени "VB-Audio Virtual Cable"
+                // Приоритет 2: Отказоустойчивый поиск по техническому имени "VB-Audio Virtual Cable"
                 if (vbInputId == null)
                 {
                     foreach (var device in inputDevices)
@@ -220,14 +209,14 @@ namespace MORT
                     }
                 }
 
-                // Поиск VB-Cable Output (динамики)
+                // Поиск VB-Cable Output (устройство воспроизведения/динамики)
                 var outputDevices = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
                 
-                // Приоритет 1: CABLE Output по FriendlyName
+                // Приоритет 1: CABLE Input (правильное устройство воспроизведения) по FriendlyName
                 foreach (var device in outputDevices)
                 {
                     string deviceName = device.FriendlyName.ToLower();
-                    if (deviceName.Contains("cable output"))
+                    if (deviceName.Contains("cable input") && !deviceName.Contains("16ch"))
                     {
                         vbOutputId = device.ID;
                         vbOutputName = device.FriendlyName;
@@ -235,13 +224,13 @@ namespace MORT
                     }
                 }
                 
-                // Приоритет 2: CABLE Input в устройствах воспроизведения по FriendlyName
+                // Приоритет 2: CABLE In 16ch по FriendlyName (если обычного нет)
                 if (vbOutputId == null)
                 {
                     foreach (var device in outputDevices)
                     {
                         string deviceName = device.FriendlyName.ToLower();
-                        if (deviceName.Contains("cable input"))
+                        if (deviceName.Contains("cable") && deviceName.Contains("16ch"))
                         {
                             vbOutputId = device.ID;
                             vbOutputName = device.FriendlyName;
