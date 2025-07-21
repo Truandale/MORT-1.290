@@ -230,7 +230,7 @@ namespace MORT
                     foreach (var device in outputDevices)
                     {
                         string deviceName = device.FriendlyName.ToLower();
-                        if (deviceName.Contains("cable") && deviceName.Contains("16ch"))
+                        if (deviceName.Contains("cable in 16ch"))
                         {
                             vbOutputId = device.ID;
                             vbOutputName = device.FriendlyName;
@@ -299,16 +299,16 @@ namespace MORT
             {
                 if (_deviceEnumerator == null) return (microphones, speakers);
 
-                // Поиск физических микрофонов (исключая ВСЕ VB-Cable устройства)
+                // Поиск физических микрофонов (исключая ТОЧНО определённые VB-Cable устройства)
                 var inputDevices = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
                 foreach (var device in inputDevices)
                 {
                     string deviceName = device.FriendlyName.ToLower();
                     
-                    // Исключаем ВСЕ VB-Cable устройства: CABLE Input, CABLE In 16ch, CABLE Output
+                    // Исключаем ТОЧНО VB-Cable устройства (избегаем ложных срабатываний)
                     bool isVBCable = deviceName.Contains("cable input") || 
                                     deviceName.Contains("cable output") ||
-                                    (deviceName.Contains("cable") && deviceName.Contains("16ch"));
+                                    deviceName.Contains("cable in 16ch");
                     
                     if (!isVBCable)
                     {
@@ -316,16 +316,16 @@ namespace MORT
                     }
                 }
 
-                // Поиск физических динамиков (исключая ВСЕ VB-Cable устройства)
+                // Поиск физических динамиков (исключая ТОЧНО определённые VB-Cable устройства)
                 var outputDevices = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
                 foreach (var device in outputDevices)
                 {
                     string deviceName = device.FriendlyName.ToLower();
                     
-                    // Исключаем ВСЕ VB-Cable устройства
+                    // Исключаем ТОЧНО VB-Cable устройства (избегаем ложных срабатываний)
                     bool isVBCable = deviceName.Contains("cable input") || 
                                     deviceName.Contains("cable output") ||
-                                    (deviceName.Contains("cable") && deviceName.Contains("16ch"));
+                                    deviceName.Contains("cable in 16ch");
                     
                     if (!isVBCable)
                     {
