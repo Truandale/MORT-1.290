@@ -8,6 +8,7 @@ using NAudio.CoreAudioApi;
 using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Media.SpeechSynthesis;
 
 namespace MORT
 {
@@ -618,7 +619,80 @@ namespace MORT
             mainTabControl?.TabPages.Add(ttsTab);
             
             // Загружаем доступные TTS голоса
-            // LoadTTSVoices(); // Временно отключено
+            LoadTTSVoices();
+        }
+
+        private void LoadTTSVoices()
+        {
+            try
+            {
+                if (cbTTSVoiceRU == null || cbTTSVoiceEN == null) return;
+
+                cbTTSVoiceRU.Items.Clear();
+                cbTTSVoiceEN.Items.Clear();
+
+                // Используем Windows.Media.SpeechSynthesis для получения голосов
+                var synthesizer = new Windows.Media.SpeechSynthesis.SpeechSynthesizer();
+                var voices = Windows.Media.SpeechSynthesis.SpeechSynthesizer.AllVoices;
+
+                if (voices.Count > 0)
+                {
+                    foreach (var voice in voices)
+                    {
+                        string voiceName = voice.DisplayName;
+                        string language = voice.Language;
+
+                        // Добавляем русские голоса в cbTTSVoiceRU
+                        if (language.StartsWith("ru") || voiceName.ToLower().Contains("russian") || 
+                            voiceName.ToLower().Contains("русский"))
+                        {
+                            cbTTSVoiceRU.Items.Add($"{voiceName} ({language})");
+                        }
+                        
+                        // Добавляем английские голоса в cbTTSVoiceEN
+                        if (language.StartsWith("en") || voiceName.ToLower().Contains("english") || 
+                            voiceName.ToLower().Contains("american") || voiceName.ToLower().Contains("british"))
+                        {
+                            cbTTSVoiceEN.Items.Add($"{voiceName} ({language})");
+                        }
+                        
+                        // Также добавляем все голоса в оба списка для выбора
+                        if (!language.StartsWith("ru") && !language.StartsWith("en"))
+                        {
+                            cbTTSVoiceRU.Items.Add($"{voiceName} ({language})");
+                            cbTTSVoiceEN.Items.Add($"{voiceName} ({language})");
+                        }
+                    }
+                }
+                else
+                {
+                    // Если голоса не найдены, добавляем стандартные пустые элементы
+                    cbTTSVoiceRU.Items.Add("Голоса не найдены");
+                    cbTTSVoiceEN.Items.Add("No voices found");
+                }
+
+                // Выбираем первый доступный голос
+                if (cbTTSVoiceRU.Items.Count > 0) cbTTSVoiceRU.SelectedIndex = 0;
+                if (cbTTSVoiceEN.Items.Count > 0) cbTTSVoiceEN.SelectedIndex = 0;
+
+                System.Diagnostics.Debug.WriteLine($"Загружено голосов: RU={cbTTSVoiceRU.Items.Count}, EN={cbTTSVoiceEN.Items.Count}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки TTS голосов: {ex.Message}");
+                
+                if (cbTTSVoiceRU != null)
+                {
+                    cbTTSVoiceRU.Items.Clear();
+                    cbTTSVoiceRU.Items.Add("Ошибка загрузки голосов");
+                }
+                
+                if (cbTTSVoiceEN != null)
+                {
+                    cbTTSVoiceEN.Items.Clear();
+                    cbTTSVoiceEN.Items.Add("Error loading voices");
+                }
+            }
         }
 
         private void CreateAudioDevicesTab()
