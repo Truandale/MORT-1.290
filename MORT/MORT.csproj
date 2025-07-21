@@ -47,6 +47,9 @@
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
     <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
     <PackageReference Include="System.Windows.Extensions" Version="7.0.0" />
+    <!-- STT библиотеки -->
+    <PackageReference Include="Whisper.net" Version="1.7.0" />
+    <PackageReference Include="Vosk" Version="0.3.38" />
   </ItemGroup>
 
   <ItemGroup>
