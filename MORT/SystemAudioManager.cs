@@ -148,6 +148,7 @@ namespace MORT
 
         /// <summary>
         /// Найти VB-Cable устройства
+        /// Ищет только устройства с FriendlyName содержащими "CABLE Input" или "CABLE Output"
         /// </summary>
         public (string? inputId, string? outputId, string inputName, string outputName) FindVBCableDevices()
         {
@@ -160,31 +161,63 @@ namespace MORT
                 string vbInputName = "";
                 string vbOutputName = "";
 
-                // Поиск VB-Cable Input (микрофон)
+                // Поиск VB-Cable Input (микрофон) с приоритетом
                 var inputDevices = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+                
+                // Приоритет 1: CABLE Input (обычный) - будет выбран первым ✅
                 foreach (var device in inputDevices)
                 {
-                    if (device.FriendlyName.ToLower().Contains("cable") || 
-                        device.FriendlyName.ToLower().Contains("vb-audio") ||
-                        device.FriendlyName.ToLower().Contains("virtual"))
+                    string deviceName = device.FriendlyName.ToLower();
+                    if (deviceName.Contains("cable input") && !deviceName.Contains("16ch"))
                     {
                         vbInputId = device.ID;
                         vbInputName = device.FriendlyName;
                         break;
                     }
                 }
+                
+                // Приоритет 2: CABLE In 16ch - будет использован только если обычного нет
+                if (vbInputId == null)
+                {
+                    foreach (var device in inputDevices)
+                    {
+                        string deviceName = device.FriendlyName.ToLower();
+                        if (deviceName.Contains("cable") && deviceName.Contains("16ch"))
+                        {
+                            vbInputId = device.ID;
+                            vbInputName = device.FriendlyName;
+                            break;
+                        }
+                    }
+                }
 
                 // Поиск VB-Cable Output (динамики)
                 var outputDevices = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+                
+                // CABLE Output - найдется как устройство воспроизведения
                 foreach (var device in outputDevices)
                 {
-                    if (device.FriendlyName.ToLower().Contains("cable") || 
-                        device.FriendlyName.ToLower().Contains("vb-audio") ||
-                        device.FriendlyName.ToLower().Contains("virtual"))
+                    string deviceName = device.FriendlyName.ToLower();
+                    if (deviceName.Contains("cable output"))
                     {
                         vbOutputId = device.ID;
                         vbOutputName = device.FriendlyName;
                         break;
+                    }
+                }
+                
+                // Если CABLE Output не найден, ищем CABLE Input в устройствах воспроизведения
+                if (vbOutputId == null)
+                {
+                    foreach (var device in outputDevices)
+                    {
+                        string deviceName = device.FriendlyName.ToLower();
+                        if (deviceName.Contains("cable input"))
+                        {
+                            vbOutputId = device.ID;
+                            vbOutputName = device.FriendlyName;
+                            break;
+                        }
                     }
                 }
 
@@ -208,6 +241,7 @@ namespace MORT
 
         /// <summary>
         /// Найти физические (реальные) аудиоустройства
+        /// Все устройства считаются физическими, кроме CABLE Input и CABLE Output
         /// </summary>
         public (List<(string id, string name)> microphones, List<(string id, string name)> speakers) FindPhysicalDevices()
         {
@@ -218,28 +252,31 @@ namespace MORT
             {
                 if (_deviceEnumerator == null) return (microphones, speakers);
 
-                // Поиск физических микрофонов
+                // Поиск физических микрофонов (включая Voicemeeter и все остальные)
                 var inputDevices = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
                 foreach (var device in inputDevices)
                 {
-                    // Исключаем виртуальные устройства
-                    if (!device.FriendlyName.ToLower().Contains("cable") && 
-                        !device.FriendlyName.ToLower().Contains("vb-audio") &&
-                        !device.FriendlyName.ToLower().Contains("virtual") &&
-                        !device.FriendlyName.ToLower().Contains("stereomix"))
+                    string deviceName = device.FriendlyName.ToLower();
+                    
+                    // Исключаем только VB-Cable устройства (CABLE Input/Output)
+                    bool isVBCable = deviceName.Contains("cable input") || deviceName.Contains("cable output");
+                    
+                    if (!isVBCable)
                     {
                         microphones.Add((device.ID, device.FriendlyName));
                     }
                 }
 
-                // Поиск физических динамиков
+                // Поиск физических динамиков (включая Voicemeeter и все остальные)
                 var outputDevices = _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
                 foreach (var device in outputDevices)
                 {
-                    // Исключаем виртуальные устройства
-                    if (!device.FriendlyName.ToLower().Contains("cable") && 
-                        !device.FriendlyName.ToLower().Contains("vb-audio") &&
-                        !device.FriendlyName.ToLower().Contains("virtual"))
+                    string deviceName = device.FriendlyName.ToLower();
+                    
+                    // Исключаем только VB-Cable устройства (CABLE Input/Output)
+                    bool isVBCable = deviceName.Contains("cable input") || deviceName.Contains("cable output");
+                    
+                    if (!isVBCable)
                     {
                         speakers.Add((device.ID, device.FriendlyName));
                     }

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PipeClient")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+36c6e147eda6c8c09b37da87e7b9729c02e1bb14")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+575ed60fc890499e6438dfe1cc29f6d29ce8bbae")]
 [assembly: System.Reflection.AssemblyProductAttribute("PipeClient")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PipeClient")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
