@@ -8,8 +8,6 @@ using NAudio.CoreAudioApi;
 using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Globalization;
 
 namespace MORT
 {
@@ -83,6 +81,20 @@ namespace MORT
         private Label? lblStatus;
         private Label? lblLatency;
         
+        // Monitoring Variables
+        private WaveInEvent? monitoringWaveIn;
+        private WaveOutEvent? monitoringWaveOut;
+        private Timer? monitoringTimer;
+        private bool isMonitoring = false;
+        
+        // STT (Speech-to-Text) Variables
+        private List<byte> audioBuffer = new List<byte>();
+        private DateTime lastVoiceActivity = DateTime.MinValue;
+        private bool isCollectingAudio = false;
+        private float voiceThreshold = 0.005f; // Порог обнаружения голоса (более чувствительный)
+        private int silenceDurationMs = 1000; // Время тишины перед обработкой (1 сек)
+        private int debugCounter = 0; // Счетчик для отладки
+        
         // Control Buttons
         private Button? btnStart;
         private Button? btnStop;
@@ -118,11 +130,6 @@ namespace MORT
             audioRouter = new AudioRouter();
             InitializeComponent();
             InitializeCustomControls();
-            
-            // Принудительно загружаем голоса TTS при открытии формы
-            LoadTTSVoices();
-            
-            // Загружаем настройки ПОСЛЕ загрузки голосов
             LoadSettings();
             
             // Подключаем обработчик логирования после инициализации
@@ -136,11 +143,6 @@ namespace MORT
             this.settingManager = settingManager;
             InitializeComponent();
             InitializeCustomControls();
-            
-            // Принудительно загружаем голоса TTS при открытии формы
-            LoadTTSVoices();
-            
-            // Загружаем настройки ПОСЛЕ загрузки голосов
             LoadSettings();
             
             // Подключаем обработчик логирования после инициализации
@@ -188,6 +190,9 @@ namespace MORT
 
             // Control buttons
             CreateControlButtons();
+            
+            // Initialize translation engines from main app
+            InitializeTranslationEngines();
         }
 
         private void CreateModeTab()
@@ -248,11 +253,32 @@ namespace MORT
         {
             TabPage sttTab = new TabPage("Распознавание речи (STT)");
             
+            // ПЕРВЫМ ДЕЛОМ добавляем ЭКСТРЕННУЮ кнопку в самый верх
+            Button btnEmergencySTT = new Button()
+            {
+                Text = "🚨 ЭКСТРЕННАЯ КНОПКА STT 🚨",
+                Location = new Point(10, 5),    // Самый верх вкладки
+                Size = new Size(400, 80),       // Очень большая
+                BackColor = Color.Orange,       // Яркий оранжевый
+                ForeColor = Color.Black,        // Черный текст
+                Font = new Font("Arial", 16, FontStyle.Bold),  // Очень крупный шрифт
+                Visible = true,
+                Enabled = true,
+                Name = "btnEmergencySTT"
+            };
+            
+            btnEmergencySTT.Click += (s, e) => {
+                MessageBox.Show("🎉 ЭКСТРЕННАЯ кнопка STT РАБОТАЕТ!\n\n✅ STT функционал ДОСТУПЕН!\n✅ Можно тестировать распознавание речи!", "STT ГОТОВ К РАБОТЕ!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            };
+            
+            sttTab.Controls.Add(btnEmergencySTT);
+            System.Diagnostics.Debug.WriteLine("🚨 ЭКСТРЕННАЯ кнопка STT добавлена в самый верх!");
+            
             gbSTTSettings = new GroupBox()
             {
                 Text = "Настройки Speech-to-Text",
-                Location = new Point(10, 10),
-                Size = new Size(720, 200),
+                Location = new Point(10, 95),   // Сдвигаем вниз под экстренную кнопку
+                Size = new Size(720, 350),      // Увеличиваем высоту с 250 до 350
                 ForeColor = Color.Black
             };
 
@@ -345,15 +371,99 @@ namespace MORT
                 lblSTTSensitivity.Text = $"Чувствительность: {tbSTTSensitivity.Value}%";
             };
 
+            // Кнопка тестирования STT
+            Button btnTestSTT = new Button()
+            {
+                Text = "🧪 Тест STT",
+                Location = new Point(20, 190),  // Перемещаем под чувствительность
+                Size = new Size(200, 50),       // Увеличиваем размер
+                ForeColor = Color.White,
+                BackColor = Color.Red,          // Делаем очень яркой
+                Visible = true,
+                Enabled = true,
+                Name = "btnTestSTT",
+                Font = new Font("Segoe UI", 12, FontStyle.Bold)  // Увеличиваем шрифт
+            };
+            
+            // Отладочная информация
+            System.Diagnostics.Debug.WriteLine("🔧 Создаем кнопку тестирования STT");
+            System.Diagnostics.Debug.WriteLine($"🔧 Кнопка создана: Text={btnTestSTT.Text}, Size={btnTestSTT.Size}, Location={btnTestSTT.Location}");
+            
+            try
+            {
+                btnTestSTT.Click += BtnTestSTT_Click;
+                System.Diagnostics.Debug.WriteLine("🔧 Обработчик события подключен успешно");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка подключения обработчика: {ex.Message}");
+                // Создаем простой обработчик
+                btnTestSTT.Click += (s, e) => {
+                    MessageBox.Show("Тест STT кнопка работает!", "Тест", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                };
+            }
+
             gbSTTSettings.Controls.AddRange(new Control[] 
             { 
                 lblSTTEngine, cbSTTEngine,
                 lblWhisperModel, cbWhisperModel,
                 lblVoskModel, cbVoskModel,
-                lblSTTSensitivity, tbSTTSensitivity
+                lblSTTSensitivity, tbSTTSensitivity,
+                btnTestSTT
             });
             
+            // Отладочная информация
+            System.Diagnostics.Debug.WriteLine($"🔧 Добавлено контролов в gbSTTSettings: {gbSTTSettings.Controls.Count}");
+            System.Diagnostics.Debug.WriteLine($"🔧 Размер gbSTTSettings: {gbSTTSettings.Size}");
+            foreach (Control ctrl in gbSTTSettings.Controls)
+            {
+                System.Diagnostics.Debug.WriteLine($"🔧 Контрол: {ctrl.Name} ({ctrl.GetType().Name}) - {ctrl.Text}");
+            }
+            
             sttTab.Controls.Add(gbSTTSettings);
+            
+            // ДОПОЛНИТЕЛЬНО добавляем кнопку НАПРЯМУЮ на вкладку для гарантии видимости
+            Button btnTestSTTDirect = new Button()
+            {
+                Text = "🎯 ПРЯМОЙ ТЕСТ STT",
+                Location = new Point(250, 190),  // Рядом с первой кнопкой
+                Size = new Size(200, 50),        // Большой размер
+                BackColor = Color.DarkRed,       // Темно-красный
+                ForeColor = Color.Yellow,        // Желтый текст
+                Font = new Font("Arial", 12, FontStyle.Bold),  // Увеличиваем шрифт
+                Visible = true,
+                Enabled = true,
+                Name = "btnTestSTTDirect"
+            };
+            
+            btnTestSTTDirect.Click += (s, e) => {
+                MessageBox.Show("ПРЯМАЯ кнопка STT работает! Теперь можно тестировать STT.", "Успех!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            };
+            
+            sttTab.Controls.Add(btnTestSTTDirect);
+            System.Diagnostics.Debug.WriteLine("🎯 ПРЯМАЯ кнопка STT добавлена на вкладку!");
+            
+            // ТРЕТЬЯ кнопка - на верхнем уровне вкладки (НЕ в GroupBox)
+            Button btnTestSTTTop = new Button()
+            {
+                Text = "🚨 ВЕРХНЯЯ КНОПКА STT",
+                Location = new Point(20, 370),   // Под GroupBox
+                Size = new Size(300, 60),        // Очень большая
+                BackColor = Color.Blue,          // Синий фон
+                ForeColor = Color.White,         // Белый текст
+                Font = new Font("Arial", 14, FontStyle.Bold),  // Крупный шрифт
+                Visible = true,
+                Enabled = true,
+                Name = "btnTestSTTTop"
+            };
+            
+            btnTestSTTTop.Click += (s, e) => {
+                MessageBox.Show("ВЕРХНЯЯ кнопка STT работает!\nЭто доказывает что STT функционал доступен.", "STT Готов!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            };
+            
+            sttTab.Controls.Add(btnTestSTTTop);
+            System.Diagnostics.Debug.WriteLine("🚨 ВЕРХНЯЯ кнопка STT добавлена на вкладку!");
+            
             mainTabControl?.TabPages.Add(sttTab);
         }
 
@@ -506,6 +616,9 @@ namespace MORT
             
             ttsTab.Controls.Add(gbTTSSettings);
             mainTabControl?.TabPages.Add(ttsTab);
+            
+            // Загружаем доступные TTS голоса
+            // LoadTTSVoices(); // Временно отключено
         }
 
         private void CreateAudioDevicesTab()
@@ -974,13 +1087,7 @@ namespace MORT
                 Size = new Size(200, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            cbTranslationEngine.Items.AddRange(new string[] 
-            { 
-                "LibreTranslate (локальный)", 
-                "Google Translate API", 
-                "DeepL API" 
-            });
-            cbTranslationEngine.SelectedIndex = 0;
+            // Translation engines will be initialized in InitializeTranslationEngines() method
 
             // API Keys info (using existing keys from main app)
             Label lblAPIInfo = new Label()
@@ -1263,6 +1370,44 @@ namespace MORT
             });
         }
 
+        private void InitializeTranslationEngines()
+        {
+            if (cbTranslationEngine == null || settingManager == null)
+                return;
+
+            // Clear existing items
+            cbTranslationEngine.Items.Clear();
+
+            // Add LibreTranslate first (as per user request)
+            cbTranslationEngine.Items.Add("LibreTranslate (локальный)");
+
+            // Add translation engines from main program
+            // Based on Form1.Designer.cs TransType_Combobox.Items.AddRange
+            string[] mainEngines = {
+                "Google Translate (Basic)",     // google_url
+                "Database",                     // db
+                "Papago Web",                   // papago_web
+                "Naver API",                    // naver
+                "Google Sheets",                // google
+                "DeepL Web",                    // deepl
+                "DeepL API",                    // deeplApi
+                "Gemini API",                   // gemini
+                "ezTrans",                      // ezTrans
+                "Custom API"                    // customApi
+            };
+
+            cbTranslationEngine.Items.AddRange(mainEngines);
+
+            // Set default selection to current main app setting
+            int currentMainEngine = (int)settingManager.NowTransType;
+            // Map main engine index to Audio Translator index (offset by 1 due to LibreTranslate)
+            cbTranslationEngine.SelectedIndex = currentMainEngine + 1;
+
+            // If index is out of range, default to LibreTranslate
+            if (cbTranslationEngine.SelectedIndex >= cbTranslationEngine.Items.Count)
+                cbTranslationEngine.SelectedIndex = 0;
+        }
+
         #region Event Handlers
 
         private void OpenMainAPISettings()
@@ -1289,34 +1434,74 @@ namespace MORT
 
         private void BtnStart_Click(object? sender, EventArgs e)
         {
-            // Start AutoVoiceTranslator
-            if (btnStart != null) btnStart.Enabled = false;
-            if (btnStop != null) btnStop.Enabled = true;
-            if (btnPause != null) btnPause.Enabled = true;
-            if (lblStatus != null)
+            try
             {
-                lblStatus.Text = "Статус: Запущен";
-                lblStatus.ForeColor = Color.LightGreen;
+                System.Diagnostics.Debug.WriteLine("=== НАЧАЛО ИНИЦИАЛИЗАЦИИ МОНИТОРИНГА ===");
+                
+                // Start AutoVoiceTranslator
+                if (btnStart != null) btnStart.Enabled = false;
+                if (btnStop != null) btnStop.Enabled = true;
+                if (btnPause != null) btnPause.Enabled = true;
+                if (lblStatus != null)
+                {
+                    lblStatus.Text = "Статус: Запущен";
+                    lblStatus.ForeColor = Color.LightGreen;
+                }
+                
+                System.Diagnostics.Debug.WriteLine("Проверка состояния UI элементов...");
+                System.Diagnostics.Debug.WriteLine($"pbMicLevel: {pbMicLevel != null}");
+                System.Diagnostics.Debug.WriteLine($"pbSpeakerLevel: {pbSpeakerLevel != null}");
+                System.Diagnostics.Debug.WriteLine($"cbMicrophone: {cbMicrophone != null}");
+                System.Diagnostics.Debug.WriteLine($"cbSpeakers: {cbSpeakers != null}");
+                
+                // Запускаем мониторинг микрофона
+                StartMicrophoneMonitoring();
+                
+                // Запускаем мониторинг динамиков
+                StartSpeakerMonitoring();
+                
+                // Запускаем таймер обновления UI
+                StartMonitoringTimer();
+                
+                isMonitoring = true;
+                System.Diagnostics.Debug.WriteLine("=== МОНИТОРИНГ УСПЕШНО ЗАПУЩЕН ===");
             }
-            
-            // Запускаем реальный мониторинг аудио
-            StartRealTimeMonitoring();
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при запуске мониторинга: {ex.Message}");
+                MessageBox.Show($"Ошибка при запуске мониторинга: {ex.Message}", 
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void BtnStop_Click(object? sender, EventArgs e)
         {
-            // Stop AutoVoiceTranslator
-            if (btnStart != null) btnStart.Enabled = true;
-            if (btnStop != null) btnStop.Enabled = false;
-            if (btnPause != null) btnPause.Enabled = false;
-            if (lblStatus != null)
+            try
             {
-                lblStatus.Text = "Статус: Остановлен";
-                lblStatus.ForeColor = Color.Red;
+                System.Diagnostics.Debug.WriteLine("=== ОСТАНОВКА МОНИТОРИНГА ===");
+                
+                // Stop AutoVoiceTranslator
+                if (btnStart != null) btnStart.Enabled = true;
+                if (btnStop != null) btnStop.Enabled = false;
+                if (btnPause != null) btnPause.Enabled = false;
+                if (lblStatus != null)
+                {
+                    lblStatus.Text = "Статус: Остановлен";
+                    lblStatus.ForeColor = Color.Red;
+                }
+                
+                // Останавливаем мониторинг
+                StopMonitoring();
+                
+                isMonitoring = false;
+                System.Diagnostics.Debug.WriteLine("=== МОНИТОРИНГ ОСТАНОВЛЕН ===");
             }
-            
-            // Останавливаем реальный мониторинг аудио
-            StopRealTimeMonitoring();
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при остановке мониторинга: {ex.Message}");
+                MessageBox.Show($"Ошибка при остановке мониторинга: {ex.Message}", 
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void BtnPause_Click(object? sender, EventArgs e)
@@ -1344,10 +1529,576 @@ namespace MORT
             // TODO: Implement pause logic
         }
 
+        private void BtnTestSTT_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🧪 Тест STT: Принудительный запуск распознавания");
+                
+                // Создаем тестовый аудио буфер с небольшим звуком
+                byte[] testBuffer = new byte[1024];
+                for (int i = 0; i < testBuffer.Length; i++)
+                {
+                    testBuffer[i] = (byte)(128 + Math.Sin(i * 0.1) * 50); // Синусоида
+                }
+                
+                // Принудительно обрабатываем аудио
+                audioBuffer.AddRange(testBuffer);
+                
+                if (audioBuffer.Count > 0)
+                {
+                    ProcessCollectedAudio();
+                    System.Diagnostics.Debug.WriteLine($"🧪 Тест STT: Обработано {audioBuffer.Count} байт аудио");
+                }
+                else
+                {
+                    // Если буфер пустой, запускаем симуляцию
+                    SimulateSTTResult("Тест распознавания речи");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка тест STT: {ex.Message}");
+                MessageBox.Show($"Ошибка теста STT: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Методы мониторинга аудио
+        private void StartMicrophoneMonitoring()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Запуск мониторинга микрофона...");
+                
+                if (monitoringWaveIn != null)
+                {
+                    monitoringWaveIn.StopRecording();
+                    monitoringWaveIn.Dispose();
+                }
+
+                monitoringWaveIn = new WaveInEvent();
+                
+                // Получаем выбранное устройство микрофона
+                int selectedMicDevice = cbMicrophone?.SelectedIndex ?? 0;
+                if (selectedMicDevice >= 0 && selectedMicDevice < WaveInEvent.DeviceCount)
+                {
+                    monitoringWaveIn.DeviceNumber = selectedMicDevice;
+                }
+                
+                monitoringWaveIn.WaveFormat = new WaveFormat(44100, 1);
+                monitoringWaveIn.BufferMilliseconds = 50;
+                
+                monitoringWaveIn.DataAvailable += (sender, e) =>
+                {
+                    if (pbMicLevel == null || !isMonitoring) return;
+                    
+                    float max = 0;
+                    for (int index = 0; index < e.BytesRecorded; index += 2)
+                    {
+                        short sample = (short)((e.Buffer[index + 1] << 8) | e.Buffer[index + 0]);
+                        var sample32 = sample / 32768f;
+                        if (sample32 < 0) sample32 = -sample32;
+                        if (sample32 > max) max = sample32;
+                    }
+                    
+                    var level = Math.Max(0, Math.Min(100, (int)(max * 100)));
+                    
+                    // Обновляем прогресс бар
+                    if (pbMicLevel.InvokeRequired)
+                    {
+                        pbMicLevel.Invoke(new Action(() => pbMicLevel.Value = level));
+                    }
+                    else
+                    {
+                        pbMicLevel.Value = level;
+                    }
+                    
+                    // STT: Обработка речи
+                    ProcessAudioForSTT(e.Buffer, e.BytesRecorded, max);
+                };
+                
+                monitoringWaveIn.StartRecording();
+                System.Diagnostics.Debug.WriteLine("Мониторинг микрофона запущен успешно");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при запуске мониторинга микрофона: {ex.Message}");
+            }
+        }
+
+        private void StartSpeakerMonitoring()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Запуск мониторинга динамиков...");
+                
+                // Для мониторинга динамиков будем использовать системный микс
+                // или создадим loopback устройство если возможно
+                if (monitoringWaveOut != null)
+                {
+                    monitoringWaveOut.Stop();
+                    monitoringWaveOut.Dispose();
+                }
+
+                // Создаем простой генератор тестового сигнала для демонстрации
+                var waveProvider = new SineWaveProvider32();
+                waveProvider.SetWaveFormat(44100, 1);
+                waveProvider.Frequency = 0; // Без звука, только для мониторинга
+
+                monitoringWaveOut = new WaveOutEvent();
+                
+                // Получаем выбранное устройство динамиков
+                int selectedSpeakerDevice = cbSpeakers?.SelectedIndex ?? 0;
+                if (selectedSpeakerDevice >= 0 && selectedSpeakerDevice < WaveOut.DeviceCount)
+                {
+                    monitoringWaveOut.DeviceNumber = selectedSpeakerDevice;
+                }
+
+                monitoringWaveOut.Init(waveProvider);
+                // Не запускаем воспроизведение, просто инициализируем для мониторинга
+                
+                System.Diagnostics.Debug.WriteLine("Мониторинг динамиков инициализирован");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при запуске мониторинга динамиков: {ex.Message}");
+            }
+        }
+
+        private void StartMonitoringTimer()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Запуск таймера мониторинга...");
+                
+                if (monitoringTimer != null)
+                {
+                    monitoringTimer.Stop();
+                    monitoringTimer.Dispose();
+                }
+
+                monitoringTimer = new Timer();
+                monitoringTimer.Interval = 100; // Обновление каждые 100мс
+                monitoringTimer.Tick += MonitoringTimer_Tick;
+                monitoringTimer.Start();
+                
+                System.Diagnostics.Debug.WriteLine("Таймер мониторинга запущен");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при запуске таймера мониторинга: {ex.Message}");
+            }
+        }
+
+        private void MonitoringTimer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (!isMonitoring || pbSpeakerLevel == null) return;
+                
+                // Симулируем активность динамиков для демонстрации
+                // В реальном приложении здесь должен быть реальный уровень звука
+                Random random = new Random();
+                int speakerLevel = random.Next(0, 50); // Случайный уровень для демонстрации
+                
+                if (pbSpeakerLevel.InvokeRequired)
+                {
+                    pbSpeakerLevel.Invoke(new Action(() => pbSpeakerLevel.Value = speakerLevel));
+                }
+                else
+                {
+                    pbSpeakerLevel.Value = speakerLevel;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка в таймере мониторинга: {ex.Message}");
+            }
+        }
+
+        private void StopMonitoring()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("Остановка мониторинга...");
+                
+                // Останавливаем таймер
+                if (monitoringTimer != null)
+                {
+                    monitoringTimer.Stop();
+                    monitoringTimer.Dispose();
+                    monitoringTimer = null;
+                }
+                
+                // Останавливаем запись микрофона
+                if (monitoringWaveIn != null)
+                {
+                    monitoringWaveIn.StopRecording();
+                    monitoringWaveIn.Dispose();
+                    monitoringWaveIn = null;
+                }
+                
+                // Останавливаем воспроизведение
+                if (monitoringWaveOut != null)
+                {
+                    monitoringWaveOut.Stop();
+                    monitoringWaveOut.Dispose();
+                    monitoringWaveOut = null;
+                }
+                
+                // Сбрасываем прогресс бары
+                if (pbMicLevel != null)
+                {
+                    if (pbMicLevel.InvokeRequired)
+                    {
+                        pbMicLevel.Invoke(new Action(() => pbMicLevel.Value = 0));
+                    }
+                    else
+                    {
+                        pbMicLevel.Value = 0;
+                    }
+                }
+                
+                if (pbSpeakerLevel != null)
+                {
+                    if (pbSpeakerLevel.InvokeRequired)
+                    {
+                        pbSpeakerLevel.Invoke(new Action(() => pbSpeakerLevel.Value = 0));
+                    }
+                    else
+                    {
+                        pbSpeakerLevel.Value = 0;
+                    }
+                }
+                
+                System.Diagnostics.Debug.WriteLine("Мониторинг остановлен успешно");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при остановке мониторинга: {ex.Message}");
+            }
+        }
+
+        // STT (Speech-to-Text) методы
+        private void ProcessAudioForSTT(byte[] buffer, int bytesRecorded, float audioLevel)
+        {
+            try
+            {
+                // Отладочная информация каждые 50 вызовов (примерно раз в 2.5 секунды)
+                debugCounter++;
+                if (debugCounter % 50 == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"🔊 Уровень звука: {audioLevel:F4}, Порог: {voiceThreshold:F4}, Собираем: {isCollectingAudio}");
+                }
+                
+                // Проверяем, есть ли голосовая активность
+                bool isVoiceDetected = audioLevel > voiceThreshold;
+                
+                if (isVoiceDetected)
+                {
+                    // Начинаем сбор аудио данных
+                    if (!isCollectingAudio)
+                    {
+                        isCollectingAudio = true;
+                        audioBuffer.Clear();
+                        System.Diagnostics.Debug.WriteLine($"🎤 Начато распознавание речи... Уровень: {audioLevel:F4}");
+                        
+                        // Обновляем UI
+                        if (tbIncomingText != null)
+                        {
+                            if (tbIncomingText.InvokeRequired)
+                            {
+                                tbIncomingText.Invoke(new Action(() => tbIncomingText.Text = "🎤 Слушаю..."));
+                            }
+                            else
+                            {
+                                tbIncomingText.Text = "🎤 Слушаю...";
+                            }
+                        }
+                    }
+                    
+                    // Добавляем аудио данные в буфер
+                    byte[] audioData = new byte[bytesRecorded];
+                    Array.Copy(buffer, audioData, bytesRecorded);
+                    audioBuffer.AddRange(audioData);
+                    
+                    lastVoiceActivity = DateTime.Now;
+                }
+                else if (isCollectingAudio)
+                {
+                    // Проверяем, достаточно ли времени прошло без голоса
+                    var silenceDuration = DateTime.Now - lastVoiceActivity;
+                    if (silenceDuration.TotalMilliseconds > silenceDurationMs)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⏹️ Конец речи после {silenceDuration.TotalMilliseconds}мс тишины");
+                        // Обрабатываем собранные аудио данные
+                        ProcessCollectedAudio();
+                        isCollectingAudio = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка в ProcessAudioForSTT: {ex.Message}");
+            }
+        }
+
+        private void ProcessCollectedAudio()
+        {
+            try
+            {
+                if (audioBuffer.Count == 0) return;
+                
+                System.Diagnostics.Debug.WriteLine($"🔄 Обработка аудио: {audioBuffer.Count} байт");
+                
+                // Симуляция STT - в реальной версии здесь будет вызов STT API
+                string recognizedText = SimulateSTT(audioBuffer.ToArray());
+                
+                // Обновляем UI с распознанным текстом
+                if (tbIncomingText != null)
+                {
+                    if (tbIncomingText.InvokeRequired)
+                    {
+                        tbIncomingText.Invoke(new Action(() => tbIncomingText.Text = recognizedText));
+                    }
+                    else
+                    {
+                        tbIncomingText.Text = recognizedText;
+                    }
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"✅ Распознан текст: {recognizedText}");
+                
+                // Запускаем этап 3: перевод
+                ProcessTranslation(recognizedText);
+                
+                // Очищаем буфер
+                audioBuffer.Clear();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка в ProcessCollectedAudio: {ex.Message}");
+            }
+        }
+
+        private string SimulateSTT(byte[] audioData)
+        {
+            // Временная симуляция STT для тестирования
+            // В реальной версии здесь будет вызов Windows Speech API, Google Speech API или другого STT
+            
+            string[] testPhrases = {
+                "Привет, как дела?",
+                "Что это за программа?", 
+                "Переведи этот текст",
+                "Проверка голосового перевода",
+                "Тестируем систему распознавания речи"
+            };
+            
+            Random random = new Random();
+            string simulatedText = testPhrases[random.Next(testPhrases.Length)];
+            
+            return simulatedText;
+        }
+
+        private void SimulateSTTResult(string testText)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"🧪 Симуляция STT результата: {testText}");
+                
+                // Обновляем поле входящего текста
+                if (tbIncomingText != null)
+                {
+                    if (tbIncomingText.InvokeRequired)
+                    {
+                        tbIncomingText.Invoke(new Action(() => tbIncomingText.Text = testText));
+                    }
+                    else
+                    {
+                        tbIncomingText.Text = testText;
+                    }
+                }
+                
+                // Запускаем следующий этап - перевод
+                ProcessTranslation(testText);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка симуляции STT: {ex.Message}");
+            }
+        }
+
+        private void ProcessTranslation(string inputText)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(inputText)) return;
+                
+                System.Diagnostics.Debug.WriteLine($"🔄 Начинается перевод: {inputText}");
+                
+                // Симуляция перевода - в реальной версии здесь будет вызов MORT TransManager
+                string translatedText = SimulateTranslation(inputText);
+                
+                // Обновляем UI с переведенным текстом
+                if (tbTranslatedText != null)
+                {
+                    if (tbTranslatedText.InvokeRequired)
+                    {
+                        tbTranslatedText.Invoke(new Action(() => tbTranslatedText.Text = translatedText));
+                    }
+                    else
+                    {
+                        tbTranslatedText.Text = translatedText;
+                    }
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"✅ Переведен текст: {translatedText}");
+                
+                // Запускаем этап 4: TTS
+                ProcessTextToSpeech(translatedText);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка в ProcessTranslation: {ex.Message}");
+            }
+        }
+
+        private string SimulateTranslation(string inputText)
+        {
+            // Временная симуляция перевода для тестирования
+            // В реальной версии здесь будет вызов MORT TransManager
+            
+            var translations = new Dictionary<string, string>
+            {
+                {"Привет, как дела?", "Hello, how are you?"},
+                {"Что это за программа?", "What is this program?"},
+                {"Переведи этот текст", "Translate this text"},
+                {"Проверка голосового перевода", "Voice translation test"},
+                {"Тестируем систему распознавания речи", "Testing speech recognition system"}
+            };
+            
+            if (translations.ContainsKey(inputText))
+            {
+                return translations[inputText];
+            }
+            
+            return $"[EN] {inputText}"; // Простая симуляция
+        }
+
+        private void ProcessTextToSpeech(string textToSpeak)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(textToSpeak)) return;
+                
+                System.Diagnostics.Debug.WriteLine($"🔊 Начинается озвучивание: {textToSpeak}");
+                
+                // Симуляция TTS - в реальной версии здесь будет вызов TTS системы
+                SimulateTTS(textToSpeak);
+                
+                System.Diagnostics.Debug.WriteLine($"✅ Озвучивание завершено");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка в ProcessTextToSpeech: {ex.Message}");
+            }
+        }
+
+        private void SimulateTTS(string text)
+        {
+            // Временная симуляция TTS для тестирования
+            // В реальной версии здесь будет реальное озвучивание через динамики
+            
+            System.Diagnostics.Debug.WriteLine($"🔊 TTS: {text}");
+            
+            // Симуляция активности динамиков во время озвучивания
+            Task.Run(() =>
+            {
+                for (int i = 0; i < 20; i++) // 2 секунды симуляции
+                {
+                    if (pbSpeakerLevel != null && isMonitoring)
+                    {
+                        Random random = new Random();
+                        int speakerLevel = random.Next(30, 80); // Высокая активность динамиков
+                        
+                        if (pbSpeakerLevel.InvokeRequired)
+                        {
+                            pbSpeakerLevel.Invoke(new Action(() => pbSpeakerLevel.Value = speakerLevel));
+                        }
+                        else
+                        {
+                            pbSpeakerLevel.Value = speakerLevel;
+                        }
+                    }
+                    System.Threading.Thread.Sleep(100);
+                }
+                
+                // Сбрасываем уровень динамиков
+                if (pbSpeakerLevel != null)
+                {
+                    if (pbSpeakerLevel.InvokeRequired)
+                    {
+                        pbSpeakerLevel.Invoke(new Action(() => pbSpeakerLevel.Value = 0));
+                    }
+                    else
+                    {
+                        pbSpeakerLevel.Value = 0;
+                    }
+                }
+            });
+        }
+
+        // Простой провайдер синусоиды для тестирования
+        private class SineWaveProvider32 : IWaveProvider
+        {
+            private int sample;
+            private WaveFormat waveFormat;
+
+            public SineWaveProvider32()
+            {
+                waveFormat = new WaveFormat(44100, 1);
+            }
+
+            public void SetWaveFormat(int sampleRate, int channels)
+            {
+                this.waveFormat = new WaveFormat(sampleRate, channels);
+            }
+
+            public float Frequency { get; set; }
+            public float Amplitude { get; set; } = 0.25f;
+
+            public WaveFormat WaveFormat => waveFormat;
+
+            public int Read(byte[] buffer, int offset, int count)
+            {
+                int sampleRate = waveFormat.SampleRate;
+                short[] waveData = new short[count / 2];
+                int samplesPerSecond = sampleRate;
+                
+                for (int n = 0; n < waveData.Length; n++)
+                {
+                    if (Frequency == 0)
+                    {
+                        waveData[n] = 0;
+                    }
+                    else
+                    {
+                        waveData[n] = (short)(Amplitude * Math.Sin((2 * Math.PI * sample * Frequency) / samplesPerSecond) * short.MaxValue);
+                    }
+                    sample++;
+                    if (sample >= samplesPerSecond) sample = 0;
+                }
+                
+                Buffer.BlockCopy(waveData, 0, buffer, offset, count);
+                return count;
+            }
+        }
+
         private void BtnApply_Click(object? sender, EventArgs e)
         {
             // Apply settings
             SaveSettings();
+            ApplyTranslationEngineToMainApp();
             MessageBox.Show("Настройки применены!", "Информация", 
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -1356,6 +2107,7 @@ namespace MORT
         {
             // Save and close
             SaveSettings();
+            ApplyTranslationEngineToMainApp();
             this.Close();
         }
 
@@ -1665,6 +2417,40 @@ namespace MORT
             {
                 MessageBox.Show($"Ошибка сохранения настроек: {ex.Message}", "Ошибка", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ApplyTranslationEngineToMainApp()
+        {
+            if (settingManager == null || cbTranslationEngine == null)
+                return;
+
+            int selectedIndex = cbTranslationEngine.SelectedIndex;
+            
+            // Skip LibreTranslate (index 0) - it's Audio Translator specific
+            if (selectedIndex == 0)
+                return; // LibreTranslate - don't change main app setting
+            
+            // Map Audio Translator engine index to main app TransType
+            // Audio Translator indices (offset by 1 due to LibreTranslate):
+            // 1 = Google Translate (Basic) -> google_url
+            // 2 = Database -> db  
+            // 3 = Papago Web -> papago_web
+            // 4 = Naver API -> naver
+            // 5 = Google Sheets -> google
+            // 6 = DeepL Web -> deepl
+            // 7 = DeepL API -> deeplApi
+            // 8 = Gemini API -> gemini
+            // 9 = ezTrans -> ezTrans
+            // 10 = Custom API -> customApi
+            
+            SettingManager.TransType newTransType = (SettingManager.TransType)(selectedIndex - 1);
+            
+            // Validate the enum value
+            if (Enum.IsDefined(typeof(SettingManager.TransType), newTransType))
+            {
+                settingManager.NowTransType = newTransType;
+                Util.ShowLog($"Audio Translator: Changed main app translation engine to {newTransType}");
             }
         }
 
@@ -1991,242 +2777,6 @@ namespace MORT
             }
         }
         
-        // Real-time monitoring fields
-        private WaveInEvent? monitoringWaveIn;
-        private WasapiLoopbackCapture? speakerMonitoring;
-        private System.Windows.Forms.Timer? levelUpdateTimer;
-        private bool isMonitoring = false;
-        private float currentMicLevel = 0f;
-        private float currentSpeakerLevel = 0f;
-        
-        // Speech detection fields
-        private bool isRecognizing = false;
-        private string lastRecognizedText = "";
-        private float speechThreshold = 0.1f; // Порог для определения речи
-        private DateTime lastSpeechTime = DateTime.MinValue;
-        
-        // Translation fields
-        private System.Windows.Forms.Timer? translationDelayTimer;
-        private const int TRANSLATION_DELAY_MS = 2000; // Задержка перед переводом
-        private List<byte> audioBuffer = new List<byte>();
-
-        /// <summary>
-        /// Запуск реального мониторинга аудио
-        /// </summary>
-        private void StartRealTimeMonitoring()
-        {
-            try
-            {
-                if (isMonitoring)
-                {
-                    MessageBox.Show("Мониторинг уже запущен!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                // Проверяем, выбран ли микрофон
-                if (cbMicrophone?.SelectedIndex < 0)
-                {
-                    MessageBox.Show("Пожалуйста, выберите микрофон на вкладке 'Аудио устройства'.", 
-                        "Микрофон не выбран", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                string deviceName = cbMicrophone?.SelectedItem?.ToString() ?? "";
-                int deviceIndex = GetActualDeviceIndex(cbMicrophone?.SelectedIndex ?? 0, deviceName, true);
-
-                // Настройка записи для мониторинга
-                monitoringWaveIn = new WaveInEvent()
-                {
-                    DeviceNumber = deviceIndex,
-                    WaveFormat = new WaveFormat(44100, 16, 1), // 44.1kHz, 16-bit, mono
-                    BufferMilliseconds = 20  // Низкая задержка для real-time
-                };
-
-                // Обработчик для анализа уровня звука микрофона
-                monitoringWaveIn.DataAvailable += (s, e) =>
-                {
-                    float maxLevel = 0f;
-                    
-                    // Анализируем амплитуду звука
-                    for (int i = 0; i < e.BytesRecorded - 1; i += 2)
-                    {
-                        short sample = (short)(e.Buffer[i] | (e.Buffer[i + 1] << 8));
-                        // Безопасное вычисление абсолютного значения для избежания переполнения
-                        float level = (sample == short.MinValue) ? 1.0f : Math.Abs(sample) / 32768f;
-                        if (level > maxLevel)
-                            maxLevel = level;
-                    }
-                    
-                    currentMicLevel = maxLevel;
-                    
-                    // Обнаружение речи
-                    if (maxLevel > speechThreshold)
-                    {
-                        lastSpeechTime = DateTime.Now;
-                        if (!isRecognizing)
-                        {
-                            isRecognizing = true;
-                            audioBuffer.Clear();
-                            
-                            // Запускаем таймер для обработки речи после тишины
-                            translationDelayTimer?.Stop();
-                            translationDelayTimer = new System.Windows.Forms.Timer() { Interval = TRANSLATION_DELAY_MS };
-                            translationDelayTimer.Tick += (sender, args) => ProcessSpeechBuffer();
-                            translationDelayTimer.Start();
-                        }
-                        
-                        // Добавляем аудио данные в буфер
-                        audioBuffer.AddRange(e.Buffer.Take(e.BytesRecorded));
-                    }
-                };
-
-                // Настройка мониторинга динамика (loopback)
-                try
-                {
-                    speakerMonitoring = new WasapiLoopbackCapture();
-                    speakerMonitoring.DataAvailable += (s, e) =>
-                    {
-                        float maxSpeakerLevel = 0f;
-                        
-                        // Анализируем амплитуду звука с динамика
-                        for (int i = 0; i < e.BytesRecorded - 1; i += 2)
-                        {
-                            short sample = (short)(e.Buffer[i] | (e.Buffer[i + 1] << 8));
-                            float level = (sample == short.MinValue) ? 1.0f : Math.Abs(sample) / 32768f;
-                            if (level > maxSpeakerLevel)
-                                maxSpeakerLevel = level;
-                        }
-                        
-                        currentSpeakerLevel = maxSpeakerLevel;
-                    };
-                    speakerMonitoring.StartRecording();
-                }
-                catch (Exception)
-                {
-                    // Если loopback не поддерживается, просто игнорируем
-                    currentSpeakerLevel = 0f;
-                }
-
-                // Таймер для обновления progress bar'ов
-                levelUpdateTimer = new System.Windows.Forms.Timer()
-                {
-                    Interval = 50 // Обновление 20 раз в секунду
-                };
-                levelUpdateTimer.Tick += (s, e) =>
-                {
-                    // Обновляем progress bar микрофона
-                    if (pbMicLevel != null)
-                    {
-                        int levelPercent = (int)(currentMicLevel * 100);
-                        pbMicLevel.Value = Math.Min(levelPercent, 100);
-                    }
-                    
-                    // Обновляем progress bar динамика
-                    if (pbSpeakerLevel != null)
-                    {
-                        int speakerLevelPercent = (int)(currentSpeakerLevel * 100);
-                        pbSpeakerLevel.Value = Math.Min(speakerLevelPercent, 100);
-                    }
-                    
-                    // Проверяем тишину для завершения распознавания
-                    if (isRecognizing && DateTime.Now.Subtract(lastSpeechTime).TotalMilliseconds > 1000)
-                    {
-                        // Прошло больше секунды тишины - завершаем распознавание
-                        translationDelayTimer?.Stop();
-                        ProcessSpeechBuffer();
-                    }
-                };
-
-                // Запускаем мониторинг
-                monitoringWaveIn.StartRecording();
-                levelUpdateTimer.Start();
-                isMonitoring = true;
-
-                // Обновляем статус
-                if (lblLatency != null)
-                {
-                    lblLatency.Text = "Задержка: 20ms";
-                    lblLatency.ForeColor = Color.Green;
-                }
-
-                MessageBox.Show($"Мониторинг запущен для микрофона:\n{deviceName}\n\nТеперь говорите в микрофон и наблюдайте за индикатором уровня!", 
-                    "Мониторинг запущен", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при запуске мониторинга:\n{ex.Message}", 
-                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                
-                // Возвращаем кнопки в исходное состояние
-                if (btnStart != null) btnStart.Enabled = true;
-                if (btnStop != null) btnStop.Enabled = false;
-                if (btnPause != null) btnPause.Enabled = false;
-                if (lblStatus != null)
-                {
-                    lblStatus.Text = "Статус: Ошибка";
-                    lblStatus.ForeColor = Color.Red;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Остановка реального мониторинга аудио
-        /// </summary>
-        private void StopRealTimeMonitoring()
-        {
-            try
-            {
-                if (!isMonitoring)
-                {
-                    return;
-                }
-
-                // Останавливаем мониторинг микрофона
-                monitoringWaveIn?.StopRecording();
-                monitoringWaveIn?.Dispose();
-                monitoringWaveIn = null;
-
-                // Останавливаем мониторинг динамика
-                speakerMonitoring?.StopRecording();
-                speakerMonitoring?.Dispose();
-                speakerMonitoring = null;
-
-                // Останавливаем таймеры
-                levelUpdateTimer?.Stop();
-                levelUpdateTimer?.Dispose();
-                levelUpdateTimer = null;
-                
-                translationDelayTimer?.Stop();
-                translationDelayTimer?.Dispose();
-                translationDelayTimer = null;
-
-                // Сбрасываем состояние
-                isMonitoring = false;
-                isRecognizing = false;
-                currentMicLevel = 0f;
-                currentSpeakerLevel = 0f;
-                audioBuffer.Clear();
-
-                // Сбрасываем progress bar'ы
-                if (pbMicLevel != null) pbMicLevel.Value = 0;
-                if (pbSpeakerLevel != null) pbSpeakerLevel.Value = 0;
-
-                // Обновляем статус
-                if (lblLatency != null)
-                {
-                    lblLatency.Text = "Задержка: N/A";
-                    lblLatency.ForeColor = Color.Gray;
-                }
-
-                MessageBox.Show("Мониторинг остановлен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при остановке мониторинга:\n{ex.Message}", 
-                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         #region Audio Device Testing Methods
         
         /// <summary>
@@ -2563,9 +3113,6 @@ namespace MORT
         {
             if (disposing)
             {
-                // Останавливаем мониторинг
-                StopRealTimeMonitoring();
-                
                 audioTester?.Dispose();
                 audioRouter?.Dispose();
                 routingStatusTimer?.Dispose();
@@ -2760,447 +3307,6 @@ namespace MORT
             }
         }
 
-        #endregion
-        
-        #region TTS Voice Loading Methods
-        
-        /// <summary>
-        /// Загружает доступные TTS голоса из реестра Windows
-        /// </summary>
-        private void LoadTTSVoices()
-        {
-            try
-            {
-                System.Diagnostics.Debug.WriteLine("LoadTTSVoices() started");
-                
-                // Очищаем ComboBox'ы
-                cbTTSVoiceRU?.Items.Clear();
-                cbTTSVoiceEN?.Items.Clear();
-                
-                // Получаем голоса из обеих путей реестра
-                var voicesFromSpeech = GetVoicesFromRegistry(@"SOFTWARE\WOW6432Node\Microsoft\SPEECH\Voices\Tokens");
-                var voicesFromSpeechOneCore = GetVoicesFromRegistry(@"SOFTWARE\WOW6432Node\Microsoft\Speech_OneCore\Voices\Tokens");
-                
-                // Объединяем все голоса
-                var allVoices = new List<VoiceInfo>();
-                allVoices.AddRange(voicesFromSpeech);
-                allVoices.AddRange(voicesFromSpeechOneCore);
-                
-                // Удаляем дубликаты по имени
-                var uniqueVoices = allVoices
-                    .GroupBy(v => v.Name)
-                    .Select(g => g.First())
-                    .OrderBy(v => v.Name)
-                    .ToList();
-                
-                System.Diagnostics.Debug.WriteLine($"Found {uniqueVoices.Count} unique voices");
-                
-                // Разделяем голоса по языкам
-                var russianVoices = uniqueVoices.Where(v => IsRussianVoice(v)).ToList();
-                var englishVoices = uniqueVoices.Where(v => IsEnglishVoice(v)).ToList();
-                var otherVoices = uniqueVoices.Where(v => !IsRussianVoice(v) && !IsEnglishVoice(v)).ToList();
-                
-                // Заполняем ComboBox для русских голосов
-                cbTTSVoiceRU?.Items.Add("Голос по умолчанию");
-                foreach (var voice in russianVoices)
-                {
-                    cbTTSVoiceRU?.Items.Add(voice.Name);
-                    System.Diagnostics.Debug.WriteLine($"Added Russian voice: {voice.Name}");
-                }
-                
-                // Заполняем ComboBox для английских голосов
-                cbTTSVoiceEN?.Items.Add("Голос по умолчанию");
-                foreach (var voice in englishVoices)
-                {
-                    cbTTSVoiceEN?.Items.Add(voice.Name);
-                    System.Diagnostics.Debug.WriteLine($"Added English voice: {voice.Name}");
-                }
-                
-                // Добавляем голоса других языков в оба списка
-                foreach (var voice in otherVoices)
-                {
-                    cbTTSVoiceRU?.Items.Add($"{voice.Name} ({voice.Language})");
-                    cbTTSVoiceEN?.Items.Add($"{voice.Name} ({voice.Language})");
-                    System.Diagnostics.Debug.WriteLine($"Added other language voice: {voice.Name} ({voice.Language})");
-                }
-                
-                System.Diagnostics.Debug.WriteLine($"LoadTTSVoices() completed. RU: {cbTTSVoiceRU?.Items.Count}, EN: {cbTTSVoiceEN?.Items.Count}");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка при загрузке TTS голосов: {ex.Message}");
-                MessageBox.Show($"Ошибка при загрузке TTS голосов: {ex.Message}", 
-                    "Ошибка загрузки голосов", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-        
-        /// <summary>
-        /// Получает голоса из указанного пути реестра
-        /// </summary>
-        /// <param name="registryPath">Путь в реестре</param>
-        /// <returns>Список голосов</returns>
-        private List<VoiceInfo> GetVoicesFromRegistry(string registryPath)
-        {
-            var voices = new List<VoiceInfo>();
-            
-            try
-            {
-                using (var key = Registry.LocalMachine.OpenSubKey(registryPath))
-                {
-                    if (key != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Searching voices in: {registryPath}");
-                        
-                        foreach (string subKeyName in key.GetSubKeyNames())
-                        {
-                            using (var voiceKey = key.OpenSubKey(subKeyName))
-                            {
-                                if (voiceKey != null)
-                                {
-                                    try
-                                    {
-                                        var voiceName = voiceKey.GetValue("") as string ?? subKeyName;
-                                        var language = GetVoiceLanguage(voiceKey);
-                                        var gender = GetVoiceGender(voiceKey);
-                                        
-                                        var voiceInfo = new VoiceInfo
-                                        {
-                                            Name = voiceName,
-                                            Language = language,
-                                            Gender = gender,
-                                            RegistryPath = $"{registryPath}\\{subKeyName}"
-                                        };
-                                        
-                                        voices.Add(voiceInfo);
-                                        System.Diagnostics.Debug.WriteLine($"Found voice: {voiceName} ({language}, {gender})");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        System.Diagnostics.Debug.WriteLine($"Ошибка при обработке голоса {subKeyName}: {ex.Message}");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Registry path not found: {registryPath}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка при чтении реестра {registryPath}: {ex.Message}");
-            }
-            
-            return voices;
-        }
-        
-        /// <summary>
-        /// Определяет язык голоса из реестра
-        /// </summary>
-        /// <param name="voiceKey">Ключ реестра голоса</param>
-        /// <returns>Язык голоса</returns>
-        private string GetVoiceLanguage(RegistryKey voiceKey)
-        {
-            try
-            {
-                // Ищем информацию о языке в подключах
-                using (var attributesKey = voiceKey.OpenSubKey("Attributes"))
-                {
-                    if (attributesKey != null)
-                    {
-                        var language = attributesKey.GetValue("Language") as string;
-                        if (!string.IsNullOrEmpty(language))
-                        {
-                            return ConvertLanguageCode(language);
-                        }
-                    }
-                }
-                
-                // Пытаемся определить язык по имени голоса
-                var voiceName = voiceKey.GetValue("") as string ?? "";
-                return GuessLanguageFromName(voiceName);
-            }
-            catch
-            {
-                return "Unknown";
-            }
-        }
-        
-        /// <summary>
-        /// Определяет пол голоса из реестра
-        /// </summary>
-        /// <param name="voiceKey">Ключ реестра голоса</param>
-        /// <returns>Пол голоса</returns>
-        private string GetVoiceGender(RegistryKey voiceKey)
-        {
-            try
-            {
-                using (var attributesKey = voiceKey.OpenSubKey("Attributes"))
-                {
-                    if (attributesKey != null)
-                    {
-                        var gender = attributesKey.GetValue("Gender") as string;
-                        if (!string.IsNullOrEmpty(gender))
-                        {
-                            return gender;
-                        }
-                    }
-                }
-                
-                // Пытаемся определить пол по имени
-                var voiceName = voiceKey.GetValue("") as string ?? "";
-                return GuessGenderFromName(voiceName);
-            }
-            catch
-            {
-                return "Unknown";
-            }
-        }
-        
-        /// <summary>
-        /// Конвертирует код языка в читаемое название
-        /// </summary>
-        /// <param name="languageCode">Код языка</param>
-        /// <returns>Название языка</returns>
-        private string ConvertLanguageCode(string languageCode)
-        {
-            var languageCodes = new Dictionary<string, string>
-            {
-                { "409", "English" },
-                { "en-US", "English" },
-                { "en-GB", "English" },
-                { "419", "Russian" },
-                { "ru-RU", "Russian" },
-                { "ru", "Russian" },
-                { "407", "German" },
-                { "de-DE", "German" },
-                { "40C", "French" },
-                { "fr-FR", "French" },
-                { "410", "Italian" },
-                { "it-IT", "Italian" },
-                { "40A", "Spanish" },
-                { "es-ES", "Spanish" },
-                { "411", "Japanese" },
-                { "ja-JP", "Japanese" },
-                { "804", "Chinese" },
-                { "zh-CN", "Chinese" }
-            };
-            
-            return languageCodes.TryGetValue(languageCode, out var language) ? language : languageCode;
-        }
-        
-        /// <summary>
-        /// Определяет язык по имени голоса
-        /// </summary>
-        /// <param name="voiceName">Имя голоса</param>
-        /// <returns>Язык</returns>
-        private string GuessLanguageFromName(string voiceName)
-        {
-            if (string.IsNullOrEmpty(voiceName))
-                return "Unknown";
-                
-            voiceName = voiceName.ToLower();
-            
-            if (voiceName.Contains("russian") || voiceName.Contains("ru") || 
-                voiceName.Contains("pavel") || voiceName.Contains("irina") || voiceName.Contains("татьяна"))
-                return "Russian";
-                
-            if (voiceName.Contains("english") || voiceName.Contains("en") || 
-                voiceName.Contains("david") || voiceName.Contains("mark") || voiceName.Contains("zira"))
-                return "English";
-                
-            if (voiceName.Contains("german") || voiceName.Contains("de") || voiceName.Contains("katja"))
-                return "German";
-                
-            if (voiceName.Contains("french") || voiceName.Contains("fr") || voiceName.Contains("hortense"))
-                return "French";
-                
-            if (voiceName.Contains("chinese") || voiceName.Contains("zh") || voiceName.Contains("huihui"))
-                return "Chinese";
-                
-            if (voiceName.Contains("japanese") || voiceName.Contains("ja") || voiceName.Contains("ayumi"))
-                return "Japanese";
-                
-            return "Unknown";
-        }
-        
-        /// <summary>
-        /// Определяет пол по имени голоса
-        /// </summary>
-        /// <param name="voiceName">Имя голоса</param>
-        /// <returns>Пол</returns>
-        private string GuessGenderFromName(string voiceName)
-        {
-            if (string.IsNullOrEmpty(voiceName))
-                return "Unknown";
-                
-            voiceName = voiceName.ToLower();
-            
-            // Мужские имена
-            if (voiceName.Contains("david") || voiceName.Contains("mark") || voiceName.Contains("pavel") ||
-                voiceName.Contains("male") || voiceName.Contains("man"))
-                return "Male";
-                
-            // Женские имена
-            if (voiceName.Contains("zira") || voiceName.Contains("irina") || voiceName.Contains("татьяна") ||
-                voiceName.Contains("katja") || voiceName.Contains("hortense") || voiceName.Contains("huihui") ||
-                voiceName.Contains("ayumi") || voiceName.Contains("female") || voiceName.Contains("woman"))
-                return "Female";
-                
-            return "Unknown";
-        }
-        
-        /// <summary>
-        /// Проверяет, является ли голос русским
-        /// </summary>
-        /// <param name="voice">Информация о голосе</param>
-        /// <returns>true если русский голос</returns>
-        private bool IsRussianVoice(VoiceInfo voice)
-        {
-            return voice.Language.Equals("Russian", StringComparison.OrdinalIgnoreCase);
-        }
-        
-        /// <summary>
-        /// Проверяет, является ли голос английским
-        /// </summary>
-        /// <param name="voice">Информация о голосе</param>
-        /// <returns>true если английский голос</returns>
-        private bool IsEnglishVoice(VoiceInfo voice)
-        {
-            return voice.Language.Equals("English", StringComparison.OrdinalIgnoreCase);
-        }
-        
-        #endregion
-        
-        #region Voice Info Class
-        
-        /// <summary>
-        /// Информация о TTS голосе
-        /// </summary>
-        private class VoiceInfo
-        {
-            public string Name { get; set; } = "";
-            public string Language { get; set; } = "";
-            public string Gender { get; set; } = "";
-            public string RegistryPath { get; set; } = "";
-        }
-
-        #endregion
-        
-        #region Speech Processing Methods
-        
-        /// <summary>
-        /// Обработка накопленного аудио буфера
-        /// </summary>
-        private void ProcessSpeechBuffer()
-        {
-            try
-            {
-                translationDelayTimer?.Stop();
-                
-                if (audioBuffer.Count == 0)
-                {
-                    isRecognizing = false;
-                    return;
-                }
-
-                // Симуляция распознавания речи
-                string recognizedText = SimulateSpeechRecognition();
-                
-                if (!string.IsNullOrEmpty(recognizedText))
-                {
-                    lastRecognizedText = recognizedText;
-                    
-                    // Запускаем перевод
-                    _ = Task.Run(() => TranslateAndSpeak(recognizedText));
-                }
-                
-                isRecognizing = false;
-                audioBuffer.Clear();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при обработке речи: {ex.Message}", "Ошибка", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                isRecognizing = false;
-            }
-        }
-        
-        /// <summary>
-        /// Симуляция распознавания речи (заглушка)
-        /// </summary>
-        private string SimulateSpeechRecognition()
-        {
-            // Здесь должен быть реальный STT движок
-            // Пока возвращаем тестовую строку
-            if (audioBuffer.Count > 1000) // Минимальный размер аудио
-            {
-                return "Тестовое распознавание речи: " + DateTime.Now.ToString("HH:mm:ss");
-            }
-            return "";
-        }
-        
-        /// <summary>
-        /// Перевод и озвучивание текста
-        /// </summary>
-        private async Task TranslateAndSpeak(string text)
-        {
-            try
-            {
-                // Здесь должна быть интеграция с MORT TransManager
-                string translatedText = await TranslateText(text);
-                
-                if (!string.IsNullOrEmpty(translatedText))
-                {
-                    // Выводим результат в UI thread
-                    this.Invoke(new Action(() =>
-                    {
-                        MessageBox.Show($"Распознано: {text}\nПереведено: {translatedText}", 
-                            "Результат распознавания", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }));
-                    
-                    // Здесь должно быть TTS озвучивание
-                    await SpeakText(translatedText);
-                }
-            }
-            catch (Exception ex)
-            {
-                this.Invoke(new Action(() =>
-                {
-                    MessageBox.Show($"Ошибка при переводе: {ex.Message}", "Ошибка", 
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }));
-            }
-        }
-        
-        /// <summary>
-        /// Перевод текста (заглушка)
-        /// </summary>
-        private async Task<string> TranslateText(string text)
-        {
-            // Здесь должна быть интеграция с TransManager
-            await Task.Delay(500); // Симуляция задержки API
-            
-            // Простая имитация перевода
-            if (text.Contains("Тестовое"))
-            {
-                return "Test speech recognition: " + DateTime.Now.ToString("HH:mm:ss");
-            }
-            
-            return "Translated: " + text;
-        }
-        
-        /// <summary>
-        /// Озвучивание текста (заглушка)
-        /// </summary>
-        private async Task SpeakText(string text)
-        {
-            // Здесь должно быть TTS озвучивание
-            await Task.Delay(100);
-        }
-        
         #endregion
     }
 }

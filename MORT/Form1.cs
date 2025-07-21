@@ -1425,7 +1425,7 @@ namespace MORT
             // Open AutoVoiceTranslator settings form
             try
             {
-                using (AdvancedAudioSettings audioForm = new AdvancedAudioSettings())
+                using (AdvancedAudioSettings audioForm = new AdvancedAudioSettings(MySettingManager))
                 {
                     DialogResult result = audioForm.ShowDialog(this);
                     if (result == DialogResult.OK)
