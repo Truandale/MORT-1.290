@@ -75,6 +75,7 @@ namespace MORT
             // Используем те же переводчики, что и в основном приложении
             cbTranslationEngine.Items.AddRange(new string[] 
             { 
+                "LibreTranslate (локальный)",
                 "TRANSLATE GOOGLE", 
                 "TRANSLATE DB", 
                 "TRANSLATE PAPAGO WEB", 
@@ -96,19 +97,19 @@ namespace MORT
                 if (form1 != null)
                 {
                     var currentTransType = form1.MySettingManager.NowTransType;
-                    cbTranslationEngine.SelectedIndex = (int)currentTransType;
+                    // LibreTranslate at index 0, so main app engines start from index 1
+                    cbTranslationEngine.SelectedIndex = (int)currentTransType + 1;
                 }
                 else
                 {
-                    cbTranslationEngine.SelectedIndex = 0;
+                    cbTranslationEngine.SelectedIndex = 1; // Google by default
                 }
             }
             catch
             {
                 // Если не удалось получить настройки, используем Google по умолчанию
-                cbTranslationEngine.SelectedIndex = 0;
+                cbTranslationEngine.SelectedIndex = 1; // Google is now at index 1
             }
-            cbTranslationEngine.SelectedIndex = 0;
 
             // Source Language
             Label lblSourceLang = new Label()
@@ -311,6 +312,15 @@ namespace MORT
             
             try
             {
+                // Check if LibreTranslate is selected
+                string? selectedEngine = cbTranslationEngine?.SelectedItem?.ToString();
+                if (selectedEngine == "LibreTranslate (локальный)")
+                {
+                    // TODO: Implement LibreTranslate API call when it's configured
+                    // For now, return a placeholder message
+                    return "[LibreTranslate] Данный переводчик находится в разработке. Пожалуйста, настройте LibreTranslate сервер и API для тестирования.";
+                }
+                
                 // Get TransManager instance
                 TransManager transManager = TransManager.Instace;
                 
@@ -399,6 +409,7 @@ namespace MORT
             
             return selectedEngine switch
             {
+                "LibreTranslate (локальный)" => SettingManager.TransType.google_url, // Placeholder until LibreTranslate is implemented
                 "TRANSLATE GOOGLE" => SettingManager.TransType.google_url,
                 "TRANSLATE DB" => SettingManager.TransType.db,
                 "TRANSLATE PAPAGO WEB" => SettingManager.TransType.papago_web,

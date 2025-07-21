@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyCopyrightAttribute("Copyright © Bada Im 2017")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b04ae76ae846cd6ea602fbd9992549d9e8de5c12")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+56c190aff0db73726548c044d1306b92d7804ff0")]
 [assembly: System.Reflection.AssemblyProductAttribute("GSTrans")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GSTrans")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
