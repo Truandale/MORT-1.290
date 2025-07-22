@@ -2892,23 +2892,55 @@ namespace MORT
         {
             try
             {
-                // TODO: Реализация System.Speech.Recognition
-                // Требует преобразования byte[] в поток аудио и настройки грамматики
                 System.Diagnostics.Debug.WriteLine("🎯 System.Speech.Recognition: обработка аудио...");
                 
-                // Возвращаем реальные русские фразы как если бы распознавание сработало
-                var systemSpeechPhrases = new string[]
-                {
-                    "Система распознавания работает",
-                    "Windows Speech API активен",
-                    "Голосовое управление готово",
-                    "Распознавание речи включено",
-                    "Тестируем Windows STT",
-                    "Встроенное распознавание речи"
-                };
+                // Создаем временный WAV файл из аудиоданных
+                string tempWavFile = Path.GetTempFileName() + ".wav";
+                WriteWavFile(tempWavFile, audioData, 44100, 16, 1);
                 
-                int index = (duration + (int)(level * 200)) % systemSpeechPhrases.Length;
-                return systemSpeechPhrases[index];
+                try
+                {
+                    // Используем рефлексию для System.Speech.Recognition
+                    var speechRecognitionEngineType = Type.GetType("System.Speech.Recognition.SpeechRecognitionEngine, System.Speech");
+                    if (speechRecognitionEngineType == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("⚠️ System.Speech.Recognition не найден");
+                        return "";
+                    }
+                    
+                    dynamic recognizer = Activator.CreateInstance(speechRecognitionEngineType);
+                    
+                    // Загружаем стандартную грамматику
+                    var grammarBuilderType = Type.GetType("System.Speech.Recognition.GrammarBuilder, System.Speech");
+                    var dictationGrammarType = Type.GetType("System.Speech.Recognition.DictationGrammar, System.Speech");
+                    
+                    if (dictationGrammarType != null)
+                    {
+                        dynamic dictationGrammar = Activator.CreateInstance(dictationGrammarType);
+                        recognizer.LoadGrammar(dictationGrammar);
+                    }
+                    
+                    // Устанавливаем аудио источник
+                    recognizer.SetInputToWaveFile(tempWavFile);
+                    
+                    // Выполняем синхронное распознавание
+                    dynamic result = recognizer.Recognize();
+                    
+                    if (result != null && result.Text != null)
+                    {
+                        string recognizedText = result.Text.ToString();
+                        System.Diagnostics.Debug.WriteLine($"✅ System.Speech распознал: {recognizedText}");
+                        return recognizedText;
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine("⚠️ System.Speech: текст не распознан");
+                    return "";
+                }
+                finally
+                {
+                    // Удаляем временный файл
+                    try { File.Delete(tempWavFile); } catch { }
+                }
             }
             catch (Exception ex)
             {
@@ -2921,23 +2953,167 @@ namespace MORT
         {
             try
             {
-                // TODO: Реализация Windows Runtime Speech
-                // Требует использования Windows.Media.SpeechRecognition
                 System.Diagnostics.Debug.WriteLine("🎯 Windows Runtime Speech: обработка аудио...");
                 
-                // Возвращаем реальные русские фразы как если бы распознавание сработало
-                var winrtPhrases = new string[]
-                {
-                    "Windows Runtime готов",
-                    "Современное распознавание речи",
-                    "UWP Speech API работает",
-                    "Голосовые команды доступны",
-                    "Встроенная технология Microsoft",
-                    "Распознавание нового поколения"
-                };
+                // Создаем временный WAV файл для WinRT API
+                string tempWavFile = Path.GetTempFileName() + ".wav";
+                WriteWavFile(tempWavFile, audioData, 44100, 16, 1);
                 
-                int index = (duration * 3 + (int)(level * 150)) % winrtPhrases.Length;
-                return winrtPhrases[index];
+                try
+                {
+                    // Пробуем использовать Windows Runtime Speech API через рефлексию
+                    // Это работает только на Windows 10+ с UWP поддержкой
+                    
+                    // Загружаем Windows Runtime типы
+                    var speechRecognizerType = Type.GetType("Windows.Media.SpeechRecognition.SpeechRecognizer, Windows.Media, ContentType=WindowsRuntime");
+                    var storageFileType = Type.GetType("Windows.Storage.StorageFile, Windows.Storage, ContentType=WindowsRuntime");
+                    var speechRecognitionTopicConstraintType = Type.GetType("Windows.Media.SpeechRecognition.SpeechRecognitionTopicConstraint, Windows.Media, ContentType=WindowsRuntime");
+                    
+                    if (speechRecognizerType == null || storageFileType == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("⚠️ Windows Runtime Speech API недоступен");
+                        return "";
+                    }
+                    
+                    // Создаем SpeechRecognizer
+                    dynamic speechRecognizer = Activator.CreateInstance(speechRecognizerType);
+                    
+                    if (speechRecognitionTopicConstraintType != null)
+                    {
+                        // Создаем топик-ограничение для диктовки
+                        // SpeechRecognitionScenario.Dictation = 1
+                        dynamic topicConstraint = Activator.CreateInstance(speechRecognitionTopicConstraintType, 1, "dictation");
+                        speechRecognizer.Constraints.Add(topicConstraint);
+                    }
+                    
+                    // Компилируем ограничения синхронно через Task.Wait
+                    var compileTask = speechRecognizer.CompileConstraintsAsync();
+                    var compileTaskType = compileTask.GetType();
+                    var getAwaiterMethod = compileTaskType.GetMethod("GetAwaiter");
+                    dynamic awaiter = getAwaiterMethod?.Invoke(compileTask, null);
+                    
+                    if (awaiter != null)
+                    {
+                        // Ждем завершения компиляции
+                        while (!awaiter.IsCompleted)
+                        {
+                            System.Threading.Thread.Sleep(10);
+                        }
+                        
+                        dynamic compileResult = awaiter.GetResult();
+                        System.Diagnostics.Debug.WriteLine($"✅ WinRT ограничения скомпилированы: {compileResult}");
+                    }
+                    
+                    // Загружаем аудио файл через StorageFile
+                    var getFileFromPathMethod = storageFileType.GetMethod("GetFileFromPathAsync", 
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    
+                    if (getFileFromPathMethod != null)
+                    {
+                        dynamic getFileTask = getFileFromPathMethod.Invoke(null, new object[] { tempWavFile });
+                        var getFileAwaiter = getFileTask.GetAwaiter();
+                        
+                        while (!getFileAwaiter.IsCompleted)
+                        {
+                            System.Threading.Thread.Sleep(10);
+                        }
+                        
+                        dynamic storageFile = getFileAwaiter.GetResult();
+                        System.Diagnostics.Debug.WriteLine("✅ StorageFile создан");
+                        
+                        // Выполняем распознавание
+                        dynamic recognizeTask = speechRecognizer.RecognizeAsync(storageFile);
+                        var recognizeAwaiter = recognizeTask.GetAwaiter();
+                        
+                        // Ждем результат с таймаутом
+                        int timeout = 0;
+                        while (!recognizeAwaiter.IsCompleted && timeout < 500) // 5 секунд максимум
+                        {
+                            System.Threading.Thread.Sleep(10);
+                            timeout++;
+                        }
+                        
+                        if (recognizeAwaiter.IsCompleted)
+                        {
+                            dynamic recognitionResult = recognizeAwaiter.GetResult();
+                            
+                            if (recognitionResult != null && recognitionResult.Text != null)
+                            {
+                                string recognizedText = recognitionResult.Text.ToString();
+                                System.Diagnostics.Debug.WriteLine($"✅ WinRT Speech распознал: {recognizedText}");
+                                return recognizedText;
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine("⚠️ WinRT Speech: пустой результат");
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("⚠️ WinRT Speech: таймаут распознавания");
+                        }
+                    }
+                    
+                    return "";
+                }
+                catch (Exception winrtSpecificEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"⚠️ WinRT Speech файловый API ошибка: {winrtSpecificEx.Message}");
+                    
+                    // Пробуем альтернативный метод через поток
+                    try
+                    {
+                        string advancedResult = PerformWinRTSpeechSTTAdvanced(audioData, level, duration);
+                        if (!string.IsNullOrEmpty(advancedResult))
+                        {
+                            System.Diagnostics.Debug.WriteLine("✅ WinRT Advanced метод сработал");
+                            return advancedResult;
+                        }
+                    }
+                    catch (Exception advancedEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠️ WinRT Advanced тоже не сработал: {advancedEx.Message}");
+                    }
+                    
+                    // Пробуем real-time метод для коротких аудио
+                    if (duration <= 3) // Для коротких фрагментов до 3 секунд
+                    {
+                        try
+                        {
+                            string realtimeResult = PerformWinRTSpeechSTTRealTime(audioData, level, duration);
+                            if (!string.IsNullOrEmpty(realtimeResult))
+                            {
+                                System.Diagnostics.Debug.WriteLine("✅ WinRT Real-Time метод сработал");
+                                return realtimeResult;
+                            }
+                        }
+                        catch (Exception realtimeEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"⚠️ WinRT Real-Time тоже не сработал: {realtimeEx.Message}");
+                        }
+                    }
+                    
+                    // Последний Fallback на симуляцию если все API недоступны
+                    var winrtFallbackPhrases = new string[]
+                    {
+                        "Современное распознавание речи",
+                        "Windows 10 Speech API",
+                        "UWP Speech Recognition", 
+                        "Голосовые команды Windows",
+                        "Встроенная технология Microsoft",
+                        "Распознавание нового поколения"
+                    };
+                    
+                    int index = (duration * 3 + (int)(level * 150)) % winrtFallbackPhrases.Length;
+                    return $"[WinRT Fallback] {winrtFallbackPhrases[index]}";
+                }
+                finally
+                {
+                    // Удаляем временный файл
+                    try { File.Delete(tempWavFile); } catch { }
+                }
+                
+                return "";
             }
             catch (Exception ex)
             {
@@ -2950,33 +3126,73 @@ namespace MORT
         {
             try
             {
-                // TODO: Реализация SAPI Speech Recognition
-                // Используем SAPI.SpInProcRecoContext для распознавания речи
                 System.Diagnostics.Debug.WriteLine("🎯 SAPI Speech Recognition: обработка аудио...");
                 
-                var sapiType = Type.GetTypeFromProgID("SAPI.SpInProcRecoContext");
-                if (sapiType != null)
-                {
-                    // Возвращаем реальные русские фразы как если бы SAPI распознавание сработало
-                    var sapiPhrases = new string[]
-                    {
-                        "SAPI распознает речь",
-                        "Классическое Windows API",
-                        "Голосовое распознавание SAPI",
-                        "Стандартный Microsoft STT",
-                        "Проверенная технология",
-                        "SAPI Speech Recognition"
-                    };
-                    
-                    int index = (duration * 4 + (int)(level * 100)) % sapiPhrases.Length;
-                    return sapiPhrases[index];
-                }
+                // Создаем временный WAV файл
+                string tempWavFile = Path.GetTempFileName() + ".wav";
+                WriteWavFile(tempWavFile, audioData, 44100, 16, 1);
                 
-                return "";
+                try
+                {
+                    // Пробуем создать SAPI объекты через COM
+                    var sapiRecoContextType = Type.GetTypeFromProgID("SAPI.SpInProcRecoContext");
+                    var sapiFileStreamType = Type.GetTypeFromProgID("SAPI.SpFileStream");
+                    
+                    if (sapiRecoContextType == null || sapiFileStreamType == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("⚠️ SAPI COM объекты недоступны");
+                        return "";
+                    }
+                    
+                    dynamic recoContext = Activator.CreateInstance(sapiRecoContextType);
+                    dynamic fileStream = Activator.CreateInstance(sapiFileStreamType);
+                    
+                    // Открываем аудио файл
+                    fileStream.Open(tempWavFile, 0); // 0 = SSFMOpenForRead
+                    
+                    // Устанавливаем аудио источник
+                    recoContext.Recognizer.AudioInputStream = fileStream;
+                    
+                    // Создаем грамматику для диктовки
+                    dynamic grammar = recoContext.CreateGrammar(1);
+                    grammar.DictationLoad("", 1); // 1 = SLOStatic
+                    grammar.DictationSetState(1); // 1 = SGDSActive
+                    
+                    // Выполняем распознавание с таймаутом
+                    dynamic result = recoContext.WaitForNewPhrase(5000); // 5 секунд таймаут
+                    
+                    if (result != null && result.PhraseInfo != null)
+                    {
+                        string recognizedText = result.PhraseInfo.GetText().ToString();
+                        System.Diagnostics.Debug.WriteLine($"✅ SAPI распознал: {recognizedText}");
+                        
+                        // Освобождаем ресурсы
+                        grammar.DictationUnload();
+                        fileStream.Close();
+                        
+                        return recognizedText;
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine("⚠️ SAPI: текст не распознан или таймаут");
+                    
+                    // Освобождаем ресурсы
+                    grammar.DictationUnload();
+                    fileStream.Close();
+                    
+                    return "";
+                }
+                finally
+                {
+                    // Удаляем временный файл
+                    try { File.Delete(tempWavFile); } catch { }
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Ошибка SAPI Speech STT: {ex.Message}");
+                return "";
+            }
+        }
                 return "";
             }
         }
@@ -5909,6 +6125,355 @@ namespace MORT
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Ошибка проверки моделей: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Создает WAV файл из аудиоданных для использования с Windows Speech API
+        /// </summary>
+        /// <param name="filename">Путь к выходному WAV файлу</param>
+        /// <param name="audioData">Аудиоданные в формате PCM</param>
+        /// <param name="sampleRate">Частота дискретизации (например, 44100)</param>
+        /// <param name="bitsPerSample">Бит на семпл (например, 16)</param>
+        /// <param name="channels">Количество каналов (1 для моно, 2 для стерео)</param>
+        private void WriteWavFile(string filename, byte[] audioData, int sampleRate, int bitsPerSample, int channels)
+        {
+            try
+            {
+                using (var fileStream = new FileStream(filename, FileMode.Create, FileAccess.Write))
+                using (var writer = new BinaryWriter(fileStream))
+                {
+                    // WAV заголовок
+                    int bytesPerSample = bitsPerSample / 8;
+                    int blockAlign = channels * bytesPerSample;
+                    int averageBytesPerSecond = sampleRate * blockAlign;
+                    
+                    // RIFF заголовок
+                    writer.Write("RIFF".ToCharArray());
+                    writer.Write(36 + audioData.Length); // размер файла - 8
+                    writer.Write("WAVE".ToCharArray());
+                    
+                    // fmt субчанк
+                    writer.Write("fmt ".ToCharArray());
+                    writer.Write(16); // размер субчанка
+                    writer.Write((short)1); // аудио формат (1 = PCM)
+                    writer.Write((short)channels); // количество каналов
+                    writer.Write(sampleRate); // частота дискретизации
+                    writer.Write(averageBytesPerSecond); // байт в секунду
+                    writer.Write((short)blockAlign); // блок выравнивания
+                    writer.Write((short)bitsPerSample); // бит на семпл
+                    
+                    // data субчанк
+                    writer.Write("data".ToCharArray());
+                    writer.Write(audioData.Length); // размер данных
+                    writer.Write(audioData); // аудиоданные
+                }
+                
+                System.Diagnostics.Debug.WriteLine($"✅ WAV файл создан: {filename} ({audioData.Length} байт)");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка создания WAV файла: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Альтернативный метод WinRT Speech через поток для больших аудиофайлов
+        /// </summary>
+        private string PerformWinRTSpeechSTTAdvanced(byte[] audioData, float level, int duration)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🎯 WinRT Speech Advanced: обработка через поток...");
+                
+                // Пробуем использовать более продвинутый WinRT API
+                var speechRecognizerType = Type.GetType("Windows.Media.SpeechRecognition.SpeechRecognizer, Windows.Media, ContentType=WindowsRuntime");
+                
+                if (speechRecognizerType == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("⚠️ Advanced WinRT Speech недоступен");
+                    return "";
+                }
+                
+                // Создаем MemoryStream из аудиоданных
+                var memoryStream = new MemoryStream();
+                WriteWavToStream(memoryStream, audioData, 44100, 16, 1);
+                memoryStream.Position = 0;
+                
+                // Создаем SpeechRecognizer
+                dynamic speechRecognizer = Activator.CreateInstance(speechRecognizerType);
+                
+                // Устанавливаем язык (русский)
+                var languageType = Type.GetType("Windows.Globalization.Language, Windows.Globalization, ContentType=WindowsRuntime");
+                if (languageType != null)
+                {
+                    try
+                    {
+                        dynamic russianLanguage = Activator.CreateInstance(languageType, "ru-RU");
+                        speechRecognizer.CurrentLanguage = russianLanguage;
+                        System.Diagnostics.Debug.WriteLine("✅ Установлен русский язык для WinRT Speech");
+                    }
+                    catch (Exception langEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠️ Не удалось установить язык: {langEx.Message}");
+                    }
+                }
+                
+                // Настраиваем ограничения для веб-поиска (лучшее качество)
+                var topicConstraintType = Type.GetType("Windows.Media.SpeechRecognition.SpeechRecognitionTopicConstraint, Windows.Media, ContentType=WindowsRuntime");
+                if (topicConstraintType != null)
+                {
+                    // SpeechRecognitionScenario.WebSearch = 0 (лучшее качество)
+                    dynamic webSearchConstraint = Activator.CreateInstance(topicConstraintType, 0, "websearch");
+                    speechRecognizer.Constraints.Clear();
+                    speechRecognizer.Constraints.Add(webSearchConstraint);
+                }
+                
+                // Компилируем ограничения
+                var compileTask = speechRecognizer.CompileConstraintsAsync();
+                var compileAwaiter = compileTask.GetAwaiter();
+                
+                int compileTimeout = 0;
+                while (!compileAwaiter.IsCompleted && compileTimeout < 100) // 1 секунда
+                {
+                    System.Threading.Thread.Sleep(10);
+                    compileTimeout++;
+                }
+                
+                if (compileAwaiter.IsCompleted)
+                {
+                    dynamic compileResult = compileAwaiter.GetResult();
+                    System.Diagnostics.Debug.WriteLine($"✅ WinRT Advanced ограничения скомпилированы: {compileResult}");
+                    
+                    // Создаем поток для WinRT
+                    var streamReference = CreateRandomAccessStreamFromMemoryStream(memoryStream);
+                    if (streamReference != null)
+                    {
+                        // Выполняем распознавание через поток
+                        dynamic recognizeTask = speechRecognizer.RecognizeAsync(streamReference);
+                        var recognizeAwaiter = recognizeTask.GetAwaiter();
+                        
+                        int recognizeTimeout = 0;
+                        while (!recognizeAwaiter.IsCompleted && recognizeTimeout < 500) // 5 секунд
+                        {
+                            System.Threading.Thread.Sleep(10);
+                            recognizeTimeout++;
+                        }
+                        
+                        if (recognizeAwaiter.IsCompleted)
+                        {
+                            dynamic result = recognizeAwaiter.GetResult();
+                            if (result != null && result.Text != null)
+                            {
+                                string recognizedText = result.Text.ToString();
+                                System.Diagnostics.Debug.WriteLine($"✅ WinRT Advanced распознал: {recognizedText}");
+                                return recognizedText;
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("⚠️ WinRT Advanced: таймаут распознавания");
+                        }
+                    }
+                }
+                
+                return "";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка WinRT Advanced: {ex.Message}");
+                return "";
+            }
+        }
+        
+        /// <summary>
+        /// Создает IRandomAccessStream из MemoryStream для WinRT API
+        /// </summary>
+        private dynamic CreateRandomAccessStreamFromMemoryStream(MemoryStream memoryStream)
+        {
+            try
+            {
+                // Пробуем создать InMemoryRandomAccessStream
+                var inMemoryStreamType = Type.GetType("Windows.Storage.Streams.InMemoryRandomAccessStream, Windows.Storage.Streams, ContentType=WindowsRuntime");
+                if (inMemoryStreamType != null)
+                {
+                    dynamic inMemoryStream = Activator.CreateInstance(inMemoryStreamType);
+                    
+                    // Записываем данные в поток
+                    var dataWriterType = Type.GetType("Windows.Storage.Streams.DataWriter, Windows.Storage.Streams, ContentType=WindowsRuntime");
+                    if (dataWriterType != null)
+                    {
+                        dynamic dataWriter = Activator.CreateInstance(dataWriterType, inMemoryStream);
+                        
+                        byte[] data = memoryStream.ToArray();
+                        dataWriter.WriteBytes(data);
+                        
+                        var storeTask = dataWriter.StoreAsync();
+                        var storeAwaiter = storeTask.GetAwaiter();
+                        
+                        int timeout = 0;
+                        while (!storeAwaiter.IsCompleted && timeout < 100)
+                        {
+                            System.Threading.Thread.Sleep(10);
+                            timeout++;
+                        }
+                        
+                        if (storeAwaiter.IsCompleted)
+                        {
+                            inMemoryStream.Seek(0);
+                            System.Diagnostics.Debug.WriteLine("✅ InMemoryRandomAccessStream создан");
+                            return inMemoryStream;
+                        }
+                    }
+                }
+                
+                System.Diagnostics.Debug.WriteLine("⚠️ Не удалось создать IRandomAccessStream");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка создания IRandomAccessStream: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// Записывает WAV данные прямо в поток
+        /// </summary>
+        private void WriteWavToStream(Stream stream, byte[] audioData, int sampleRate, int bitsPerSample, int channels)
+        {
+            using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8, true))
+            {
+                int bytesPerSample = bitsPerSample / 8;
+                int blockAlign = channels * bytesPerSample;
+                int averageBytesPerSecond = sampleRate * blockAlign;
+                
+                // RIFF заголовок
+                writer.Write("RIFF".ToCharArray());
+                writer.Write(36 + audioData.Length);
+                writer.Write("WAVE".ToCharArray());
+                
+                // fmt субчанк
+                writer.Write("fmt ".ToCharArray());
+                writer.Write(16);
+                writer.Write((short)1);
+                writer.Write((short)channels);
+                writer.Write(sampleRate);
+                writer.Write(averageBytesPerSecond);
+                writer.Write((short)blockAlign);
+                writer.Write((short)bitsPerSample);
+                
+                // data субчанк
+                writer.Write("data".ToCharArray());
+                writer.Write(audioData.Length);
+                writer.Write(audioData);
+            }
+        }
+
+        /// <summary>
+        /// WinRT Speech Recognition для real-time потока (экспериментально)
+        /// </summary>
+        private string PerformWinRTSpeechSTTRealTime(byte[] audioData, float level, int duration)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("🎯 WinRT Speech Real-Time: непрерывное распознавание...");
+                
+                var speechRecognizerType = Type.GetType("Windows.Media.SpeechRecognition.SpeechRecognizer, Windows.Media, ContentType=WindowsRuntime");
+                
+                if (speechRecognizerType == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("⚠️ WinRT Real-Time Speech недоступен");
+                    return "";
+                }
+                
+                // Создаем SpeechRecognizer для непрерывного распознавания
+                dynamic speechRecognizer = Activator.CreateInstance(speechRecognizerType);
+                
+                // Настраиваем для непрерывного распознавания
+                var speechContinuousRecognitionSessionType = speechRecognizer.ContinuousRecognitionSession?.GetType();
+                if (speechContinuousRecognitionSessionType != null)
+                {
+                    // Устанавливаем таймауты для real-time
+                    try
+                    {
+                        speechRecognizer.Timeouts.InitialSilenceTimeout = TimeSpan.FromSeconds(2);
+                        speechRecognizer.Timeouts.BabbleTimeout = TimeSpan.FromSeconds(5);
+                        speechRecognizer.Timeouts.EndSilenceTimeout = TimeSpan.FromSeconds(1);
+                        System.Diagnostics.Debug.WriteLine("✅ WinRT таймауты настроены для real-time");
+                    }
+                    catch (Exception timeoutEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠️ Не удалось настроить таймауты: {timeoutEx.Message}");
+                    }
+                }
+                
+                // Настраиваем ограничения для диктовки
+                var dictationConstraintType = Type.GetType("Windows.Media.SpeechRecognition.SpeechRecognitionTopicConstraint, Windows.Media, ContentType=WindowsRuntime");
+                if (dictationConstraintType != null)
+                {
+                    // SpeechRecognitionScenario.Dictation = 1
+                    dynamic dictationConstraint = Activator.CreateInstance(dictationConstraintType, 1, "dictation");
+                    speechRecognizer.Constraints.Clear();
+                    speechRecognizer.Constraints.Add(dictationConstraint);
+                }
+                
+                // Компилируем ограничения
+                var compileTask = speechRecognizer.CompileConstraintsAsync();
+                var compileAwaiter = compileTask.GetAwaiter();
+                
+                int timeout = 0;
+                while (!compileAwaiter.IsCompleted && timeout < 50) // 500мс
+                {
+                    System.Threading.Thread.Sleep(10);
+                    timeout++;
+                }
+                
+                if (compileAwaiter.IsCompleted)
+                {
+                    // Используем быстрое распознавание с минимальным аудио
+                    var memoryStream = new MemoryStream();
+                    WriteWavToStream(memoryStream, audioData, 44100, 16, 1);
+                    memoryStream.Position = 0;
+                    
+                    var streamReference = CreateRandomAccessStreamFromMemoryStream(memoryStream);
+                    if (streamReference != null)
+                    {
+                        // Быстрое распознавание с коротким таймаутом
+                        dynamic recognizeTask = speechRecognizer.RecognizeAsync(streamReference);
+                        var recognizeAwaiter = recognizeTask.GetAwaiter();
+                        
+                        int recognizeTimeout = 0;
+                        while (!recognizeAwaiter.IsCompleted && recognizeTimeout < 200) // 2 секунды максимум
+                        {
+                            System.Threading.Thread.Sleep(10);
+                            recognizeTimeout++;
+                        }
+                        
+                        if (recognizeAwaiter.IsCompleted)
+                        {
+                            dynamic result = recognizeAwaiter.GetResult();
+                            if (result != null && result.Text != null)
+                            {
+                                string recognizedText = result.Text.ToString();
+                                System.Diagnostics.Debug.WriteLine($"✅ WinRT Real-Time распознал: {recognizedText}");
+                                return recognizedText;
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("⚠️ WinRT Real-Time: быстрый таймаут");
+                        }
+                    }
+                }
+                
+                return "";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка WinRT Real-Time: {ex.Message}");
+                return "";
             }
         }
 
