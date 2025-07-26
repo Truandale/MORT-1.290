@@ -113,7 +113,7 @@ namespace MORT
         private List<byte> audioBuffer = new List<byte>();
         private DateTime lastVoiceActivity = DateTime.MinValue;
         private bool isCollectingAudio = false;
-        private float voiceThreshold = 0.001f; // Порог обнаружения голоса (понижен для лучшей чувствительности)
+        private float voiceThreshold = 0.0001f; // Порог обнаружения голоса (очень низкий для максимальной чувствительности)
         private int silenceDurationMs = 1000; // Время тишины перед обработкой (1 сек)
         private int debugCounter = 0; // Счетчик для отладки
         private float microphoneGain = 2.0f;   // Коэффициент усиления микрофона (по умолчанию x2)
@@ -2353,8 +2353,10 @@ namespace MORT
                 }
                 else
                 {
-                    // Если буфер пустой, запускаем симуляцию
-                    SimulateSTTResult("Тест распознавания речи");
+                    // Если буфер пустой, сообщаем об этом честно
+                    System.Diagnostics.Debug.WriteLine("❌ Нет аудио данных для тестирования STT");
+                    MessageBox.Show("Нет аудио данных для тестирования.\nПопробуйте сначала запустить мониторинг и поговорить в микрофон.", 
+                                  "Тест STT", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
@@ -2804,26 +2806,33 @@ namespace MORT
                 
                 System.Diagnostics.Debug.WriteLine($"🔄 Обработка аудио: {audioBuffer.Count} байт");
                 
-                // Симуляция STT - в реальной версии здесь будет вызов STT API
-                string recognizedText = await SimulateSTTAsync(audioBuffer.ToArray());
+                // Реальное STT без симуляции
+                string recognizedText = await PerformRealSTTAsync(audioBuffer.ToArray());
                 
-                // Обновляем UI с распознанным текстом
-                if (tbIncomingText != null)
+                // Обновляем UI и запускаем перевод только если есть результат STT
+                if (!string.IsNullOrEmpty(recognizedText))
                 {
-                    if (tbIncomingText.InvokeRequired)
+                    if (tbIncomingText != null)
                     {
-                        tbIncomingText.Invoke(new Action(() => tbIncomingText.Text = recognizedText));
+                        if (tbIncomingText.InvokeRequired)
+                        {
+                            tbIncomingText.Invoke(new Action(() => tbIncomingText.Text = recognizedText));
+                        }
+                        else
+                        {
+                            tbIncomingText.Text = recognizedText;
+                        }
                     }
-                    else
-                    {
-                        tbIncomingText.Text = recognizedText;
-                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"✅ Распознан текст: {recognizedText}");
+                    
+                    // Запускаем перевод только при успешном STT
+                    ProcessTranslation(recognizedText);
                 }
-                
-                System.Diagnostics.Debug.WriteLine($"✅ Распознан текст: {recognizedText}");
-                
-                // Запускаем этап 3: перевод
-                ProcessTranslation(recognizedText);
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("❌ STT не дал результата - перевод не запускается");
+                }
                 
                 // Очищаем буфер
                 audioBuffer.Clear();
@@ -2832,79 +2841,6 @@ namespace MORT
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка в ProcessCollectedAudio: {ex.Message}");
             }
-        }
-
-        private async Task<string> SimulateSTTAsync(byte[] audioData)
-        {
-            try
-            {
-                System.Diagnostics.Debug.WriteLine($"🎯 SimulateSTTAsync: получено {audioData?.Length ?? 0} байт аудио");
-                
-                // Пытаемся сделать реальное распознавание речи
-                string realText = await PerformRealSTTAsync(audioData);
-                if (!string.IsNullOrEmpty(realText))
-                {
-                    System.Diagnostics.Debug.WriteLine($"✅ Реальное STT успешно: '{realText}'");
-                    return realText;
-                }
-                
-                System.Diagnostics.Debug.WriteLine("⚠️ Реальное STT не дало результата, используем симуляцию");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ Ошибка реального STT: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"❌ Стек ошибки: {ex.StackTrace}");
-            }
-            
-            // Если реальное STT не сработало, используем симуляцию РЕАЛЬНЫХ русских фраз
-            if (audioData != null && audioData.Length > 0)
-            {
-                float averageLevel = CalculateAudioLevel(audioData);
-                System.Diagnostics.Debug.WriteLine($"🔊 Уровень аудио: {averageLevel:F4}, порог: {voiceThreshold:F4}");
-                
-                if (averageLevel > voiceThreshold)
-                {
-                    // Возвращаем реальные русские фразы для тестирования перевода
-                    var testPhrases = new string[]
-                    {
-                        "Привет как дела",
-                        "Что ты делаешь сейчас",
-                        "Расскажи мне что-нибудь",
-                        "Как работает эта программа",
-                        "Переведи этот текст на английский",
-                        "Проверяем голосовой перевод",
-                        "Тестируем систему распознавания речи",
-                        "Добро пожаловать в программу MORT",
-                        "Система работает корректно",
-                        "Русский текст переводится на английский",
-                        "Спасибо за помощь",
-                        "Пожалуйста помогите мне",
-                        "Извините за беспокойство",
-                        "До свидания увидимся позже",
-                        "Хорошо всё понятно",
-                        "Отлично работает прекрасно",
-                        "Не понимаю что происходит",
-                        "Можете повторить еще раз",
-                        "Это очень интересно",
-                        "Сегодня хорошая погода"
-                    };
-                    
-                    // Выбираем фразу на основе уровня звука для разнообразия
-                    int index = (int)(averageLevel * 1000) % testPhrases.Length;
-                    string selectedPhrase = testPhrases[index];
-                    
-                    System.Diagnostics.Debug.WriteLine($"🎭 Симуляция STT: уровень={averageLevel:F4} → '{selectedPhrase}'");
-                    return selectedPhrase;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"🔇 Уровень аудио слишком низкий: {averageLevel:F4} <= {voiceThreshold:F4}");
-                    return ""; // Не возвращаем ничего при низком уровне
-                }
-            }
-            
-            System.Diagnostics.Debug.WriteLine("❌ Нет аудио данных для обработки");
-            return "";
         }
         
         private async Task<string> PerformRealSTTAsync(byte[] audioData)
@@ -3185,52 +3121,80 @@ namespace MORT
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("🤖 Запуск реального Whisper.NET...");
+                System.Diagnostics.Debug.WriteLine("🤖 ========== Запуск Whisper STT ==========");
                 
                 // Реальная реализация Whisper.NET
                 float level = CalculateAudioLevel(audioData);
-                int duration = audioData.Length / (44100 * 2);
+                // ИСПРАВЛЕНО: правильный расчет длительности для 16-bit моно 44100Hz
+                double durationSeconds = (double)audioData.Length / (44100.0 * 2.0); // 2 байта на семпл
                 
-                if (level <= 0.005f || duration <= 0)
+                System.Diagnostics.Debug.WriteLine($"🎵 Аудио данные: уровень={level:F4}, длительность={durationSeconds:F1}сек, размер={audioData.Length} байт");
+                
+                // СМЯГЧЕННЫЕ проверки - убираем слишком строгие ограничения
+                if (audioData.Length < 4000) // Минимум 4000 байт (около 0.05 секунд)
                 {
+                    System.Diagnostics.Debug.WriteLine("⚠️ Аудио слишком короткое для STT (менее 0.05 сек)");
                     return "";
                 }
+                
+                // Убираем проверку на уровень звука - Whisper сам решит
+                System.Diagnostics.Debug.WriteLine($"✅ Аудио данные прошли проверку, передаем в Whisper");
                 
                 // Получаем модель из кэша (безопасно для многопоточности)
                 string[] whisperModels = { "tiny", "base", "small", "medium", "large" };
                 int modelIndex = Math.Max(0, Math.Min(cachedWhisperModel, whisperModels.Length - 1));
                 string selectedModel = whisperModels[modelIndex];
-                System.Diagnostics.Debug.WriteLine($"Используем модель Whisper: {selectedModel}");
+                
+                System.Diagnostics.Debug.WriteLine($"🎯 Выбрана Whisper модель #{modelIndex}: {selectedModel} (из {whisperModels.Length} доступных)");
+                
+                // Получаем путь к модели и проверяем её существование
+                string modelPath = GetWhisperModelPath(selectedModel);
+                System.Diagnostics.Debug.WriteLine($"📁 Путь к модели: {modelPath}");
+                
+                if (!File.Exists(modelPath))
+                {
+                    System.Diagnostics.Debug.WriteLine($"❌ КРИТИЧЕСКАЯ ОШИБКА: Файл модели не найден!");
+                    System.Diagnostics.Debug.WriteLine($"💡 Ожидаемый путь: {modelPath}");
+                    
+                    // Попробуем найти любую доступную модель
+                    string fallbackModel = FindAnyAvailableWhisperModel();
+                    if (!string.IsNullOrEmpty(fallbackModel))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"🔄 Найдена резервная модель: {fallbackModel}");
+                        modelPath = fallbackModel;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"❌ Ни одной Whisper модели не найдено!");
+                        return "[Ошибка: Whisper модель не найдена]";
+                    }
+                }
+                else
+                {
+                    FileInfo modelFile = new FileInfo(modelPath);
+                    System.Diagnostics.Debug.WriteLine($"✅ Модель найдена! Размер: {modelFile.Length / 1024 / 1024:F1} MB");
+                }
                 
                 // Конвертируем byte[] в WAV формат
                 byte[] wavData = ConvertToWav(audioData, 44100, 1);
+                System.Diagnostics.Debug.WriteLine($"🔄 WAV данные подготовлены: {wavData.Length} байт");
                 
                 // Вызываем Whisper.NET
-                return await CallWhisperNetAsync(wavData, selectedModel);
+                string result = await CallWhisperNetAsync(wavData, selectedModel);
+                System.Diagnostics.Debug.WriteLine($"🎤 Whisper результат: '{result}'");
+                System.Diagnostics.Debug.WriteLine("🤖 ==========================================");
+                
+                return result;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Ошибка Whisper STT: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"📝 Стек вызовов: {ex.StackTrace}");
                 
-                // Fallback к симуляции при ошибке
-                var fallbackPhrases = new string[]
-                {
-                    "Привет мир",
-                    "Как дела сегодня", 
-                    "Тестируем Whisper",
-                    "Распознавание работает",
-                    "Русская речь",
-                    "Проверка системы"
-                };
-                
-                float level = CalculateAudioLevel(audioData);
-                int duration = audioData.Length / (44100 * 2);
-                if (level > 0.005f && duration > 0)
-                {
-                    int index = (duration + (int)(level * 100)) % fallbackPhrases.Length;
-                    return $"[Fallback] {fallbackPhrases[index]}";
-                }
-                return "";
+                // НЕ используем симуляцию - возвращаем четкое сообщение об ошибке
+                string errorMessage = $"[Ошибка Whisper STT]: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"� Возвращаем сообщение об ошибке: '{errorMessage}'");
+                return errorMessage;
             }
         }
         
@@ -3238,52 +3202,97 @@ namespace MORT
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("🎯 Запуск реального Vosk.NET...");
+                System.Diagnostics.Debug.WriteLine("🎯 ========== Запуск Vosk STT ==========");
                 
                 // Реальная реализация Vosk.NET
                 float level = CalculateAudioLevel(audioData);
-                int duration = audioData.Length / (44100 * 2);
+                // ИСПРАВЛЕНО: правильный расчет длительности для 16-bit моно 44100Hz
+                double durationSeconds = (double)audioData.Length / (44100.0 * 2.0); // 2 байта на семпл
                 
-                if (level <= 0.005f || duration <= 0)
+                System.Diagnostics.Debug.WriteLine($"🎵 Аудио данные: уровень={level:F4}, длительность={durationSeconds:F1}сек, размер={audioData.Length} байт");
+                
+                // СМЯГЧЕННЫЕ проверки - убираем слишком строгие ограничения
+                if (audioData.Length < 4000) // Минимум 4000 байт (около 0.05 секунд)
                 {
+                    System.Diagnostics.Debug.WriteLine("⚠️ Аудио слишком короткое для STT (менее 0.05 сек)");
                     return "";
                 }
                 
+                // Убираем проверку на уровень звука - Vosk сам решит
+                System.Diagnostics.Debug.WriteLine($"✅ Аудио данные прошли проверку, передаем в Vosk");
+                
                 // Получаем модель из кэша (безопасно для многопоточности)
                 string[] voskModels = { "ru", "en-us", "ru-small", "en-us-small" };
+                string[] voskNames = { 
+                    "vosk-model-ru-0.42 (Русский)", 
+                    "vosk-model-en-us-0.22 (Английский)",
+                    "vosk-model-small-ru-0.22 (Русский малый)",
+                    "vosk-model-small-en-us-0.15 (Английский малый)"
+                };
+                
                 int modelIndex = Math.Max(0, Math.Min(cachedVoskModel, voskModels.Length - 1));
                 string selectedModel = voskModels[modelIndex];
-                System.Diagnostics.Debug.WriteLine($"Используем модель Vosk: {selectedModel}");
+                string selectedName = voskNames[modelIndex];
+                
+                System.Diagnostics.Debug.WriteLine($"🎯 Выбрана Vosk модель #{modelIndex}: {selectedName} (код: {selectedModel})");
+                
+                // Получаем путь к модели и проверяем её существование
+                string modelPath = GetVoskModelPath(selectedModel);
+                System.Diagnostics.Debug.WriteLine($"📁 Путь к модели: {modelPath}");
+                
+                if (!Directory.Exists(modelPath))
+                {
+                    System.Diagnostics.Debug.WriteLine($"❌ КРИТИЧЕСКАЯ ОШИБКА: Папка модели не найдена!");
+                    System.Diagnostics.Debug.WriteLine($"💡 Ожидаемый путь: {modelPath}");
+                    
+                    // Попробуем найти любую доступную модель
+                    string fallbackModel = FindAnyAvailableVoskModel();
+                    if (!string.IsNullOrEmpty(fallbackModel))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"🔄 Найдена резервная модель: {fallbackModel}");
+                        modelPath = fallbackModel;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"❌ Ни одной Vosk модели не найдено!");
+                        return "[Ошибка: Vosk модель не найдена]";
+                    }
+                }
+                else
+                {
+                    // Проверяем целостность модели
+                    bool isValid = CheckVoskModelIntegrity(modelPath);
+                    if (isValid)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✅ Модель найдена и проверена!");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"❌ Модель повреждена или неполная!");
+                        return "[Ошибка: Vosk модель повреждена]";
+                    }
+                }
                 
                 // Конвертируем в формат для Vosk (16-bit PCM)
                 short[] pcmData = ConvertToPcm16(audioData);
+                System.Diagnostics.Debug.WriteLine($"🔄 PCM данные подготовлены: {pcmData.Length} семплов");
                 
                 // Вызываем Vosk.NET
-                return CallVoskNet(pcmData, selectedModel);
+                string result = CallVoskNet(pcmData, selectedModel);
+                System.Diagnostics.Debug.WriteLine($"🎤 Vosk результат: '{result}'");
+                System.Diagnostics.Debug.WriteLine("🎯 =====================================");
+                
+                return result;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Ошибка Vosk STT: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"📝 Стек вызовов: {ex.StackTrace}");
                 
-                // Fallback к симуляции при ошибке
-                var fallbackPhrases = new string[]
-                {
-                    "Добро пожаловать",
-                    "Система готова к работе",
-                    "Vosk распознает речь", 
-                    "Отличная работа",
-                    "Перевод текста",
-                    "Русский язык"
-                };
-                
-                float level = CalculateAudioLevel(audioData);
-                int duration = audioData.Length / (44100 * 2);
-                if (level > 0.005f && duration > 0)
-                {
-                    int index = (duration * 2 + (int)(level * 50)) % fallbackPhrases.Length;
-                    return $"[Fallback] {fallbackPhrases[index]}";
-                }
-                return "";
+                // НЕ используем симуляцию - возвращаем четкое сообщение об ошибке
+                string errorMessage = $"[Ошибка Vosk STT]: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"� Возвращаем сообщение об ошибке: '{errorMessage}'");
+                return errorMessage;
             }
         }
         
@@ -3294,18 +3303,23 @@ namespace MORT
                 System.Diagnostics.Debug.WriteLine("🪟 Попытка использования Windows Speech Recognition...");
                 
                 float level = CalculateAudioLevel(audioData);
-                int duration = audioData.Length / (44100 * 2);
+                // ИСПРАВЛЕНО: правильный расчет длительности
+                double durationSeconds = (double)audioData.Length / (44100.0 * 2.0);
                 
-                if (level < 0.005f || duration < 0)
+                // СМЯГЧЕННЫЕ проверки
+                if (audioData.Length < 4000) // Минимум 4000 байт
                 {
+                    System.Diagnostics.Debug.WriteLine("⚠️ Аудио слишком короткое для Windows STT");
                     return "";
                 }
+                
+                System.Diagnostics.Debug.WriteLine($"🎵 Windows STT: уровень={level:F4}, длительность={durationSeconds:F1}сек, размер={audioData.Length} байт");
                 
                 // Попытка использования System.Speech.Recognition (Windows Desktop)
                 try
                 {
                     System.Diagnostics.Debug.WriteLine("✅ Используем System.Speech.Recognition...");
-                    return PerformSystemSpeechSTT(audioData, level, duration);
+                    return PerformSystemSpeechSTT(audioData, level, (int)durationSeconds);
                 }
                 catch (PlatformNotSupportedException platformEx)
                 {
@@ -3319,7 +3333,7 @@ namespace MORT
                 // Попытка использования Windows Runtime Speech (UWP/Modern)
                 try
                 {
-                    return PerformWinRTSpeechSTT(audioData, level, duration);
+                    return PerformWinRTSpeechSTT(audioData, level, (int)durationSeconds);
                 }
                 catch (Exception winrtEx)
                 {
@@ -3329,16 +3343,16 @@ namespace MORT
                 // Попытка использования SAPI для распознавания речи
                 try
                 {
-                    return PerformSAPISpeechSTT(audioData, level, duration);
+                    return PerformSAPISpeechSTT(audioData, level, (int)durationSeconds);
                 }
                 catch (Exception sapiEx)
                 {
                     System.Diagnostics.Debug.WriteLine($"⚠️ SAPI Speech Recognition недоступен: {sapiEx.Message}");
                 }
                 
-                // Если все Windows API недоступны, возвращаем симулированный результат
-                System.Diagnostics.Debug.WriteLine("⚠️ Все Windows Speech API недоступны, используем симуляцию");
-                return PerformWindowsSTTSimulation(audioData, level, duration);
+                // Если все Windows API недоступны, возвращаем честное сообщение об ошибке
+                System.Diagnostics.Debug.WriteLine("⚠️ Все Windows Speech API недоступны");
+                return PerformWindowsSTTSimulation(audioData, level, (int)durationSeconds);
             }
             catch (Exception ex)
             {
@@ -3461,27 +3475,12 @@ namespace MORT
             }
             catch (InvalidOperationException ex)
             {
-                System.Diagnostics.Debug.WriteLine($"⚠️ System.Speech конфигурация: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ System.Speech конфигурация: {ex.Message}");
                 
-                // Fallback: возвращаем реальные русские фразы для тестирования
-                if (level > 0.01f && duration > 0)
-                {
-                    var fallbackPhrases = new string[]
-                    {
-                        "Система распознавания работает",
-                        "Windows Speech API активен", 
-                        "Голосовое управление готово",
-                        "Распознавание речи включено",
-                        "Тестируем Windows STT",
-                        "Встроенное распознавание речи"
-                    };
-                    
-                    int index = (duration + (int)(level * 200)) % fallbackPhrases.Length;
-                    System.Diagnostics.Debug.WriteLine($"🔄 System.Speech fallback: {fallbackPhrases[index]}");
-                    return fallbackPhrases[index];
-                }
-                
-                return "";
+                // НЕ используем симуляцию - возвращаем четкое сообщение об ошибке
+                string errorMessage = $"[Ошибка Windows STT]: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"� Возвращаем сообщение об ошибке: '{errorMessage}'");
+                return errorMessage;
             }
             catch (Exception ex)
             {
@@ -3568,83 +3567,16 @@ namespace MORT
         
         private string PerformWindowsSTTSimulation(byte[] audioData, float level, int duration)
         {
-            try
-            {
-                // Симуляция Windows STT когда API недоступны - возвращаем реальные русские фразы
-                System.Diagnostics.Debug.WriteLine("🎭 Windows STT симуляция: имитация распознавания...");
-                
-                var simulationPhrases = new string[]
-                {
-                    "Система работает нормально",
-                    "Проверяем качество связи",
-                    "Всё в порядке отлично",
-                    "Понимаю вас хорошо",
-                    "Качество звука отличное",
-                    "Связь стабильная",
-                    "Микрофон работает прекрасно",
-                    "Слышимость очень хорошая",
-                    "Тест прошёл успешно",
-                    "Голос распознается чётко"
-                };
-                
-                int index = (duration * 5 + (int)(level * 80)) % simulationPhrases.Length;
-                string selectedPhrase = simulationPhrases[index];
-                
-                System.Diagnostics.Debug.WriteLine($"🎭 Windows STT симуляция: '{selectedPhrase}'");
-                return selectedPhrase;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ Ошибка Windows STT симуляции: {ex.Message}");
-                return "";
-            }
+            // НЕ выполняем симуляцию - возвращаем четкое сообщение об ошибке
+            System.Diagnostics.Debug.WriteLine("❌ Windows STT API недоступен");
+            return "[Ошибка]: Windows STT API недоступен или не настроен";
         }
         
         private string PerformBasicSTT(byte[] audioData)
         {
-            try
-            {
-                // Базовая эвристика как резерв - возвращаем реальные русские фразы
-                float level = CalculateAudioLevel(audioData);
-                int duration = audioData.Length / (44100 * 2);
-                
-                if (level > 0.01f && duration > 0)
-                {
-                    // Возвращаем реальные русские фразы для тестирования перевода
-                    var basicPhrases = new string[]
-                    {
-                        "Привет как дела",
-                        "Что ты делаешь",
-                        "Расскажи мне",
-                        "Хорошо понятно",
-                        "Спасибо большое",
-                        "До свидания",
-                        "Извините пожалуйста",
-                        "Не понимаю",
-                        "Конечно да",
-                        "Нет не надо",
-                        "Может быть",
-                        "Очень хорошо",
-                        "Плохо не работает",
-                        "Помогите мне",
-                        "Где это находится"
-                    };
-                    
-                    // Выбираем фразу на основе продолжительности и уровня
-                    int index = (duration * 100 + (int)(level * 500)) % basicPhrases.Length;
-                    string selectedPhrase = basicPhrases[index];
-                    
-                    System.Diagnostics.Debug.WriteLine($"🔄 Базовый STT: уровень={level:F3}, длительность={duration}с → '{selectedPhrase}'");
-                    return selectedPhrase;
-                }
-                
-                return "";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ошибка в PerformBasicSTT: {ex.Message}");
-                return "";
-            }
+            // НЕ выполняем симуляцию - возвращаем четкое сообщение об ошибке
+            System.Diagnostics.Debug.WriteLine("❌ Все STT движки недоступны");
+            return "[Ошибка]: Все STT движки недоступны или не настроены";
         }
         
         private float CalculateAudioLevel(byte[] audioData)
@@ -3672,34 +3604,6 @@ namespace MORT
                 amplifiedLevel = 1.0f;
                 
             return amplifiedLevel;
-        }
-
-        private void SimulateSTTResult(string testText)
-        {
-            try
-            {
-                System.Diagnostics.Debug.WriteLine($"🧪 Симуляция STT результата: {testText}");
-                
-                // Обновляем поле входящего текста
-                if (tbIncomingText != null)
-                {
-                    if (tbIncomingText.InvokeRequired)
-                    {
-                        tbIncomingText.Invoke(new Action(() => tbIncomingText.Text = testText));
-                    }
-                    else
-                    {
-                        tbIncomingText.Text = testText;
-                    }
-                }
-                
-                // Запускаем следующий этап - перевод
-                ProcessTranslation(testText);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"❌ Ошибка симуляции STT: {ex.Message}");
-            }
         }
 
         private void ProcessTranslation(string inputText)
@@ -4344,13 +4248,17 @@ namespace MORT
                 }
             }
             
-            // Запускаем TTS только для успешно переведенного текста (не для ошибок)
+            // Запускаем TTS только для успешно переведенного текста (НЕ для ошибок STT или переводчика)
             if (!string.IsNullOrEmpty(text) && 
-                !text.StartsWith("[Ошибка]") && 
+                !text.StartsWith("[Ошибка") && 
                 !text.StartsWith("[Проблема") && 
                 !text.StartsWith("🔄") &&
                 !text.Contains("BadRequest") &&
                 !text.Contains("errorCode") &&
+                !text.Contains("Ошибка Whisper STT") &&
+                !text.Contains("Ошибка Vosk STT") &&
+                !text.Contains("Ошибка Windows STT") &&
+                !text.Contains("STT движки недоступны") &&
                 text.Length > 2) // Минимальная длина для TTS
             {
                 System.Diagnostics.Debug.WriteLine($"🔊 Запуск TTS для переведенного текста: '{text}'");
@@ -4358,7 +4266,7 @@ namespace MORT
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"⚠️ Пропускаем TTS для системного сообщения: '{text}'");
+                System.Diagnostics.Debug.WriteLine($"⚠️ Пропускаем TTS для системного сообщения или ошибки: '{text}'");
             }
         }
 
@@ -6298,15 +6206,83 @@ namespace MORT
         /// <summary>
         /// Получает путь к модели Whisper
         /// </summary>
+        /// <summary>
+        /// Ищет любую доступную Whisper модель
+        /// </summary>
+        private string FindAnyAvailableWhisperModel()
+        {
+            try
+            {
+                string appDir = Path.GetDirectoryName(Application.ExecutablePath) ?? "";
+                string modelsDir = Path.Combine(appDir, "models", "whisper");
+                
+                if (!Directory.Exists(modelsDir))
+                    return "";
+                
+                // Ищем любые .bin или .ggml файлы
+                var allModelFiles = Directory.GetFiles(modelsDir, "*.bin")
+                    .Concat(Directory.GetFiles(modelsDir, "*.ggml"))
+                    .ToArray();
+                
+                if (allModelFiles.Length > 0)
+                {
+                    string firstModel = allModelFiles[0];
+                    System.Diagnostics.Debug.WriteLine($"🔍 Найдена резервная Whisper модель: {Path.GetFileName(firstModel)}");
+                    return firstModel;
+                }
+                
+                return "";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка поиска резервной Whisper модели: {ex.Message}");
+                return "";
+            }
+        }
+        
+        /// <summary>
+        /// Получает путь к модели Whisper
+        /// </summary>
         private string GetWhisperModelPath(string modelName)
         {
             // Ищем модели в папке приложения
             string appDir = Path.GetDirectoryName(Application.ExecutablePath) ?? "";
             string modelsDir = Path.Combine(appDir, "models", "whisper");
             
+            System.Diagnostics.Debug.WriteLine($"🔍 Поиск Whisper модели '{modelName}' в '{modelsDir}'");
+            
+            // Карта для преобразования кодовых имен в реальные файлы
+            var modelMap = new Dictionary<string, string>
+            {
+                { "tiny", "ggml-tiny.bin" },
+                { "base", "ggml-base.bin" },
+                { "small", "ggml-small.bin" },
+                { "medium", "ggml-medium.bin" },
+                { "large", "ggml-large.bin" }
+            };
+            
+            // Проверяем сначала по карте
+            if (modelMap.ContainsKey(modelName))
+            {
+                string mappedName = modelMap[modelName];
+                string mappedPath = Path.Combine(modelsDir, mappedName);
+                System.Diagnostics.Debug.WriteLine($"🎯 Проверяем маппированный путь: {mappedPath}");
+                if (File.Exists(mappedPath))
+                {
+                    System.Diagnostics.Debug.WriteLine($"✅ Найдена Whisper модель: {mappedPath}");
+                    return mappedPath;
+                }
+            }
+            
             // Проверяем стандартные названия моделей
             string[] possibleExtensions = { ".bin", ".ggml" };
-            string[] possibleNames = { modelName, $"ggml-{modelName}", $"ggml-{modelName}.bin" };
+            string[] possibleNames = { 
+                modelName, 
+                $"ggml-{modelName}", 
+                $"ggml-{modelName}.bin",
+                $"whisper-{modelName}",
+                $"whisper-{modelName}.bin"
+            };
             
             foreach (string name in possibleNames)
             {
@@ -6314,13 +6290,54 @@ namespace MORT
                 {
                     string fullName = name.EndsWith(ext) ? name : name + ext;
                     string fullPath = Path.Combine(modelsDir, fullName);
+                    System.Diagnostics.Debug.WriteLine($"🔍 Проверяем путь: {fullPath}");
                     if (File.Exists(fullPath))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✅ Найдена Whisper модель: {fullPath}");
                         return fullPath;
+                    }
                 }
             }
             
             // Если не найдено, возвращаем путь по умолчанию
-            return Path.Combine(modelsDir, $"ggml-{modelName}.bin");
+            string defaultPath = Path.Combine(modelsDir, $"ggml-{modelName}.bin");
+            System.Diagnostics.Debug.WriteLine($"❌ Whisper модель не найдена, используем путь по умолчанию: {defaultPath}");
+            return defaultPath;
+        }
+        
+        /// <summary>
+        /// Ищет любую доступную Vosk модель
+        /// </summary>
+        private string FindAnyAvailableVoskModel()
+        {
+            try
+            {
+                string appDir = Path.GetDirectoryName(Application.ExecutablePath) ?? "";
+                string modelsDir = Path.Combine(appDir, "models", "vosk");
+                
+                if (!Directory.Exists(modelsDir))
+                    return "";
+                
+                // Ищем любые папки с моделями
+                var allModelDirs = Directory.GetDirectories(modelsDir);
+                
+                foreach (string modelDir in allModelDirs)
+                {
+                    // Проверяем, является ли это валидной Vosk моделью
+                    if (CheckVoskModelIntegrity(modelDir))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"🔍 Найдена резервная Vosk модель: {Path.GetFileName(modelDir)}");
+                        return modelDir;
+                    }
+                }
+                
+                return "";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Ошибка поиска резервной Vosk модели: {ex.Message}");
+                return "";
+            }
         }
         
         /// <summary>
@@ -6332,18 +6349,53 @@ namespace MORT
             string appDir = Path.GetDirectoryName(Application.ExecutablePath) ?? "";
             string modelsDir = Path.Combine(appDir, "models", "vosk");
             
+            System.Diagnostics.Debug.WriteLine($"🔍 Поиск Vosk модели '{modelName}' в '{modelsDir}'");
+            
+            // Карта для преобразования кодовых имен в реальные названия папок
+            var modelMap = new Dictionary<string, string>
+            {
+                { "ru", "vosk-model-small-ru-0.22" },
+                { "en-us", "vosk-model-small-en-us-0.15" },
+                { "ru-small", "vosk-model-small-ru-0.22" },
+                { "en-us-small", "vosk-model-small-en-us-0.15" }
+            };
+            
+            // Проверяем сначала по карте
+            if (modelMap.ContainsKey(modelName))
+            {
+                string mappedName = modelMap[modelName];
+                string mappedPath = Path.Combine(modelsDir, mappedName);
+                System.Diagnostics.Debug.WriteLine($"🎯 Проверяем маппированный путь: {mappedPath}");
+                if (Directory.Exists(mappedPath))
+                {
+                    System.Diagnostics.Debug.WriteLine($"✅ Найдена Vosk модель: {mappedPath}");
+                    return mappedPath;
+                }
+            }
+            
             // Проверяем различные варианты названий папок
-            string[] possibleNames = { modelName, $"vosk-model-{modelName}", $"model-{modelName}" };
+            string[] possibleNames = { 
+                modelName, 
+                $"vosk-model-{modelName}", 
+                $"vosk-model-small-{modelName}",
+                $"model-{modelName}" 
+            };
             
             foreach (string name in possibleNames)
             {
                 string fullPath = Path.Combine(modelsDir, name);
+                System.Diagnostics.Debug.WriteLine($"🔍 Проверяем путь: {fullPath}");
                 if (Directory.Exists(fullPath))
+                {
+                    System.Diagnostics.Debug.WriteLine($"✅ Найдена Vosk модель: {fullPath}");
                     return fullPath;
+                }
             }
             
             // Если не найдено, возвращаем путь по умолчанию
-            return Path.Combine(modelsDir, modelName);
+            string defaultPath = Path.Combine(modelsDir, modelName);
+            System.Diagnostics.Debug.WriteLine($"❌ Vosk модель не найдена, используем путь по умолчанию: {defaultPath}");
+            return defaultPath;
         }
         
         #endregion
@@ -7420,6 +7472,8 @@ namespace MORT
             {
                 string appDir = Path.GetDirectoryName(Application.ExecutablePath) ?? "";
                 
+                System.Diagnostics.Debug.WriteLine("🔍 ========== ПРОВЕРКА ДОСТУПНОСТИ МОДЕЛЕЙ STT ==========");
+                
                 // Проверяем Whisper модели
                 string whisperDir = Path.Combine(appDir, "models", "whisper");
                 if (Directory.Exists(whisperDir))
@@ -7433,13 +7487,24 @@ namespace MORT
                         System.Diagnostics.Debug.WriteLine($"✅ Найдено Whisper моделей: {whisperFiles.Length}");
                         foreach (var file in whisperFiles)
                         {
-                            System.Diagnostics.Debug.WriteLine($"   - {Path.GetFileName(file)}");
+                            string fileName = Path.GetFileName(file);
+                            long fileSizeKB = new FileInfo(file).Length / 1024;
+                            System.Diagnostics.Debug.WriteLine($"   - {fileName} ({fileSizeKB:N0} KB)");
                         }
+                        
+                        // Проверяем конкретные модели из настроек
+                        CheckSpecificWhisperModels();
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("⚠️ Whisper модели не найдены. Поместите .bin или .ggml файлы в папку models/whisper");
+                        System.Diagnostics.Debug.WriteLine("❌ Whisper модели не найдены!");
+                        System.Diagnostics.Debug.WriteLine("💡 Поместите .bin или .ggml файлы в папку models/whisper");
+                        System.Diagnostics.Debug.WriteLine("💡 Рекомендуемые файлы: ggml-small.bin, ggml-base.bin");
                     }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"❌ Папка Whisper моделей не существует: {whisperDir}");
                 }
                 
                 // Проверяем Vosk модели
@@ -7453,18 +7518,115 @@ namespace MORT
                         System.Diagnostics.Debug.WriteLine($"✅ Найдено Vosk моделей: {voskDirs.Length}");
                         foreach (var dir in voskDirs)
                         {
-                            System.Diagnostics.Debug.WriteLine($"   - {Path.GetFileName(dir)}");
+                            string dirName = Path.GetFileName(dir);
+                            
+                            // Проверяем целостность модели
+                            bool isValidModel = CheckVoskModelIntegrity(dir);
+                            string status = isValidModel ? "✅" : "❌";
+                            
+                            System.Diagnostics.Debug.WriteLine($"   {status} {dirName}");
                         }
+                        
+                        // Проверяем конкретные модели из настроек
+                        CheckSpecificVoskModels();
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("⚠️ Vosk модели не найдены. Поместите папки с моделями в папку models/vosk");
+                        System.Diagnostics.Debug.WriteLine("❌ Vosk модели не найдены!");
+                        System.Diagnostics.Debug.WriteLine("💡 Поместите папки с моделями в папку models/vosk");
+                        System.Diagnostics.Debug.WriteLine("💡 Рекомендуемые модели: vosk-model-small-ru-0.22, vosk-model-small-en-us-0.15");
                     }
                 }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"❌ Папка Vosk моделей не существует: {voskDir}");
+                }
+                
+                System.Diagnostics.Debug.WriteLine("🔍 ===============================================");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ Ошибка проверки моделей: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Проверяет конкретные Whisper модели, используемые в программе
+        /// </summary>
+        private void CheckSpecificWhisperModels()
+        {
+            string[] whisperModels = { "tiny", "base", "small", "medium", "large" };
+            
+            System.Diagnostics.Debug.WriteLine("🎯 Проверка конкретных Whisper моделей:");
+            for (int i = 0; i < whisperModels.Length; i++)
+            {
+                string modelName = whisperModels[i];
+                string modelPath = GetWhisperModelPath(modelName);
+                bool exists = File.Exists(modelPath);
+                string status = exists ? "✅" : "❌";
+                string marker = (i == cachedWhisperModel) ? " ⭐ [ВЫБРАНА]" : "";
+                
+                System.Diagnostics.Debug.WriteLine($"   {status} {modelName} -> {Path.GetFileName(modelPath)}{marker}");
+            }
+        }
+        
+        /// <summary>
+        /// Проверяет конкретные Vosk модели, используемые в программе
+        /// </summary>
+        private void CheckSpecificVoskModels()
+        {
+            string[] voskModels = { "ru", "en-us", "ru-small", "en-us-small" };
+            string[] voskNames = { 
+                "vosk-model-ru-0.42 (Русский)", 
+                "vosk-model-en-us-0.22 (Английский)",
+                "vosk-model-small-ru-0.22 (Русский малый)",
+                "vosk-model-small-en-us-0.15 (Английский малый)"
+            };
+            
+            System.Diagnostics.Debug.WriteLine("🎯 Проверка конкретных Vosk моделей:");
+            for (int i = 0; i < voskModels.Length; i++)
+            {
+                string modelCode = voskModels[i];
+                string modelName = voskNames[i];
+                string modelPath = GetVoskModelPath(modelCode);
+                bool exists = Directory.Exists(modelPath);
+                string status = exists ? "✅" : "❌";
+                string marker = (i == cachedVoskModel) ? " ⭐ [ВЫБРАНА]" : "";
+                
+                System.Diagnostics.Debug.WriteLine($"   {status} {modelName} -> {Path.GetFileName(modelPath)}{marker}");
+            }
+        }
+        
+        /// <summary>
+        /// Проверяет целостность Vosk модели
+        /// </summary>
+        private bool CheckVoskModelIntegrity(string modelDir)
+        {
+            try
+            {
+                // Проверяем наличие основных файлов Vosk модели
+                string[] requiredFiles = {
+                    Path.Combine(modelDir, "am", "final.mdl"),
+                    Path.Combine(modelDir, "conf", "mfcc.conf"),
+                    Path.Combine(modelDir, "conf", "model.conf"),
+                    Path.Combine(modelDir, "graph", "HCLr.fst"),
+                    Path.Combine(modelDir, "graph", "Gr.fst")
+                };
+                
+                foreach (string file in requiredFiles)
+                {
+                    if (!File.Exists(file))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"   ❌ Отсутствует файл: {Path.GetFileName(file)}");
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
