@@ -1,2 +1,55 @@
-/MORT/obj
-/MORT/bin
+# Build artifacts
+**/bin/
+**/obj/
+**/*.user
+
+# Visual Studio
+.vs/
+.vscode/
+
+# Model files and large binaries  
+*.bin
+/models/
+/MORT/Resources/mort_resource/models/
+/MORT/DB/
+/MORT/DIC/
+/MORT/DLL/
+/MORT/ExternDLL/
+/MORT/NHocr/
+/MORT/runtimes/
+
+# NuGet
+packages/
+*.nupkg
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Package manager
+node_modules/
+.npm
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
