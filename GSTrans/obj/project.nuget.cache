@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "5UvJAdqYZcg=",
+  "dgSpecHash": "VJtgxjJAoo0=",
   "success": true,
   "projectFilePath": "C:\\Users\\Predator\\Documents\\MORT\\MORT-1.290\\MORT-1.290\\GSTrans\\GSTrans.csproj",
   "expectedPackageFiles": [
@@ -16,7 +16,7 @@
     {
       "code": "NU1701",
       "level": "Warning",
-      "message": "Пакет \"Zlib.Portable.Signed 1.11.0\" был восстановлен с помощью \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\", а не целевой платформы проекта \"net9.0-windows10.0.22621\". Этот пакет может быть не полностью совместим с вашим проектом.",
+      "message": "Package 'Zlib.Portable.Signed 1.11.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net9.0-windows10.0.22621'. This package may not be fully compatible with your project.",
       "projectPath": "C:\\Users\\Predator\\Documents\\MORT\\MORT-1.290\\MORT-1.290\\GSTrans\\GSTrans.csproj",
       "warningLevel": 1,
       "filePath": "C:\\Users\\Predator\\Documents\\MORT\\MORT-1.290\\MORT-1.290\\GSTrans\\GSTrans.csproj",
